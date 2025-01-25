@@ -9,16 +9,24 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE_NAME: snitch-backend
-  BOT_IMAGE_NAME: snitch-bot
+  NAMESPACE: snitch-discord
 
 jobs:
-  build-and-push-images:
+  build-and-push-image:
     permissions:
       packages: write
       id-token: write
       attestations: write
+    strategy:
+      matrix:
+        include:
+          - containerfile: backend.Containerfile
+            image: snitch-backend
+          - containerfile: bot.Containerfile
+            image: snitch-bot
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,48 +38,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: (BACKEND) Extract container metadata (tags, labels)
-        id: meta-backend
+      - name: Extract container metadata (tags, labels)
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.image }}
 
-      - name: (BACKEND) Build and push image
-        id: push-backend
+      - name: Build and push image
+        id: push
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: backend.Containerfile
+          file: ${{ matrix.containerfile }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-      - name: (BACKEND) Generate artifact attestation
+      - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
-          subject-digest: ${{ steps.push-backend.outputs.digest }}
-          push-to-registry: ${{ github.event_name != 'pull_request' }}
-
-      - name: (BOT) Extract container metadata (tags, labels)
-        id: meta-bot
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.BOT_IMAGE_NAME }}
-
-      - name: (BOT) Build and push image
-        id: push-bot
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: bot.Containerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-bot.outputs.tags }}
-          labels: ${{ steps.meta-bot.outputs.labels }}
-
-      - name: (BOT) Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.BOT_IMAGE_NAME }}
-          subject-digest: ${{ steps.push-bot.outputs.digest }}
+          subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ matrix.image }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: ${{ github.event_name != 'pull_request' }}
