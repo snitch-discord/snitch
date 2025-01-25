@@ -1,0 +1,77 @@
+name: Build Docker Image
+
+on:
+  pull_request:
+    branches: main
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: snitch-backend
+  BOT_IMAGE_NAME: snitch-bot
+
+jobs:
+  build-and-push-image:
+    permissions:
+      packages: write
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract container metadata (tags, labels)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+
+      - name: Build and push image
+        id: push-backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend.Containerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          subject-digest: ${{ steps.push-backend.outputs.digest }}
+          push-to-registry: ${{ github.event_name != 'pull_request' }}
+
+      - name: Extract container metadata (tags, labels)
+        id: meta-bot
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BOT_IMAGE_NAME }}
+
+      - name: Build and push image
+        id: push-bot
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: bot.Containerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-bot.outputs.tags }}
+          labels: ${{ steps.meta-bot.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.BOT_IMAGE_NAME }}
+          subject-digest: ${{ steps.push-bot.outputs.digest }}
+          push-to-registry: ${{ github.event_name != 'pull_request' }}

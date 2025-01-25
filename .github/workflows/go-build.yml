@@ -16,8 +16,11 @@ jobs:
         with:
           go-version: "stable"
 
-      - name: Build
+      - name: Build Backend
         run: go build ./cmd/backend
+
+      - name: Build Bot
+        run: go build ./cmd/bot
 
       - name: Test
         run: go test -v ./... -json > TestResults.json
