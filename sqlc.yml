@@ -1,0 +1,37 @@
+version: "2"
+overrides:
+  go:
+    overrides:
+      - db_type: "INTEGER"
+        go_type: "int"
+
+      - column: "groups.group_id"
+        go_type: "github.com/google/uuid.UUID"
+
+      - column: "servers.group_id"
+        go_type: "github.com/google/uuid.UUID"
+
+sql:
+  - name: "group"
+    engine: "sqlite"
+    queries: "./internal/group/sql/queries.sql"
+    schema: "./internal/group/sql/schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "./internal/group/sqlc"
+        emit_json_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+
+  - name: "metadata"
+    engine: "sqlite"
+    queries: "./internal/metadata/sql/queries.sql"
+    schema: "./internal/metadata/sql/schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "./internal/metadata/sqlc"
+        emit_json_tags: true
+        emit_prepared_queries: true
+        emit_interface: true

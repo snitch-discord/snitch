@@ -1,0 +1,104 @@
+networks:
+  snitch-network:
+    ipam:
+      config:
+        - subnet: 219.219.219.64/26
+
+services:
+  snitch-sqld:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    command: sqld --enable-namespaces
+    environment:
+      - SQLD_NODE=primary
+      - SQLD_HTTP_LISTEN_ADDR=0.0.0.0:8080
+      - SQLD_ADMIN_LISTEN_ADDR=0.0.0.0:9090
+      - SQLD_DB_PATH=snitch.db
+      - RUST_LOG=debug
+      - SQL_AUTH_JWT_KEY="${PUBLIC_KEY}"
+    ports:
+      - ":8080"
+      - ":9090"
+    volumes:
+      - sqld-volume:/var/lib/sqld
+    networks:
+      - snitch-network
+
+  dnsmasq:
+    image: strm/dnsmasq
+    volumes:
+      - ./proxy/dnsmasq.conf:/etc/dnsmasq.conf
+    cap_add:
+      - NET_ADMIN
+    networks:
+      snitch-network:
+        ipv4_address: 219.219.219.126
+
+  snitch-sqld-proxy:
+    image: nginx:alpine
+    depends_on:
+      - snitch-sqld
+      - dnsmasq
+    ports:
+      - 80:80
+      - 90:90
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      snitch-network:
+        ipv4_address: 219.219.219.125
+
+  snitch-backend:
+    build:
+      dockerfile: backend.Containerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: go.mod
+        - action: rebuild
+          path: cmd/backend
+        - action: rebuild
+          path: internal/backend
+        - action: rebuild
+          path: internal/shared
+    # restart: unless-stopped
+    image: snitch-backend
+    depends_on:
+      - snitch-sqld-proxy
+    environment:
+      - LIBSQL_HOST=snitch-sqld-proxy
+      - LIBSQL_PORT=80
+      - LIBSQL_ADMIN_PORT=90
+      - LIBSQL_AUTH_KEY=${PRIVATE_KEY}
+    ports:
+      - 4200:4200
+    networks:
+      - snitch-network
+    dns:
+      - 219.219.219.126 # dnsmasq
+
+  snitch-bot:
+    build:
+      dockerfile: bot.Containerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: go.mod
+        - action: rebuild
+          path: cmd/bot
+        - action: rebuild
+          path: internal/bot
+        - action: rebuild
+          path: internal/shared
+    # restart: unless-stopped
+    image: snitch-bot
+    depends_on:
+      - snitch-backend
+    environment:
+      - SNITCH_DISCORD_TOKEN=${SNITCH_DISCORD_TOKEN}
+      - SNITCH_BACKEND_HOST=snitch-backend
+      - SNITCH_BACKEND_PORT=4200
+    networks:
+      - snitch-network
+
+volumes:
+  sqld-volume:
