@@ -1,0 +1,20 @@
+syntax = "proto3";
+option go_package = "proto/gen/snitch;snitchpb";
+
+package snitch.v1;
+
+message ReportRequest {
+  string report_text = 1;
+  int32 reporter_id = 2;
+  int32 reported_id = 3;
+}
+
+message ReportResponse {
+  bool report_successful = 1;
+}
+
+service ReportService {
+  rpc Report(ReportRequest) returns (ReportResponse) {}
+}
+
+

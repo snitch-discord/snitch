@@ -1,6 +1,5 @@
 FROM golang:bookworm AS build
 LABEL authors="minz1"
-
 WORKDIR /src
 
 COPY go.mod go.sum ./
