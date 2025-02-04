@@ -151,7 +151,7 @@ func (s *RegisterServer) Register(
 		}
 	} else {
 		// Create new group flow
-		if *req.Msg.GroupName == "" {
+		if req.Msg.GroupName == nil || *req.Msg.GroupName == "" {
 			slogger.ErrorContext(ctx, "Group name is required when creating a new group")
 			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
@@ -207,10 +207,12 @@ func (s *RegisterServer) Register(
 			slogger.Error("Create User Table", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
+
 		if err := groupQueries.CreateServerTable(ctx); err != nil {
 			slogger.Error("Create Server Table", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
+
 		if err := groupQueries.CreateReportTable(ctx); err != nil {
 			slogger.Error("Create Group Table", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
@@ -251,7 +253,7 @@ func (s *RegisterServer) Register(
 	slogger.InfoContext(ctx, "Registration completed",
 		"groupID", groupID.String(),
 		"serverID", serverID,
-		"isNewGroup", *req.Msg.GroupId == "")
+		"isNewGroup", req.Msg.GroupId == nil)
 
 	return connect.NewResponse(&snitchpb.RegisterResponse{
 		ServerId: int32(serverID),
