@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"snitch/internal/backend/dbconfig"
 	"snitch/internal/backend/group"
-	groupSQLc "snitch/internal/backend/group/sqlc"
+	groupSQLc "snitch/internal/backend/group/gen/sqlc"
 	"snitch/internal/backend/jwt"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"

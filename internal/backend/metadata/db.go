@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"snitch/internal/backend/dbconfig"
 	"snitch/internal/backend/libsqladmin"
-	"snitch/internal/backend/metadata/sqlc"
+	"snitch/internal/backend/metadata/gen/sqlc"
 	"snitch/internal/shared/ctxutil"
 
 	"github.com/google/uuid"
