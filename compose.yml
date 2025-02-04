@@ -13,7 +13,7 @@ services:
       - SQLD_HTTP_LISTEN_ADDR=0.0.0.0:8080
       - SQLD_ADMIN_LISTEN_ADDR=0.0.0.0:9090
       - SQLD_DB_PATH=snitch.db
-      - RUST_LOG=debug
+      # - RUST_LOG=debug
       - SQL_AUTH_JWT_KEY="${PUBLIC_KEY}"
     ports:
       - ":8080"
@@ -55,6 +55,8 @@ services:
         - action: rebuild
           path: go.mod
         - action: rebuild
+          path: pkg
+        - action: rebuild
           path: cmd/backend
         - action: rebuild
           path: internal/backend
@@ -83,6 +85,8 @@ services:
       watch:
         - action: rebuild
           path: go.mod
+        - action: rebuild
+          path: pkg
         - action: rebuild
           path: cmd/bot
         - action: rebuild

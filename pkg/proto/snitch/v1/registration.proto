@@ -1,0 +1,20 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+message RegisterRequest {
+  int32 user_id = 1;
+  optional string group_id = 2;
+  optional string group_name = 3;
+}
+
+message RegisterResponse {
+  int32 server_id = 1;
+  string group_id = 2;
+}
+
+service RegistrarService {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+}
+

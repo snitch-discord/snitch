@@ -15,10 +15,15 @@ import (
 	"time"
 
 	"snitch/internal/backend/dbconfig"
-	"snitch/internal/backend/handler"
 	"snitch/internal/backend/jwt"
 	"snitch/internal/backend/metadata"
-	"snitch/internal/backend/middleware"
+	"snitch/internal/backend/service"
+	"snitch/internal/backend/service/interceptor"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+
+	"connectrpc.com/connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
@@ -60,29 +65,22 @@ func main() {
 		panic(err)
 	}
 
-	reportEndpointHandler := handler.CreateReportHandler(jwtCache, libSQLConfig)
-	databaseEndpointHandler := handler.CreateRegistrationHandler(jwtCache, metadataDb, libSQLConfig)
+	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
+	reportServer := service.NewReportServer(jwtCache, libSQLConfig)
 
-	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/databases":
-			databaseEndpointHandler(w, r)
-		case "/reports":
-			middleware.GroupContext(reportEndpointHandler, metadataDb)(w, r)
-		default:
-			http.Error(w, "404 Not Found", http.StatusNotFound)
-		}
-	}
+	baseInterceptors := connect.WithInterceptors(
+		interceptor.NewRecoveryInterceptor(),
+		interceptor.NewLogInterceptor(),
+		interceptor.NewTraceInterceptor(),
+	)
 
-	handler = middleware.RecordResponse(handler)
-	handler = middleware.Recovery(handler)
-	handler = middleware.PermissiveCORSHandler(handler)
-	handler = middleware.Log(handler)
-	handler = middleware.Trace(handler)
+	mux := http.NewServeMux()
+	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
+	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
 
-	server := http.Server{
+	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),
-		Handler:           handler,
+		Handler:           h2c.NewHandler(mux, &http2.Server{}),
 		ReadTimeout:       1 * time.Second,
 		WriteTimeout:      1 * time.Second,
 		ReadHeaderTimeout: 200 * time.Millisecond,

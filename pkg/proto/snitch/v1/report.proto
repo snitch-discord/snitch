@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+message Empty { }
+
+message CreateReportRequest {
+  string report_text = 1;
+  int32 reporter_id = 2;
+  int32 reported_id = 3;
+}
+
+message CreateReportResponse {
+  int32 report_id = 1;
+}
+
+message ListReportsResponse {
+  repeated CreateReportRequest reports = 1;
+}
+
+service ReportService {
+  rpc CreateReport(CreateReportRequest) returns (CreateReportResponse) {};
+  rpc ListReports(Empty) returns (ListReportsResponse) {};
+}
+
+

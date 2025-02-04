@@ -1,34 +1,23 @@
 package handler
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/shared/ctxutil"
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	"strconv"
 
+	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
 )
 
-type RegistrationRequest struct {
-	ServerID  string `json:"serverId"` // we need to tell go that our number is encoded as a string, hence ',string'
-	UserID    string `json:"userId"`   // we need to tell go that our number is encoded as a string, hence ',string'
-	GroupName string `json:"groupName,omitempty"`
-}
-
-type RegistrationResponse struct {
-	ServerID string `json:"serverId"` // we need to tell go that our number is encoded as a string, hence ',string'
-	GroupID  string `json:"groupId"`
-}
-
-func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, backendURL *url.URL) {
+func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -36,67 +25,36 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
-	serverID := interaction.GuildID
 	userID := interaction.Member.User.ID
-	groupName := options[0].StringValue()
-
-	requestStruct := &RegistrationRequest{ServerID: serverID, UserID: userID, GroupName: groupName}
-
-	requestBody, err := json.Marshal(requestStruct)
+	intUserID, err := strconv.Atoi(userID)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	requestURL := backendURL.JoinPath("databases")
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), bytes.NewBuffer(requestBody))
-	if err != nil {
-		slogger.ErrorContext(ctx, "Backend Request Creation", "Error", err)
-		return
-	}
+	groupName := options[0].StringValue()
 
-	request.Header.Add("X-Server-ID", interaction.GuildID)
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: int32(intUserID), GroupName: &groupName})
+	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	registerResponse, err := client.Register(ctx, registerRequest)
 
-	response, err := session.Client.Do(request)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		return
-	}
-
-	if response.StatusCode >= 300 || response.StatusCode < 200 {
-		body, _ := io.ReadAll(response.Body)
-		defer response.Body.Close()
-		slogger.ErrorContext(ctx, "Unexpected Response", "Status", response.StatusCode, "Body", string(body))
-	
 		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Couldn't register group, error: %s", body),
+				Content: fmt.Sprintf("Couldn't register group, error: %s", err.Error()),
 			},
 		}); err != nil {
 			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
 		}
-
-		return
-	}
-
-	body, err := io.ReadAll(response.Body)
-	defer response.Body.Close()
-	if err != nil {
-		slogger.ErrorContext(ctx, "Couldn't Read Body", "Error", err)
-		return
-	}
-
-	var registrationResponse RegistrationResponse
-	if err := json.Unmarshal(body, &registrationResponse); err != nil {
-		slogger.ErrorContext(ctx, "Couldn't Unmarshal Body", "Error", err)
 		return
 	}
 
 	if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Created group %s for this server.", registrationResponse.GroupID),
+			Content: fmt.Sprintf("Created group %s for this server.", registerResponse.Msg.GroupId),
 		},
 	}); err != nil {
 		slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
@@ -104,7 +62,7 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 	}
 }
 
-func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, backendURL *url.URL) {
+func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -112,12 +70,12 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 
 	options := interaction.ApplicationCommandData().Options
 
-	slogger.DebugContext(ctx, "Join Options", "Options", options, "Session", session, "URL", backendURL)
+	slogger.DebugContext(ctx, "Join Options", "Options", options, "Session", session, "Client", client)
 
 	// TODO: implement
 }
 
-func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, backendURL *url.URL) {
+func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -127,20 +85,22 @@ func handleGroupCommands(ctx context.Context, session *discordgo.Session, intera
 
 	switch options[0].Name {
 	case "create":
-		handleCreateGroup(ctx, session, interaction, backendURL)
+		handleCreateGroup(ctx, session, interaction, client)
 	case "join":
-		handleJoinGroup(ctx, session, interaction, backendURL)
+		handleJoinGroup(ctx, session, interaction, client)
 	default:
 		slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[1].Name)
 	}
 
 }
 
-func CreateRegisterCommandHandler(botconfig botconfig.BotConfig) slashcommand.SlashCommandHandlerFunc {
+func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
 	backendURL, err := botconfig.BackendURL()
 	if err != nil {
 		log.Fatal(backendURL)
 	}
+
+	registrarServiceClient := snitchv1connect.NewRegistrarServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
@@ -152,7 +112,7 @@ func CreateRegisterCommandHandler(botconfig botconfig.BotConfig) slashcommand.Sl
 
 		switch options[0].Name {
 		case "group":
-			handleGroupCommands(ctx, session, interaction, backendURL)
+			handleGroupCommands(ctx, session, interaction, registrarServiceClient)
 		default:
 			slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[0].Name)
 		}
