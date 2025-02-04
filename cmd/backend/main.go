@@ -75,8 +75,8 @@ func main() {
 	)
 
 	mux := http.NewServeMux()
-	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors))
-	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
+	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),

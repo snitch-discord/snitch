@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/shared/ctxutil"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -50,7 +52,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	}
 }
 
-func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -86,7 +88,7 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 	}
 }
 
-func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -116,11 +118,12 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 	}
 }
 
-func CreateReportCommandHandler(botconfig botconfig.BotConfig) slashcommand.SlashCommandHandlerFunc {
+func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
 	backendURL, err := botconfig.BackendURL()
 	if err != nil {
 		log.Fatal(backendURL)
 	}
+	reportServiceClient := snitchv1connect.NewReportServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
@@ -132,11 +135,11 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig) slashcommand.Slas
 
 		switch options[0].Name {
 		case "new":
-			handleNewReport(ctx, session, interaction)
+			handleNewReport(ctx, session, interaction, reportServiceClient)
 		case "list":
-			handleListReports(ctx, session, interaction)
+			handleListReports(ctx, session, interaction, reportServiceClient)
 		case "delete":
-			handleDeleteReport(ctx, session, interaction)
+			handleDeleteReport(ctx, session, interaction, reportServiceClient)
 		default:
 			slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[0].Name)
 		}

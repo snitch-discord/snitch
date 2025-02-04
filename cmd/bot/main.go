@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -22,10 +23,14 @@ func main() {
 		log.Panic(err)
 	}
 
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
 	// initialize map of command name to command handler
 	commandHandlers := map[string]slashcommand.SlashCommandHandlerFunc{
-		"register": handler.CreateRegisterCommandHandler(config),
-		"report":   handler.CreateReportCommandHandler(config),
+		"register": handler.CreateRegisterCommandHandler(config, httpClient),
+		"report":   handler.CreateReportCommandHandler(config, httpClient),
 	}
 
 	commands := slashcommand.InitializeCommands()
