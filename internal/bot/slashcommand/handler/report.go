@@ -9,8 +9,11 @@ import (
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/shared/ctxutil"
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	"strconv"
 
+	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -24,6 +27,13 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
 	for _, opt := range options {
 		optionMap[opt.Name] = opt
+	}
+
+	reporterID := interaction.Member.User.ID
+	intReporterID, err := strconv.Atoi(reporterID)
+	if err != nil {
+		log.Print(err)
+		return
 	}
 
 	reportedUserOption, ok := optionMap["reported-user"]
@@ -40,7 +50,29 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		reportReason = reportReasonOption.StringValue()
 	}
 
-	responseContent := fmt.Sprintf("Reported user: %s; Report reason: %s", reportedUser.Username, reportReason)
+	intReportedID, err := strconv.Atoi(reportedUser.ID)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: int32(intReporterID), ReportedId: int32(intReportedID)})
+	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	reportResponse, err := client.CreateReport(ctx, reportRequest)
+	responseContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: fmt.Sprintf("Couldn't report user, error: %s", err.Error()),
+			},
+		}); err != nil {
+			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
+		}
+		return
+	}
 
 	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
