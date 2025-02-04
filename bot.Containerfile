@@ -5,6 +5,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 COPY cmd cmd
 COPY internal internal
+COPY pkg pkg
 
 RUN GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o /bin/bot ./cmd/bot
 

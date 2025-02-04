@@ -67,7 +67,7 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 		body, _ := io.ReadAll(response.Body)
 		defer response.Body.Close()
 		slogger.ErrorContext(ctx, "Unexpected Response", "Status", response.StatusCode, "Body", string(body))
-	
+
 		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{

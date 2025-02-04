@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"errors"
 	"fmt"
 	"log/slog"
 	"path/filepath"
@@ -59,7 +60,7 @@ func NewMetadataDB(ctx context.Context, token string, config dbconfig.LibSQLConf
 	}
 
 	defer func() {
-		if err := tx.Rollback(); err != nil {
+		if err := tx.Rollback(); !errors.Is(err, sql.ErrTxDone) {
 			slogger.ErrorContext(ctx, "Failed to rollback transaction", "Error", err)
 		}
 	}()
