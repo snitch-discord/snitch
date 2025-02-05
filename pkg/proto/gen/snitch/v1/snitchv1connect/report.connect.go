@@ -44,7 +44,7 @@ const (
 // ReportServiceClient is a client for the snitch.v1.ReportService service.
 type ReportServiceClient interface {
 	CreateReport(context.Context, *connect.Request[v1.CreateReportRequest]) (*connect.Response[v1.CreateReportResponse], error)
-	ListReports(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.ListReportsResponse], error)
+	ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error)
 }
 
 // NewReportServiceClient constructs a client for the snitch.v1.ReportService service. By default,
@@ -64,7 +64,7 @@ func NewReportServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(reportServiceMethods.ByName("CreateReport")),
 			connect.WithClientOptions(opts...),
 		),
-		listReports: connect.NewClient[v1.Empty, v1.ListReportsResponse](
+		listReports: connect.NewClient[v1.ListReportsRequest, v1.ListReportsResponse](
 			httpClient,
 			baseURL+ReportServiceListReportsProcedure,
 			connect.WithSchema(reportServiceMethods.ByName("ListReports")),
@@ -76,7 +76,7 @@ func NewReportServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 // reportServiceClient implements ReportServiceClient.
 type reportServiceClient struct {
 	createReport *connect.Client[v1.CreateReportRequest, v1.CreateReportResponse]
-	listReports  *connect.Client[v1.Empty, v1.ListReportsResponse]
+	listReports  *connect.Client[v1.ListReportsRequest, v1.ListReportsResponse]
 }
 
 // CreateReport calls snitch.v1.ReportService.CreateReport.
@@ -85,14 +85,14 @@ func (c *reportServiceClient) CreateReport(ctx context.Context, req *connect.Req
 }
 
 // ListReports calls snitch.v1.ReportService.ListReports.
-func (c *reportServiceClient) ListReports(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.ListReportsResponse], error) {
+func (c *reportServiceClient) ListReports(ctx context.Context, req *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error) {
 	return c.listReports.CallUnary(ctx, req)
 }
 
 // ReportServiceHandler is an implementation of the snitch.v1.ReportService service.
 type ReportServiceHandler interface {
 	CreateReport(context.Context, *connect.Request[v1.CreateReportRequest]) (*connect.Response[v1.CreateReportResponse], error)
-	ListReports(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.ListReportsResponse], error)
+	ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error)
 }
 
 // NewReportServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -133,6 +133,6 @@ func (UnimplementedReportServiceHandler) CreateReport(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.ReportService.CreateReport is not implemented"))
 }
 
-func (UnimplementedReportServiceHandler) ListReports(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.ListReportsResponse], error) {
+func (UnimplementedReportServiceHandler) ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.ReportService.ListReports is not implemented"))
 }

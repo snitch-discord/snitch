@@ -7,9 +7,10 @@ COPY cmd cmd
 COPY internal internal
 COPY pkg pkg
 
+RUN go mod download
 RUN GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o /bin/bot ./cmd/bot
 
-FROM debian
+FROM debian:stable-slim
 RUN apt-get update
 RUN apt-get -y install ca-certificates
 COPY --from=build /bin/bot /bin/bot

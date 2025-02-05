@@ -15,13 +15,18 @@ message CreateReportResponse {
   int32 report_id = 1;
 }
 
+message ListReportsRequest {
+  optional int32 reporter_id = 1;
+  optional int32 reported_id = 2;
+}
+
 message ListReportsResponse {
   repeated CreateReportRequest reports = 1;
 }
 
 service ReportService {
   rpc CreateReport(CreateReportRequest) returns (CreateReportResponse) {};
-  rpc ListReports(Empty) returns (ListReportsResponse) {};
+  rpc ListReports(ListReportsRequest) returns (ListReportsResponse) {};
 }
 
 

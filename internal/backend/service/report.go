@@ -92,7 +92,7 @@ func (s *ReportServer) CreateReport(
 
 func (s *ReportServer) ListReports(
 	ctx context.Context,
-	req *connect.Request[snitchv1.Empty],
+	req *connect.Request[snitchv1.ListReportsRequest],
 ) (*connect.Response[snitchv1.ListReportsResponse], error) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
@@ -122,6 +122,18 @@ func (s *ReportServer) ListReports(
 	rpcReports := make([]*snitchv1.CreateReportRequest, 0, len(dbReports))
 
 	for _, dbReport := range dbReports {
+		if req.Msg.ReporterId != nil {
+			if dbReport.ReporterID != int(*req.Msg.ReporterId) {
+				continue
+			}
+		}
+
+		if req.Msg.ReportedId != nil {
+			if dbReport.ReportedUserID != int(*req.Msg.ReportedId) {
+				continue
+			}
+		}
+
 		rpcReport := reportDBtoRPC(dbReport)
 		rpcReports = append(rpcReports, rpcReport)
 	}

@@ -12,6 +12,7 @@ import (
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"strconv"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
@@ -29,20 +30,24 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		optionMap[opt.Name] = opt
 	}
 
-	reporterID := interaction.Member.User.ID
-	intReporterID, err := strconv.Atoi(reporterID)
+	reporterID, err := strconv.Atoi(interaction.Member.User.ID)
 	if err != nil {
-		log.Print(err)
+		slogger.ErrorContext(ctx, "Failed to convert reporter ID", "Error", err)
 		return
 	}
 
 	reportedUserOption, ok := optionMap["reported-user"]
 	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option")
-
+		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error", err)
 		return
 	}
+
 	reportedUser := reportedUserOption.UserValue(session)
+	reportedID, err := strconv.Atoi(reportedUser.ID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "Failed to convert reported ID", "Error", err)
+		return
+	}
 
 	reportReason := ""
 	reportReasonOption, ok := optionMap["report-reason"]
@@ -50,17 +55,9 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		reportReason = reportReasonOption.StringValue()
 	}
 
-	intReportedID, err := strconv.Atoi(reportedUser.ID)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
-	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: int32(intReporterID), ReportedId: int32(intReportedID)})
+	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: int32(reporterID), ReportedId: int32(reportedID)})
 	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
-	responseContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
-
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
 		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
@@ -74,10 +71,11 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: responseContent,
+			Content: messageContent,
 		},
 	}); err != nil {
 		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)
@@ -96,24 +94,62 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		optionMap[opt.Name] = opt
 	}
 
-	reportedUserName := ""
-	reportedUserOption, ok := optionMap["reported-user"]
-	if ok {
-		reportedUserName = reportedUserOption.UserValue(session).Username
-	}
-
-	reporterUserName := ""
+	var reporterUserID *int32
 	reporterUserOption, ok := optionMap["reporter-user"]
 	if ok {
-		reporterUserName = reporterUserOption.UserValue(session).Username
+		res, err := strconv.Atoi(reporterUserOption.UserValue(session).ID)
+		if err == nil {
+			final := int32(res)
+			reporterUserID = &final
+		}
 	}
 
-	responseContent := fmt.Sprintf("Reported user: %s; Reporter user: %s", reportedUserName, reporterUserName)
+	var reportedUserID *int32
+	reportedUserOption, ok := optionMap["reported-user"]
+	if ok {
+		res, err := strconv.Atoi(reportedUserOption.UserValue(session).ID)
+		if err == nil {
+			final := int32(res)
+			reportedUserID = &final
+		}
+	}
+
+	slogger.InfoContext(ctx, "List Params", "Reporter", reporterUserID, "Reported", reportedUserID)
+
+	listReportRequest := connect.NewRequest(&snitchv1.ListReportsRequest{ReporterId: reporterUserID, ReportedId: reportedUserID})
+	listReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	listReportResponse, err := client.ListReports(ctx, listReportRequest)
+
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: fmt.Sprintf("Couldn't list reports, error: %s", err.Error()),
+			},
+		}); err != nil {
+			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
+		}
+		return
+	}
+
+	var responseStringBuilder strings.Builder
+	reports := listReportResponse.Msg.Reports
+	for index, report := range reports {
+		responseStringBuilder.WriteString(fmt.Sprintf("Report %d: %s\n", index, report))
+	}
+
+	var messageContent string
+	if responseStringBuilder.Len() == 0 {
+		messageContent = "No reports found!"
+	} else {
+		messageContent = responseStringBuilder.String()
+	}
 
 	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: responseContent,
+			Content: messageContent,
 		},
 	}); err != nil {
 		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)

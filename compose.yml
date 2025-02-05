@@ -62,7 +62,7 @@ services:
           path: internal/backend
         - action: rebuild
           path: internal/shared
-    # restart: unless-stopped
+    restart: unless-stopped
     image: snitch-backend
     depends_on:
       - snitch-sqld-proxy
@@ -93,7 +93,7 @@ services:
           path: internal/bot
         - action: rebuild
           path: internal/shared
-    # restart: unless-stopped
+    restart: unless-stopped
     image: snitch-bot
     depends_on:
       - snitch-backend

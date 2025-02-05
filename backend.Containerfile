@@ -7,10 +7,10 @@ COPY cmd cmd
 COPY internal internal
 COPY pkg pkg
 
-RUN go get ./...
+RUN go mod download
 RUN GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o /bin/backend ./cmd/backend
 
-FROM debian:bookworm-slim
+FROM debian:stable-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
