@@ -2,13 +2,15 @@ FROM golang:bookworm AS build
 LABEL authors="minz1"
 WORKDIR /src
 
+ENV GOCACHE=/root/.cache/go-build
+
 COPY go.mod go.sum ./
 COPY cmd cmd
 COPY internal internal
 COPY pkg pkg
 
-RUN go mod download
-RUN GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o /bin/bot ./cmd/bot
+RUN --mount=type=cache,target=/root/.cache/go-mod go mod download
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o /bin/bot ./cmd/bot
 
 FROM debian:stable-slim
 RUN apt-get update
