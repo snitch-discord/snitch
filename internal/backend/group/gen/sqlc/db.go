@@ -42,6 +42,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createUserTableStmt, err = db.PrepareContext(ctx, createUserTable); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUserTable: %w", err)
 	}
+	if q.deleteReportStmt, err = db.PrepareContext(ctx, deleteReport); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteReport: %w", err)
+	}
 	if q.getAllReportsStmt, err = db.PrepareContext(ctx, getAllReports); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllReports: %w", err)
 	}
@@ -78,6 +81,11 @@ func (q *Queries) Close() error {
 	if q.createUserTableStmt != nil {
 		if cerr := q.createUserTableStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserTableStmt: %w", cerr)
+		}
+	}
+	if q.deleteReportStmt != nil {
+		if cerr := q.deleteReportStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteReportStmt: %w", cerr)
 		}
 	}
 	if q.getAllReportsStmt != nil {
@@ -130,6 +138,7 @@ type Queries struct {
 	createReportTableStmt *sql.Stmt
 	createServerTableStmt *sql.Stmt
 	createUserTableStmt   *sql.Stmt
+	deleteReportStmt      *sql.Stmt
 	getAllReportsStmt     *sql.Stmt
 }
 
@@ -143,6 +152,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createReportTableStmt: q.createReportTableStmt,
 		createServerTableStmt: q.createServerTableStmt,
 		createUserTableStmt:   q.createUserTableStmt,
+		deleteReportStmt:      q.deleteReportStmt,
 		getAllReportsStmt:     q.getAllReportsStmt,
 	}
 }

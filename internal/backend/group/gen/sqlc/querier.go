@@ -15,6 +15,7 @@ type Querier interface {
 	CreateReportTable(ctx context.Context) error
 	CreateServerTable(ctx context.Context) error
 	CreateUserTable(ctx context.Context) error
+	DeleteReport(ctx context.Context, reportID int) (int, error)
 	GetAllReports(ctx context.Context) ([]GetAllReportsRow, error)
 }
 

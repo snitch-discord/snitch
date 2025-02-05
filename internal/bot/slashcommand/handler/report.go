@@ -173,13 +173,30 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		slogger.ErrorContext(ctx, "Failed to get reported user option")
 		return
 	}
+	reportID := reportIDOption.IntValue()
 
-	responseContent := fmt.Sprintf("Delete report %s", reportIDOption.StringValue())
+	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: int32(reportID)})
+	deleteReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: fmt.Sprintf("Couldn't delete report, error: %s", err.Error()),
+			},
+		}); err != nil {
+			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
+		}
+		return
+	}
+
+	messageContent := fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId)
 
 	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: responseContent,
+			Content: messageContent,
 		},
 	}); err != nil {
 		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)

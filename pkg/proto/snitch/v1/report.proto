@@ -24,9 +24,18 @@ message ListReportsResponse {
   repeated CreateReportRequest reports = 1;
 }
 
+message DeleteReportRequest {
+  int32 report_id = 1;
+}
+
+message DeleteReportResponse {
+  int32 report_id = 1;
+}
+
 service ReportService {
   rpc CreateReport(CreateReportRequest) returns (CreateReportResponse) {};
   rpc ListReports(ListReportsRequest) returns (ListReportsResponse) {};
+  rpc DeleteReport(DeleteReportRequest) returns (DeleteReportResponse) {};
 }
 
 

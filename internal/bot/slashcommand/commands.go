@@ -92,7 +92,7 @@ func InitializeCommands() []*discordgo.ApplicationCommand {
 					Options: []*discordgo.ApplicationCommandOption{
 						{
 							Name:        "report-id",
-							Type:        discordgo.ApplicationCommandOptionString,
+							Type:        discordgo.ApplicationCommandOptionInteger,
 							Description: "Report ID",
 							Required:    true,
 						},

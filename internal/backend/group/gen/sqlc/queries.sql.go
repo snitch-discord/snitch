@@ -97,6 +97,19 @@ func (q *Queries) CreateUserTable(ctx context.Context) error {
 	return err
 }
 
+const deleteReport = `-- name: DeleteReport :one
+DELETE FROM reports
+WHERE report_id = ?
+RETURNING report_id
+`
+
+func (q *Queries) DeleteReport(ctx context.Context, reportID int) (int, error) {
+	row := q.queryRow(ctx, q.deleteReportStmt, deleteReport, reportID)
+	var report_id int
+	err := row.Scan(&report_id)
+	return report_id, err
+}
+
 const getAllReports = `-- name: GetAllReports :many
 SELECT 
     report_text,

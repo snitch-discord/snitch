@@ -55,7 +55,7 @@ func (s *ReportServer) CreateReport(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	db, err := group.NewGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
+	db, err := group.GetGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
 	if err != nil {
 		slogger.Error("Failed creating group db", "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -105,9 +105,9 @@ func (s *ReportServer) ListReports(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	db, err := group.NewGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
+	db, err := group.GetGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
 	if err != nil {
-		slogger.Error("Failed creating group db", "Error", err)
+		slogger.Error("Failed getting group db", "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 	queries := groupSQLc.New(db)
@@ -141,4 +141,35 @@ func (s *ReportServer) ListReports(
 	return connect.NewResponse(&snitchv1.ListReportsResponse{
 		Reports: rpcReports,
 	}), nil
+}
+
+func (s *ReportServer) DeleteReport(
+	ctx context.Context,
+	req *connect.Request[snitchv1.DeleteReportRequest],
+) (*connect.Response[snitchv1.DeleteReportResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	groupID, err := interceptor.GetGroupID(ctx)
+	if err != nil {
+		slogger.Error("Couldn't get group id", "Error", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	db, err := group.GetGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
+	if err != nil {
+		slogger.Error("Failed getting group db", "Error", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	queries := groupSQLc.New(db)
+	deletedReportID, err := queries.DeleteReport(ctx, int(req.Msg.ReportId))
+	if err != nil {
+		slogger.Error("failed to delete report", "Error", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: int32(deletedReportID)}), nil
 }

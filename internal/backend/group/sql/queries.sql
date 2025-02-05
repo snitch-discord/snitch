@@ -25,6 +25,11 @@ INSERT INTO reports (
 ) values (?, ?, ?, ?)
 RETURNING report_id;
 
+-- name: DeleteReport :one
+DELETE FROM reports
+WHERE report_id = ?
+RETURNING report_id;
+
 -- name: CreateUserTable :exec
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY

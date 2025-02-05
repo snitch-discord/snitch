@@ -13,7 +13,7 @@ import (
 	_ "github.com/tursodatabase/go-libsql"
 )
 
-func NewGroupDB(ctx context.Context, token string, config dbconfig.LibSQLConfig, groupID string) (*sql.DB, error) {
+func GetGroupDB(ctx context.Context, token string, config dbconfig.LibSQLConfig, groupID string) (*sql.DB, error) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()

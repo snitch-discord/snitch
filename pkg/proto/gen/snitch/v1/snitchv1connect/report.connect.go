@@ -39,12 +39,16 @@ const (
 	// ReportServiceListReportsProcedure is the fully-qualified name of the ReportService's ListReports
 	// RPC.
 	ReportServiceListReportsProcedure = "/snitch.v1.ReportService/ListReports"
+	// ReportServiceDeleteReportProcedure is the fully-qualified name of the ReportService's
+	// DeleteReport RPC.
+	ReportServiceDeleteReportProcedure = "/snitch.v1.ReportService/DeleteReport"
 )
 
 // ReportServiceClient is a client for the snitch.v1.ReportService service.
 type ReportServiceClient interface {
 	CreateReport(context.Context, *connect.Request[v1.CreateReportRequest]) (*connect.Response[v1.CreateReportResponse], error)
 	ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error)
+	DeleteReport(context.Context, *connect.Request[v1.DeleteReportRequest]) (*connect.Response[v1.DeleteReportResponse], error)
 }
 
 // NewReportServiceClient constructs a client for the snitch.v1.ReportService service. By default,
@@ -70,6 +74,12 @@ func NewReportServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(reportServiceMethods.ByName("ListReports")),
 			connect.WithClientOptions(opts...),
 		),
+		deleteReport: connect.NewClient[v1.DeleteReportRequest, v1.DeleteReportResponse](
+			httpClient,
+			baseURL+ReportServiceDeleteReportProcedure,
+			connect.WithSchema(reportServiceMethods.ByName("DeleteReport")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -77,6 +87,7 @@ func NewReportServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 type reportServiceClient struct {
 	createReport *connect.Client[v1.CreateReportRequest, v1.CreateReportResponse]
 	listReports  *connect.Client[v1.ListReportsRequest, v1.ListReportsResponse]
+	deleteReport *connect.Client[v1.DeleteReportRequest, v1.DeleteReportResponse]
 }
 
 // CreateReport calls snitch.v1.ReportService.CreateReport.
@@ -89,10 +100,16 @@ func (c *reportServiceClient) ListReports(ctx context.Context, req *connect.Requ
 	return c.listReports.CallUnary(ctx, req)
 }
 
+// DeleteReport calls snitch.v1.ReportService.DeleteReport.
+func (c *reportServiceClient) DeleteReport(ctx context.Context, req *connect.Request[v1.DeleteReportRequest]) (*connect.Response[v1.DeleteReportResponse], error) {
+	return c.deleteReport.CallUnary(ctx, req)
+}
+
 // ReportServiceHandler is an implementation of the snitch.v1.ReportService service.
 type ReportServiceHandler interface {
 	CreateReport(context.Context, *connect.Request[v1.CreateReportRequest]) (*connect.Response[v1.CreateReportResponse], error)
 	ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error)
+	DeleteReport(context.Context, *connect.Request[v1.DeleteReportRequest]) (*connect.Response[v1.DeleteReportResponse], error)
 }
 
 // NewReportServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -114,12 +131,20 @@ func NewReportServiceHandler(svc ReportServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(reportServiceMethods.ByName("ListReports")),
 		connect.WithHandlerOptions(opts...),
 	)
+	reportServiceDeleteReportHandler := connect.NewUnaryHandler(
+		ReportServiceDeleteReportProcedure,
+		svc.DeleteReport,
+		connect.WithSchema(reportServiceMethods.ByName("DeleteReport")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/snitch.v1.ReportService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ReportServiceCreateReportProcedure:
 			reportServiceCreateReportHandler.ServeHTTP(w, r)
 		case ReportServiceListReportsProcedure:
 			reportServiceListReportsHandler.ServeHTTP(w, r)
+		case ReportServiceDeleteReportProcedure:
+			reportServiceDeleteReportHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -135,4 +160,8 @@ func (UnimplementedReportServiceHandler) CreateReport(context.Context, *connect.
 
 func (UnimplementedReportServiceHandler) ListReports(context.Context, *connect.Request[v1.ListReportsRequest]) (*connect.Response[v1.ListReportsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.ReportService.ListReports is not implemented"))
+}
+
+func (UnimplementedReportServiceHandler) DeleteReport(context.Context, *connect.Request[v1.DeleteReportRequest]) (*connect.Response[v1.DeleteReportResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.ReportService.DeleteReport is not implemented"))
 }
