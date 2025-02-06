@@ -11,6 +11,7 @@ import (
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/bot/slashcommand/handler"
+	"snitch/internal/bot/slashcommand/middleware"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -59,10 +60,11 @@ func main() {
 			handler(ctx, session, interaction)
 		}
 	}
-	handler = slashcommand.ResponseTime(handler)
-	handler = slashcommand.Recovery(handler)
-	handler = slashcommand.Log(handler)
-	handler = slashcommand.WithTimeout(handler, time.Second*10)
+	handler = middleware.RequireManageServer(handler)
+	handler = middleware.ResponseTime(handler)
+	handler = middleware.Recovery(handler)
+	handler = middleware.Log(handler)
+	handler = middleware.WithTimeout(handler, time.Second*10)
 	mainSession.AddHandler(slashcommand.SlashCommandHandlerFunc(handler).Adapt())
 
 	if err = mainSession.Open(); err != nil {
