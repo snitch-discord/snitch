@@ -126,7 +126,7 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		messageContent = responseStringBuilder.String()
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
+	messageutil.EmbedRespondContext(ctx, session, interaction, messageContent, "Listed Reports")
 }
 
 func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
