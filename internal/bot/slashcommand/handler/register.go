@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"snitch/internal/bot/botconfig"
+	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
@@ -40,26 +41,11 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Couldn't register group, error: %s", err.Error()),
-			},
-		}); err != nil {
-			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
-		}
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't register group, error: %s", err.Error()))
 		return
 	}
 
-	if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Created group %s for this server.", registerResponse.Msg.GroupId),
-		},
-	}); err != nil {
-		slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
-		return
-	}
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Created group %s for this server.", registerResponse.Msg.GroupId))
 }
 
 func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
@@ -91,7 +77,6 @@ func handleGroupCommands(ctx context.Context, session *discordgo.Session, intera
 	default:
 		slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[1].Name)
 	}
-
 }
 
 func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {

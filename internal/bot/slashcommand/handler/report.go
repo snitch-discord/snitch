@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"snitch/internal/bot/botconfig"
+	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
@@ -60,26 +61,12 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Couldn't report user, error: %s", err.Error()),
-			},
-		}); err != nil {
-			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
-		}
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
 		return
 	}
 
 	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
-	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: messageContent,
-		},
-	}); err != nil {
-		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)
-	}
+	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
 func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
@@ -122,14 +109,7 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Couldn't list reports, error: %s", err.Error()),
-			},
-		}); err != nil {
-			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
-		}
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't list reports, error: %s", err.Error()))
 		return
 	}
 
@@ -146,14 +126,7 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		messageContent = responseStringBuilder.String()
 	}
 
-	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: messageContent,
-		},
-	}); err != nil {
-		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)
-	}
+	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
 func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
@@ -180,27 +153,11 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		if err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Couldn't delete report, error: %s", err.Error()),
-			},
-		}); err != nil {
-			slogger.ErrorContext(ctx, "Couldn't Write Discord Response", "Error", err)
-		}
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't delete report, error: %s", err.Error()))
 		return
 	}
 
-	messageContent := fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId)
-
-	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: messageContent,
-		},
-	}); err != nil {
-		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)
-	}
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
 }
 
 func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
