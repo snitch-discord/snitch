@@ -15,7 +15,7 @@ INSERT INTO servers (
 ) VALUES (?)
 `
 
-func (q *Queries) AddServer(ctx context.Context, serverID int) error {
+func (q *Queries) AddServer(ctx context.Context, serverID string) error {
 	_, err := q.exec(ctx, q.addServerStmt, addServer, serverID)
 	return err
 }
@@ -26,7 +26,7 @@ INSERT OR IGNORE INTO users (
 ) VALUES (?)
 `
 
-func (q *Queries) AddUser(ctx context.Context, userID int) error {
+func (q *Queries) AddUser(ctx context.Context, userID string) error {
 	_, err := q.exec(ctx, q.addUserStmt, addUser, userID)
 	return err
 }
@@ -43,19 +43,19 @@ RETURNING report_id
 
 type CreateReportParams struct {
 	ReportText     string `json:"report_text"`
-	ReporterID     int    `json:"reporter_id"`
-	ReportedUserID int    `json:"reported_user_id"`
-	OriginServerID int    `json:"origin_server_id"`
+	ReporterID     string `json:"reporter_id"`
+	ReportedUserID string `json:"reported_user_id"`
+	OriginServerID string `json:"origin_server_id"`
 }
 
-func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (int, error) {
+func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (string, error) {
 	row := q.queryRow(ctx, q.createReportStmt, createReport,
 		arg.ReportText,
 		arg.ReporterID,
 		arg.ReportedUserID,
 		arg.OriginServerID,
 	)
-	var report_id int
+	var report_id string
 	err := row.Scan(&report_id)
 	return report_id, err
 }
@@ -99,7 +99,7 @@ RETURNING history_id, user_id, username, global_name, changed_at
 
 type CreateUserHistoryParams struct {
 	HistoryID  string `json:"history_id"`
-	UserID     int    `json:"user_id"`
+	UserID     string `json:"user_id"`
 	Username   string `json:"username"`
 	GlobalName string `json:"global_name"`
 	ChangedAt  string `json:"changed_at"`
@@ -157,9 +157,9 @@ WHERE report_id = ?
 RETURNING report_id
 `
 
-func (q *Queries) DeleteReport(ctx context.Context, reportID int) (int, error) {
+func (q *Queries) DeleteReport(ctx context.Context, reportID string) (string, error) {
 	row := q.queryRow(ctx, q.deleteReportStmt, deleteReport, reportID)
-	var report_id int
+	var report_id string
 	err := row.Scan(&report_id)
 	return report_id, err
 }
@@ -175,9 +175,9 @@ FROM reports
 
 type GetAllReportsRow struct {
 	ReportText     string `json:"report_text"`
-	ReporterID     int    `json:"reporter_id"`
-	ReportedUserID int    `json:"reported_user_id"`
-	OriginServerID int    `json:"origin_server_id"`
+	ReporterID     string `json:"reporter_id"`
+	ReportedUserID string `json:"reported_user_id"`
+	OriginServerID string `json:"origin_server_id"`
 }
 
 func (q *Queries) GetAllReports(ctx context.Context) ([]GetAllReportsRow, error) {
@@ -213,9 +213,9 @@ SELECT user_id FROM users
 WHERE user_id = ?
 `
 
-func (q *Queries) GetUser(ctx context.Context, userID int) (int, error) {
+func (q *Queries) GetUser(ctx context.Context, userID string) (string, error) {
 	row := q.queryRow(ctx, q.getUserStmt, getUser, userID)
-	var user_id int
+	var user_id string
 	err := row.Scan(&user_id)
 	return user_id, err
 }
@@ -226,7 +226,7 @@ WHERE user_id = ?
 ORDER BY changed_at DESC
 `
 
-func (q *Queries) GetUserHistory(ctx context.Context, userID int) ([]UserHistory, error) {
+func (q *Queries) GetUserHistory(ctx context.Context, userID string) ([]UserHistory, error) {
 	rows, err := q.query(ctx, q.getUserHistoryStmt, getUserHistory, userID)
 	if err != nil {
 		return nil, err

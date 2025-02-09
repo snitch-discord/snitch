@@ -7,17 +7,17 @@ message Empty { }
 
 message CreateReportRequest {
   string report_text = 1;
-  int32 reporter_id = 2;
-  int32 reported_id = 3;
+  string reporter_id = 2;
+  string reported_id = 3;
 }
 
 message CreateReportResponse {
-  int32 report_id = 1;
+  string report_id = 1;
 }
 
 message ListReportsRequest {
-  optional int32 reporter_id = 1;
-  optional int32 reported_id = 2;
+  optional string reporter_id = 1;
+  optional string reported_id = 2;
 }
 
 message ListReportsResponse {
@@ -25,11 +25,11 @@ message ListReportsResponse {
 }
 
 message DeleteReportRequest {
-  int32 report_id = 1;
+  string report_id = 1;
 }
 
 message DeleteReportResponse {
-  int32 report_id = 1;
+  string report_id = 1;
 }
 
 service ReportService {

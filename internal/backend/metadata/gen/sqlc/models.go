@@ -14,8 +14,8 @@ type Group struct {
 }
 
 type Server struct {
-	ServerID        int       `json:"server_id"`
-	OutputChannel   int       `json:"output_channel"`
-	GroupID         uuid.UUID `json:"group_id"`
-	PermissionLevel int       `json:"permission_level"`
+	ServerID        interface{} `json:"server_id"`
+	OutputChannel   int         `json:"output_channel"`
+	GroupID         uuid.UUID   `json:"group_id"`
+	PermissionLevel int         `json:"permission_level"`
 }

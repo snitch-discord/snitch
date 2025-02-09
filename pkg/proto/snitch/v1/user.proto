@@ -4,18 +4,18 @@ option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
 package snitch.v1;
 
 message CreateUserHistoryRequest {
-  int32 user_id = 1;
+  string user_id = 1;
   string username = 2;
   string global_name = 3;
   string changed_at = 4;
 }
 
 message CreateUserHistoryResponse {
-  int32 user_id = 1;
+  string user_id = 1;
 }
 
 message ListUserHistoryRequest {
-  int32 user_id = 1;
+  string user_id = 1;
 }
 
 message ListUserHistoryResponse {

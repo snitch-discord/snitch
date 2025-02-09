@@ -53,7 +53,7 @@ func (s *UserServer) CreateUserHistory(
 
 	userHistoryID, err := queries.CreateUserHistory(ctx, groupSQLc.CreateUserHistoryParams{
 		HistoryID:  uuid.New().String(),
-		UserID:     int(req.Msg.UserId),
+		UserID:     req.Msg.UserId,
 		Username:   req.Msg.Username,
 		GlobalName: req.Msg.GlobalName,
 		ChangedAt:  req.Msg.ChangedAt,
@@ -65,7 +65,7 @@ func (s *UserServer) CreateUserHistory(
 	}
 
 	return connect.NewResponse(&snitchv1.CreateUserHistoryResponse{
-		UserId: int32(userHistoryID.UserID),
+		UserId: userHistoryID.UserID,
 	}), nil
 }
 
@@ -93,7 +93,7 @@ func (s *UserServer) ListUserHistory(
 	}
 	queries := groupSQLc.New(db)
 
-	dbUserHistory, err := queries.GetUserHistory(ctx, int(req.Msg.UserId))
+	dbUserHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
 
 	if err != nil {
 		slogger.Error(fmt.Sprintf("failed to get user history %d", req.Msg.UserId), "Error", err)
@@ -106,7 +106,7 @@ func (s *UserServer) ListUserHistory(
 		rpcHistory = append(rpcHistory, &snitchv1.CreateUserHistoryRequest{
 			Username:   userHistory.Username,
 			ChangedAt:  userHistory.ChangedAt,
-			UserId:     int32(userHistory.UserID),
+			UserId:     userHistory.UserID,
 			GlobalName: userHistory.GlobalName,
 		})
 	}

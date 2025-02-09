@@ -12,7 +12,6 @@ import (
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	"strconv"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
@@ -27,15 +26,10 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
 	userID := interaction.Member.User.ID
-	intUserID, err := strconv.Atoi(userID)
-	if err != nil {
-		log.Print(err)
-		return
-	}
 
 	groupName := options[0].StringValue()
 
-	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: int32(intUserID), GroupName: &groupName})
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupName: &groupName})
 	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	registerResponse, err := client.Register(ctx, registerRequest)
 

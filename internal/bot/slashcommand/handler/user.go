@@ -58,7 +58,7 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 		reportReason = reportReasonOption.StringValue()
 	}
 
-	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: 123, Username: reportedUser.Username, ChangedAt: "123"})
+	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: "123", Username: reportedUser.Username, ChangedAt: "123"})
 	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateUserHistory(ctx, reportRequest)
 	if err != nil {
@@ -83,17 +83,19 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 		optionMap[opt.Name] = opt
 	}
 
-	var userID int32
-	userIDOption, ok := optionMap["user-id"]
-	if ok {
-		res, err := strconv.Atoi(userIDOption.UserValue(session).ID)
-		if err == nil {
-			final := int32(res)
-			userID = final
-		}
+	userIDOption, ok := optionMap["user"]
+	if !ok {
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Missing user-id option")
+		return
 	}
 
-	slogger.InfoContext(ctx, "List History", "User ID", userID)
+	user := userIDOption.UserValue(session)
+	if user == nil {
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Could not resolve user")
+		return
+	}
+
+	userID := user.ID
 
 	listUserHistoryRequest := connect.NewRequest(&snitchv1.ListUserHistoryRequest{UserId: userID})
 	listUserHistoryRequest.Header().Add("X-Server-ID", interaction.GuildID)

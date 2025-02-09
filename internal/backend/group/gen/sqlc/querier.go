@@ -9,18 +9,18 @@ import (
 )
 
 type Querier interface {
-	AddServer(ctx context.Context, serverID int) error
-	AddUser(ctx context.Context, userID int) error
-	CreateReport(ctx context.Context, arg CreateReportParams) (int, error)
+	AddServer(ctx context.Context, serverID string) error
+	AddUser(ctx context.Context, userID string) error
+	CreateReport(ctx context.Context, arg CreateReportParams) (string, error)
 	CreateReportTable(ctx context.Context) error
 	CreateServerTable(ctx context.Context) error
 	CreateUserHistory(ctx context.Context, arg CreateUserHistoryParams) (UserHistory, error)
 	CreateUserHistoryTable(ctx context.Context) error
 	CreateUserTable(ctx context.Context) error
-	DeleteReport(ctx context.Context, reportID int) (int, error)
+	DeleteReport(ctx context.Context, reportID string) (string, error)
 	GetAllReports(ctx context.Context) ([]GetAllReportsRow, error)
-	GetUser(ctx context.Context, userID int) (int, error)
-	GetUserHistory(ctx context.Context, userID int) ([]UserHistory, error)
+	GetUser(ctx context.Context, userID string) (string, error)
+	GetUserHistory(ctx context.Context, userID string) ([]UserHistory, error)
 }
 
 var _ Querier = (*Queries)(nil)

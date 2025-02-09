@@ -12,7 +12,6 @@ import (
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	"strconv"
 	"strings"
 	"time"
 
@@ -32,24 +31,16 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		optionMap[opt.Name] = opt
 	}
 
-	reporterID, err := strconv.Atoi(interaction.Member.User.ID)
-	if err != nil {
-		slogger.ErrorContext(ctx, "Failed to convert reporter ID", "Error", err)
-		return
-	}
+	reporterID := interaction.Member.User.ID
 
 	reportedUserOption, ok := optionMap["reported-user"]
+
 	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error", err)
-		return
+		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error")
 	}
 
 	reportedUser := reportedUserOption.UserValue(session)
-	reportedID, err := strconv.Atoi(reportedUser.ID)
-	if err != nil {
-		slogger.ErrorContext(ctx, "Failed to convert reported ID", "Error", err)
-		return
-	}
+	reportedID := reportedUser.ID
 
 	reportReason := ""
 	reportReasonOption, ok := optionMap["report-reason"]
@@ -57,7 +48,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		reportReason = reportReasonOption.StringValue()
 	}
 
-	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: int32(reporterID), ReportedId: int32(reportedID)})
+	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: reporterID, ReportedId: reportedUser.ID})
 	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
 	if err != nil {
@@ -69,7 +60,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 
-	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: int32(reportedID), Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
+	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
 	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	userResponse, err := userClient.CreateUserHistory(ctx, userRequest)
 	if err != nil {
@@ -93,24 +84,17 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		optionMap[opt.Name] = opt
 	}
 
-	var reporterUserID *int32
+	var reporterUserID *string
 	reporterUserOption, ok := optionMap["reporter-user"]
 	if ok {
-		res, err := strconv.Atoi(reporterUserOption.UserValue(session).ID)
-		if err == nil {
-			final := int32(res)
-			reporterUserID = &final
-		}
+		reporterUserID = &reporterUserOption.UserValue(session).ID
 	}
 
-	var reportedUserID *int32
+	var reportedUserID *string
 	reportedUserOption, ok := optionMap["reported-user"]
 	if ok {
-		res, err := strconv.Atoi(reportedUserOption.UserValue(session).ID)
-		if err == nil {
-			final := int32(res)
-			reportedUserID = &final
-		}
+		reportedUserID = &reportedUserOption.UserValue(session).ID
+
 	}
 
 	slogger.InfoContext(ctx, "List Params", "Reporter", reporterUserID, "Reported", reportedUserID)
@@ -153,14 +137,13 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		optionMap[opt.Name] = opt
 	}
 
+	var reportID string
 	reportIDOption, ok := optionMap["report-id"]
-	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option")
-		return
+	if ok {
+		reportID = reportIDOption.StringValue()
 	}
-	reportID := reportIDOption.IntValue()
 
-	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: int32(reportID)})
+	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
 	deleteReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
 	if err != nil {
