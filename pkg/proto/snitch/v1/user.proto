@@ -5,8 +5,9 @@ package snitch.v1;
 
 message CreateUserHistoryRequest {
   int32 user_id = 1;
-  string nickname = 2;
+  string username = 2;
   string global_name = 3;
+  string changed_at = 4;
 }
 
 message CreateUserHistoryResponse {

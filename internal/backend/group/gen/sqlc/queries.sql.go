@@ -7,7 +7,6 @@ package sqlc
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addServer = `-- name: AddServer :exec
@@ -89,23 +88,26 @@ func (q *Queries) CreateServerTable(ctx context.Context) error {
 
 const createUserHistory = `-- name: CreateUserHistory :one
 INSERT INTO user_history (
+    history_id,
     user_id,
     username,
     global_name,
     changed_at
-) VALUES (?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?)
 RETURNING history_id, user_id, username, global_name, changed_at
 `
 
 type CreateUserHistoryParams struct {
-	UserID     int            `json:"user_id"`
-	Username   string         `json:"username"`
-	GlobalName sql.NullString `json:"global_name"`
-	ChangedAt  string         `json:"changed_at"`
+	HistoryID  string `json:"history_id"`
+	UserID     int    `json:"user_id"`
+	Username   string `json:"username"`
+	GlobalName string `json:"global_name"`
+	ChangedAt  string `json:"changed_at"`
 }
 
 func (q *Queries) CreateUserHistory(ctx context.Context, arg CreateUserHistoryParams) (UserHistory, error) {
 	row := q.queryRow(ctx, q.createUserHistoryStmt, createUserHistory,
+		arg.HistoryID,
 		arg.UserID,
 		arg.Username,
 		arg.GlobalName,

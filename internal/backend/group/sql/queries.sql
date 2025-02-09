@@ -62,11 +62,12 @@ CREATE TABLE IF NOT EXISTS user_history (
 
 -- name: CreateUserHistory :one
 INSERT INTO user_history (
+    history_id,
     user_id,
     username,
     global_name,
     changed_at
-) VALUES (?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: GetUserHistory :many

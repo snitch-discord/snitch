@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS user_history (
     history_id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
     username TEXT NOT NULL,
-    global_name TEXT,
+    global_name TEXT NOT NULL,
     changed_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) STRICT;

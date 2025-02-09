@@ -14,12 +14,13 @@ import (
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"strconv"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, userClient snitchv1connect.UserHistoryServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -67,6 +68,17 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 
 	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
+
+	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: int32(reportedID), Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
+	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	userResponse, err := userClient.CreateUserHistory(ctx, userRequest)
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
+		return
+	}
+
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("IDK %v", userResponse))
 }
 
 func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
@@ -166,6 +178,7 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 		log.Fatal(backendURL)
 	}
 	reportServiceClient := snitchv1connect.NewReportServiceClient(&httpClient, backendURL.String())
+	userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
@@ -177,7 +190,7 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 
 		switch options[0].Name {
 		case "new":
-			handleNewReport(ctx, session, interaction, reportServiceClient)
+			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient)
 		case "list":
 			handleListReports(ctx, session, interaction, reportServiceClient)
 		case "delete":
