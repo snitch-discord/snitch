@@ -57,7 +57,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 
 	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
@@ -152,7 +152,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		return
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %s", deleteReportResponse.Msg.ReportId))
 }
 
 func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {

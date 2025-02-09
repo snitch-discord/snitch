@@ -51,6 +51,21 @@ func (s *UserServer) CreateUserHistory(
 
 	queries := groupSQLc.New(db)
 
+	userHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
+	if err != nil {
+		slogger.Error(fmt.Sprintf("failed to get user history %d", req.Msg.UserId), "Error", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	// loop through all user history and check if username or globalname changed. if not do not update
+	for _, history := range userHistory {
+		if history.Username == req.Msg.Username && history.GlobalName == req.Msg.GlobalName {
+			return connect.NewResponse(&snitchv1.CreateUserHistoryResponse{
+				UserId: history.UserID,
+			}), nil
+		}
+	}
+
 	userHistoryID, err := queries.CreateUserHistory(ctx, groupSQLc.CreateUserHistoryParams{
 		HistoryID:  uuid.New().String(),
 		UserID:     req.Msg.UserId,

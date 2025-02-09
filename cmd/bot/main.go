@@ -42,11 +42,7 @@ func main() {
 
 		log.Printf("commandHandlers: %v", commandHandlers)
 		if !handlerPresent {
-			// log.Printf("Missing Handler for %s", commandHandlers)
-			//
-			// log.Printf("Missing Handler for %d", commandHandlers)
-			// log.Fatalf("Missing Handler for %s", command.Name)
-			log.Printf("meow")
+			log.Fatalf("Missing Handler for %s", command.Name)
 		}
 	}
 
@@ -55,15 +51,11 @@ func main() {
 		log.Panic(err)
 	}
 	defer mainSession.Close()
-	mainSession.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
 
 	mainSession.AddHandler(func(session *discordgo.Session, _ *discordgo.Ready) {
 		log.Printf("Logged in as: %s#%s", session.State.User.Username, session.State.User.Discriminator)
 	})
 	// setup our listeners for interaction events (a user using a slash command)
-	mainSession.AddHandler(func(session *discordgo.Session, update *discordgo.GuildMemberUpdate) {
-		log.Printf("GuildMemberUpdate: %v", update.Member.Nick)
-	})
 
 	handler := func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		if handler, ok := commandHandlers[interaction.ApplicationCommandData().Name]; ok {

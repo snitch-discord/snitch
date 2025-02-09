@@ -67,7 +67,7 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.UserId)
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.UserId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
