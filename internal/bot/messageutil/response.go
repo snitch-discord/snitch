@@ -24,23 +24,16 @@ func SimpleRespondContext(ctx context.Context, session *discordgo.Session, inter
 	}
 }
 
-func EmbedRespondContext(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, messageContent string, messageTitle string) {
+func EmbedRespondContext(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, embeds []*discordgo.MessageEmbed) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
-
 	}
-
-	embed := NewEmbed().
-		SetTitle(messageTitle).
-		SetDescription("SNITCH-EMBED").
-		SetColor(0x00ff00). // GREEN
-		AddField("TESTTEST", messageContent).MessageEmbed
 
 	if err := session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
+			Embeds: embeds,
 		},
 	}); err != nil {
 		slogger.ErrorContext(ctx, "Failed to respond", "Error", err)

@@ -13,7 +13,6 @@ import (
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"strconv"
-	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -88,7 +87,7 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 
 	listUserHistoryRequest := connect.NewRequest(&snitchv1.ListUserHistoryRequest{UserId: userID})
 	listUserHistoryRequest.Header().Add("X-Server-ID", interaction.GuildID)
-	listUserHiustoryResponse, err := client.ListUserHistory(ctx, listUserHistoryRequest)
+	listUserHistoryResponse, err := client.ListUserHistory(ctx, listUserHistoryRequest)
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -96,20 +95,15 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 		return
 	}
 
-	var responseStringBuilder strings.Builder
-	history := listUserHiustoryResponse.Msg.UserHistory
+	messageHistoryEmbed := messageutil.NewEmbed().
+		SetTitle("User History")
+
+	history := listUserHistoryResponse.Msg.UserHistory
 	for index, h := range history {
-		responseStringBuilder.WriteString(fmt.Sprintf("History %d: %s\n", index, h))
+		messageHistoryEmbed.AddField(fmt.Sprintf("History %d", index), h.Username)
 	}
 
-	var messageContent string
-	if responseStringBuilder.Len() == 0 {
-		messageContent = "No history found!"
-	} else {
-		messageContent = responseStringBuilder.String()
-	}
-
-	messageutil.EmbedRespondContext(ctx, session, interaction, messageContent, "Listed User History")
+	messageutil.EmbedRespondContext(ctx, session, interaction, []*discordgo.MessageEmbed{messageHistoryEmbed.MessageEmbed})
 }
 
 func CreateUserCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {

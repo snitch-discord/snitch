@@ -12,7 +12,6 @@ import (
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -107,20 +106,17 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		return
 	}
 
-	var responseStringBuilder strings.Builder
+	reportEmbed := messageutil.NewEmbed().
+		SetTitle("Reports").
+		SetDescription("Report List")
+
 	reports := listReportResponse.Msg.Reports
 	for index, report := range reports {
-		responseStringBuilder.WriteString(fmt.Sprintf("Report %d: %s\n", index, report))
+		headerField := fmt.Sprintf("%d: Reporter ID: %s, Reported ID: %s", index, report.ReporterId, report.ReportedId)
+		reportEmbed.AddField(headerField, report.ReportText)
 	}
 
-	var messageContent string
-	if responseStringBuilder.Len() == 0 {
-		messageContent = "No reports found!"
-	} else {
-		messageContent = responseStringBuilder.String()
-	}
-
-	messageutil.EmbedRespondContext(ctx, session, interaction, messageContent, "Listed Reports")
+	messageutil.EmbedRespondContext(ctx, session, interaction, []*discordgo.MessageEmbed{reportEmbed.MessageEmbed})
 }
 
 func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
