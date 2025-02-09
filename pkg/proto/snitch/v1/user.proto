@@ -1,0 +1,31 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+message CreateUserHistoryRequest {
+  int32 user_id = 1;
+  string nickname = 2;
+  string global_name = 3;
+}
+
+message CreateUserHistoryResponse {
+  int32 user_id = 1;
+}
+
+message ListUserHistoryRequest {
+  int32 user_id = 1;
+}
+
+message ListUserHistoryResponse {
+  repeated CreateUserHistoryRequest user_history = 1;
+}
+
+
+service UserHistoryService {
+  rpc CreateUserHistory(CreateUserHistoryRequest) returns (CreateUserHistoryResponse) {};
+  rpc ListUserHistory(ListUserHistoryRequest) returns (ListUserHistoryResponse) {};
+}
+
+
+
