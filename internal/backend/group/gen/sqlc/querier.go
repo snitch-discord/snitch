@@ -14,9 +14,13 @@ type Querier interface {
 	CreateReport(ctx context.Context, arg CreateReportParams) (int, error)
 	CreateReportTable(ctx context.Context) error
 	CreateServerTable(ctx context.Context) error
+	CreateUserHistory(ctx context.Context, arg CreateUserHistoryParams) (UserHistory, error)
+	CreateUserHistoryTable(ctx context.Context) error
 	CreateUserTable(ctx context.Context) error
 	DeleteReport(ctx context.Context, reportID int) (int, error)
 	GetAllReports(ctx context.Context) ([]GetAllReportsRow, error)
+	GetUser(ctx context.Context, userID int) (int, error)
+	GetUserHistory(ctx context.Context, userID int) ([]UserHistory, error)
 }
 
 var _ Querier = (*Queries)(nil)

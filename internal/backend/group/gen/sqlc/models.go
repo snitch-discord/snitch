@@ -4,6 +4,10 @@
 
 package sqlc
 
+import (
+	"database/sql"
+)
+
 type Report struct {
 	ReportID       int    `json:"report_id"`
 	ReportText     string `json:"report_text"`
@@ -18,4 +22,12 @@ type Server struct {
 
 type User struct {
 	UserID int `json:"user_id"`
+}
+
+type UserHistory struct {
+	HistoryID  string         `json:"history_id"`
+	UserID     int            `json:"user_id"`
+	Username   string         `json:"username"`
+	GlobalName sql.NullString `json:"global_name"`
+	ChangedAt  string         `json:"changed_at"`
 }

@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addServer = `-- name: AddServer :exec
@@ -86,6 +87,57 @@ func (q *Queries) CreateServerTable(ctx context.Context) error {
 	return err
 }
 
+const createUserHistory = `-- name: CreateUserHistory :one
+INSERT INTO user_history (
+    user_id,
+    username,
+    global_name,
+    changed_at
+) VALUES (?, ?, ?, ?)
+RETURNING history_id, user_id, username, global_name, changed_at
+`
+
+type CreateUserHistoryParams struct {
+	UserID     int            `json:"user_id"`
+	Username   string         `json:"username"`
+	GlobalName sql.NullString `json:"global_name"`
+	ChangedAt  string         `json:"changed_at"`
+}
+
+func (q *Queries) CreateUserHistory(ctx context.Context, arg CreateUserHistoryParams) (UserHistory, error) {
+	row := q.queryRow(ctx, q.createUserHistoryStmt, createUserHistory,
+		arg.UserID,
+		arg.Username,
+		arg.GlobalName,
+		arg.ChangedAt,
+	)
+	var i UserHistory
+	err := row.Scan(
+		&i.HistoryID,
+		&i.UserID,
+		&i.Username,
+		&i.GlobalName,
+		&i.ChangedAt,
+	)
+	return i, err
+}
+
+const createUserHistoryTable = `-- name: CreateUserHistoryTable :exec
+CREATE TABLE IF NOT EXISTS user_history (
+    history_id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    global_name TEXT,
+    changed_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+) STRICT
+`
+
+func (q *Queries) CreateUserHistoryTable(ctx context.Context) error {
+	_, err := q.exec(ctx, q.createUserHistoryTableStmt, createUserHistoryTable)
+	return err
+}
+
 const createUserTable = `-- name: CreateUserTable :exec
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY
@@ -140,6 +192,53 @@ func (q *Queries) GetAllReports(ctx context.Context) ([]GetAllReportsRow, error)
 			&i.ReporterID,
 			&i.ReportedUserID,
 			&i.OriginServerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUser = `-- name: GetUser :one
+SELECT user_id FROM users
+WHERE user_id = ?
+`
+
+func (q *Queries) GetUser(ctx context.Context, userID int) (int, error) {
+	row := q.queryRow(ctx, q.getUserStmt, getUser, userID)
+	var user_id int
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const getUserHistory = `-- name: GetUserHistory :many
+SELECT history_id, user_id, username, global_name, changed_at FROM user_history
+WHERE user_id = ?
+ORDER BY changed_at DESC
+`
+
+func (q *Queries) GetUserHistory(ctx context.Context, userID int) ([]UserHistory, error) {
+	rows, err := q.query(ctx, q.getUserHistoryStmt, getUserHistory, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserHistory
+	for rows.Next() {
+		var i UserHistory
+		if err := rows.Scan(
+			&i.HistoryID,
+			&i.UserID,
+			&i.Username,
+			&i.GlobalName,
+			&i.ChangedAt,
 		); err != nil {
 			return nil, err
 		}

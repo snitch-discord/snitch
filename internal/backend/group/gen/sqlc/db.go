@@ -39,6 +39,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createServerTableStmt, err = db.PrepareContext(ctx, createServerTable); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateServerTable: %w", err)
 	}
+	if q.createUserHistoryStmt, err = db.PrepareContext(ctx, createUserHistory); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateUserHistory: %w", err)
+	}
+	if q.createUserHistoryTableStmt, err = db.PrepareContext(ctx, createUserHistoryTable); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateUserHistoryTable: %w", err)
+	}
 	if q.createUserTableStmt, err = db.PrepareContext(ctx, createUserTable); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUserTable: %w", err)
 	}
@@ -47,6 +53,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getAllReportsStmt, err = db.PrepareContext(ctx, getAllReports); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllReports: %w", err)
+	}
+	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	}
+	if q.getUserHistoryStmt, err = db.PrepareContext(ctx, getUserHistory); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserHistory: %w", err)
 	}
 	return &q, nil
 }
@@ -78,6 +90,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createServerTableStmt: %w", cerr)
 		}
 	}
+	if q.createUserHistoryStmt != nil {
+		if cerr := q.createUserHistoryStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createUserHistoryStmt: %w", cerr)
+		}
+	}
+	if q.createUserHistoryTableStmt != nil {
+		if cerr := q.createUserHistoryTableStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createUserHistoryTableStmt: %w", cerr)
+		}
+	}
 	if q.createUserTableStmt != nil {
 		if cerr := q.createUserTableStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserTableStmt: %w", cerr)
@@ -91,6 +113,16 @@ func (q *Queries) Close() error {
 	if q.getAllReportsStmt != nil {
 		if cerr := q.getAllReportsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllReportsStmt: %w", cerr)
+		}
+	}
+	if q.getUserStmt != nil {
+		if cerr := q.getUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
+	if q.getUserHistoryStmt != nil {
+		if cerr := q.getUserHistoryStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserHistoryStmt: %w", cerr)
 		}
 	}
 	return err
@@ -130,29 +162,37 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	addServerStmt         *sql.Stmt
-	addUserStmt           *sql.Stmt
-	createReportStmt      *sql.Stmt
-	createReportTableStmt *sql.Stmt
-	createServerTableStmt *sql.Stmt
-	createUserTableStmt   *sql.Stmt
-	deleteReportStmt      *sql.Stmt
-	getAllReportsStmt     *sql.Stmt
+	db                         DBTX
+	tx                         *sql.Tx
+	addServerStmt              *sql.Stmt
+	addUserStmt                *sql.Stmt
+	createReportStmt           *sql.Stmt
+	createReportTableStmt      *sql.Stmt
+	createServerTableStmt      *sql.Stmt
+	createUserHistoryStmt      *sql.Stmt
+	createUserHistoryTableStmt *sql.Stmt
+	createUserTableStmt        *sql.Stmt
+	deleteReportStmt           *sql.Stmt
+	getAllReportsStmt          *sql.Stmt
+	getUserStmt                *sql.Stmt
+	getUserHistoryStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		addServerStmt:         q.addServerStmt,
-		addUserStmt:           q.addUserStmt,
-		createReportStmt:      q.createReportStmt,
-		createReportTableStmt: q.createReportTableStmt,
-		createServerTableStmt: q.createServerTableStmt,
-		createUserTableStmt:   q.createUserTableStmt,
-		deleteReportStmt:      q.deleteReportStmt,
-		getAllReportsStmt:     q.getAllReportsStmt,
+		db:                         tx,
+		tx:                         tx,
+		addServerStmt:              q.addServerStmt,
+		addUserStmt:                q.addUserStmt,
+		createReportStmt:           q.createReportStmt,
+		createReportTableStmt:      q.createReportTableStmt,
+		createServerTableStmt:      q.createServerTableStmt,
+		createUserHistoryStmt:      q.createUserHistoryStmt,
+		createUserHistoryTableStmt: q.createUserHistoryTableStmt,
+		createUserTableStmt:        q.createUserTableStmt,
+		deleteReportStmt:           q.deleteReportStmt,
+		getAllReportsStmt:          q.getAllReportsStmt,
+		getUserStmt:                q.getUserStmt,
+		getUserHistoryStmt:         q.getUserHistoryStmt,
 	}
 }

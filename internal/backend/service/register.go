@@ -218,6 +218,11 @@ func (s *RegisterServer) Register(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
+		if err := groupQueries.CreateUserHistoryTable(ctx); err != nil {
+			slogger.Error("Create User History Table", "Error", err)
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+
 		if err := metadataQueries.InsertGroup(ctx, metadataSQLc.InsertGroupParams{
 			GroupID:   groupID,
 			GroupName: *req.Msg.GroupName,
