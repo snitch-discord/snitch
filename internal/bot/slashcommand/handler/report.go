@@ -36,7 +36,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	reportedUserOption, ok := optionMap["reported-user"]
 
 	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error")
+		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error", ok)
 	}
 
 	reportedUser := reportedUserOption.UserValue(session)

@@ -53,7 +53,7 @@ func (s *UserServer) CreateUserHistory(
 
 	userHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
 	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to get user history %d", req.Msg.UserId), "Error", err)
+		slogger.Error(fmt.Sprintf("failed to get user history %s", req.Msg.UserId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
@@ -75,7 +75,7 @@ func (s *UserServer) CreateUserHistory(
 	})
 
 	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user history %d", req.Msg.UserId), "Error", err)
+		slogger.Error(fmt.Sprintf("failed to add user history %s", req.Msg.UserId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
@@ -111,7 +111,7 @@ func (s *UserServer) ListUserHistory(
 	dbUserHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
 
 	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to get user history %d", req.Msg.UserId), "Error", err)
+		slogger.Error(fmt.Sprintf("failed to get user history %s", req.Msg.UserId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 

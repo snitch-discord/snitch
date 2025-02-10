@@ -64,12 +64,12 @@ func (s *ReportServer) CreateReport(
 	queries := groupSQLc.New(db)
 
 	if err := queries.AddUser(ctx, req.Msg.ReportedId); err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user %d", req.Msg.ReportedId), "Error", err)
+		slogger.Error(fmt.Sprintf("failed to add user %s", req.Msg.ReportedId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	if err := queries.AddUser(ctx, req.Msg.ReporterId); err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user %d", req.Msg.ReportedId), "Error", err)
+		slogger.Error(fmt.Sprintf("failed to add user %s", req.Msg.ReportedId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
