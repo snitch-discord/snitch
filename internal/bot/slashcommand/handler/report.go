@@ -57,19 +57,17 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
-	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
-
 	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
 	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
-	userResponse, err := userClient.CreateUserHistory(ctx, userRequest)
+	_, err = userClient.CreateUserHistory(ctx, userRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
 		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
 		return
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("IDK %v", userResponse))
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
 func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {

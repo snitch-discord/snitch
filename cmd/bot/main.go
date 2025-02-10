@@ -40,7 +40,6 @@ func main() {
 	for _, command := range commands {
 		_, handlerPresent := commandHandlers[command.Name]
 
-		log.Printf("commandHandlers: %v", commandHandlers)
 		if !handlerPresent {
 			log.Fatalf("Missing Handler for %s", command.Name)
 		}
