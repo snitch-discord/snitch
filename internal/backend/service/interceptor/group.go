@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"snitch/internal/backend/metadata"
-	"strconv"
 
 	"connectrpc.com/connect"
 )
@@ -18,16 +17,12 @@ const (
 	groupIDContextKey  = contextKey("group_id")
 )
 
-func getServerID(req connect.AnyRequest) (int, error) {
-	serverIDStr := req.Header().Get(ServerIDHeader)
-	if serverIDStr == "" {
-		return 0, fmt.Errorf("server ID header is required")
+func getServerID(req connect.AnyRequest) (string, error) {
+	serverID := req.Header().Get(ServerIDHeader)
+	if serverID == "" {
+		return "", fmt.Errorf("server ID header is required")
 	}
 
-	serverID, err := strconv.Atoi(serverIDStr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid server ID format")
-	}
 	return serverID, nil
 }
 
@@ -53,10 +48,10 @@ func NewGroupContextInterceptor(metadataDB *sql.DB) connect.UnaryInterceptorFunc
 	return connect.UnaryInterceptorFunc(interceptor)
 }
 
-func GetServerID(ctx context.Context) (int, error) {
-	serverID, ok := ctx.Value(serverIDContextKey).(int)
+func GetServerID(ctx context.Context) (string, error) {
+	serverID, ok := ctx.Value(serverIDContextKey).(string)
 	if !ok {
-		return 0, fmt.Errorf("server ID not found in context")
+		return "", fmt.Errorf("server ID not found in context")
 	}
 	return serverID, nil
 }

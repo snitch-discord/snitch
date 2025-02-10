@@ -32,6 +32,7 @@ func main() {
 	commandHandlers := map[string]slashcommand.SlashCommandHandlerFunc{
 		"register": handler.CreateRegisterCommandHandler(config, httpClient),
 		"report":   handler.CreateReportCommandHandler(config, httpClient),
+		"user":     handler.CreateUserCommandHandler(config, httpClient),
 	}
 
 	commands := slashcommand.InitializeCommands()

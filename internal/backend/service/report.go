@@ -28,8 +28,8 @@ func NewReportServer(tokenCache *jwt.TokenCache, libSQLConfig dbconfig.LibSQLCon
 func reportDBtoRPC(reportRow groupSQLc.GetAllReportsRow) *snitchv1.CreateReportRequest {
 	return &snitchv1.CreateReportRequest{
 		ReportText: reportRow.ReportText,
-		ReporterId: int32(reportRow.ReporterID),
-		ReportedId: int32(reportRow.ReportedUserID),
+		ReporterId: reportRow.ReporterID,
+		ReportedId: reportRow.ReportedUserID,
 	}
 }
 
@@ -63,21 +63,21 @@ func (s *ReportServer) CreateReport(
 
 	queries := groupSQLc.New(db)
 
-	if err := queries.AddUser(ctx, int(req.Msg.ReportedId)); err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user %d", req.Msg.ReportedId), "Error", err)
+	if err := queries.AddUser(ctx, req.Msg.ReportedId); err != nil {
+		slogger.Error(fmt.Sprintf("failed to add user %s", req.Msg.ReportedId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	if err := queries.AddUser(ctx, int(req.Msg.ReporterId)); err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user %d", req.Msg.ReportedId), "Error", err)
+	if err := queries.AddUser(ctx, req.Msg.ReporterId); err != nil {
+		slogger.Error(fmt.Sprintf("failed to add user %s", req.Msg.ReportedId), "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	reportID, err := queries.CreateReport(ctx, groupSQLc.CreateReportParams{
 		OriginServerID: serverID,
 		ReportText:     req.Msg.ReportText,
-		ReporterID:     int(req.Msg.ReporterId),
-		ReportedUserID: int(req.Msg.ReportedId),
+		ReporterID:     req.Msg.ReporterId,
+		ReportedUserID: req.Msg.ReportedId,
 	})
 
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *ReportServer) CreateReport(
 	}
 
 	return connect.NewResponse(&snitchv1.CreateReportResponse{
-		ReportId: int32(reportID),
+		ReportId: reportID,
 	}), nil
 }
 
@@ -123,13 +123,13 @@ func (s *ReportServer) ListReports(
 
 	for _, dbReport := range dbReports {
 		if req.Msg.ReporterId != nil {
-			if dbReport.ReporterID != int(*req.Msg.ReporterId) {
+			if dbReport.ReporterID != *req.Msg.ReporterId {
 				continue
 			}
 		}
 
 		if req.Msg.ReportedId != nil {
-			if dbReport.ReportedUserID != int(*req.Msg.ReportedId) {
+			if dbReport.ReportedUserID != *req.Msg.ReportedId {
 				continue
 			}
 		}
@@ -165,11 +165,11 @@ func (s *ReportServer) DeleteReport(
 	}
 
 	queries := groupSQLc.New(db)
-	deletedReportID, err := queries.DeleteReport(ctx, int(req.Msg.ReportId))
+	deletedReportID, err := queries.DeleteReport(ctx, req.Msg.ReportId)
 	if err != nil {
 		slogger.Error("failed to delete report", "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: int32(deletedReportID)}), nil
+	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: deletedReportID}), nil
 }

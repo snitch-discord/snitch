@@ -86,7 +86,7 @@ func NewMetadataDB(ctx context.Context, token string, config dbconfig.LibSQLConf
 	return db, nil
 }
 
-func FindGroupIDByServerID(ctx context.Context, db *sql.DB, serverID int) (uuid.UUID, error) {
+func FindGroupIDByServerID(ctx context.Context, db *sql.DB, serverID string) (uuid.UUID, error) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -104,7 +104,7 @@ func FindGroupIDByServerID(ctx context.Context, db *sql.DB, serverID int) (uuid.
 	return groupID, nil
 }
 
-func AddServerToGroup(ctx context.Context, db *sql.DB, serverID int, groupID uuid.UUID) error {
+func AddServerToGroup(ctx context.Context, db *sql.DB, serverID string, groupID uuid.UUID) error {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()

@@ -15,7 +15,7 @@ INSERT INTO servers (
 ) VALUES (?)
 `
 
-func (q *Queries) AddServer(ctx context.Context, serverID int) error {
+func (q *Queries) AddServer(ctx context.Context, serverID string) error {
 	_, err := q.exec(ctx, q.addServerStmt, addServer, serverID)
 	return err
 }
@@ -26,7 +26,7 @@ INSERT OR IGNORE INTO users (
 ) VALUES (?)
 `
 
-func (q *Queries) AddUser(ctx context.Context, userID int) error {
+func (q *Queries) AddUser(ctx context.Context, userID string) error {
 	_, err := q.exec(ctx, q.addUserStmt, addUser, userID)
 	return err
 }
@@ -43,19 +43,19 @@ RETURNING report_id
 
 type CreateReportParams struct {
 	ReportText     string `json:"report_text"`
-	ReporterID     int    `json:"reporter_id"`
-	ReportedUserID int    `json:"reported_user_id"`
-	OriginServerID int    `json:"origin_server_id"`
+	ReporterID     string `json:"reporter_id"`
+	ReportedUserID string `json:"reported_user_id"`
+	OriginServerID string `json:"origin_server_id"`
 }
 
-func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (int, error) {
+func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (string, error) {
 	row := q.queryRow(ctx, q.createReportStmt, createReport,
 		arg.ReportText,
 		arg.ReporterID,
 		arg.ReportedUserID,
 		arg.OriginServerID,
 	)
-	var report_id int
+	var report_id string
 	err := row.Scan(&report_id)
 	return report_id, err
 }
@@ -86,6 +86,60 @@ func (q *Queries) CreateServerTable(ctx context.Context) error {
 	return err
 }
 
+const createUserHistory = `-- name: CreateUserHistory :one
+INSERT INTO user_history (
+    history_id,
+    user_id,
+    username,
+    global_name,
+    changed_at
+) VALUES (?, ?, ?, ?, ?)
+RETURNING history_id, user_id, username, global_name, changed_at
+`
+
+type CreateUserHistoryParams struct {
+	HistoryID  string `json:"history_id"`
+	UserID     string `json:"user_id"`
+	Username   string `json:"username"`
+	GlobalName string `json:"global_name"`
+	ChangedAt  string `json:"changed_at"`
+}
+
+func (q *Queries) CreateUserHistory(ctx context.Context, arg CreateUserHistoryParams) (UserHistory, error) {
+	row := q.queryRow(ctx, q.createUserHistoryStmt, createUserHistory,
+		arg.HistoryID,
+		arg.UserID,
+		arg.Username,
+		arg.GlobalName,
+		arg.ChangedAt,
+	)
+	var i UserHistory
+	err := row.Scan(
+		&i.HistoryID,
+		&i.UserID,
+		&i.Username,
+		&i.GlobalName,
+		&i.ChangedAt,
+	)
+	return i, err
+}
+
+const createUserHistoryTable = `-- name: CreateUserHistoryTable :exec
+CREATE TABLE IF NOT EXISTS user_history (
+    history_id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    global_name TEXT,
+    changed_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+) STRICT
+`
+
+func (q *Queries) CreateUserHistoryTable(ctx context.Context) error {
+	_, err := q.exec(ctx, q.createUserHistoryTableStmt, createUserHistoryTable)
+	return err
+}
+
 const createUserTable = `-- name: CreateUserTable :exec
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY
@@ -103,9 +157,9 @@ WHERE report_id = ?
 RETURNING report_id
 `
 
-func (q *Queries) DeleteReport(ctx context.Context, reportID int) (int, error) {
+func (q *Queries) DeleteReport(ctx context.Context, reportID string) (string, error) {
 	row := q.queryRow(ctx, q.deleteReportStmt, deleteReport, reportID)
-	var report_id int
+	var report_id string
 	err := row.Scan(&report_id)
 	return report_id, err
 }
@@ -121,9 +175,9 @@ FROM reports
 
 type GetAllReportsRow struct {
 	ReportText     string `json:"report_text"`
-	ReporterID     int    `json:"reporter_id"`
-	ReportedUserID int    `json:"reported_user_id"`
-	OriginServerID int    `json:"origin_server_id"`
+	ReporterID     string `json:"reporter_id"`
+	ReportedUserID string `json:"reported_user_id"`
+	OriginServerID string `json:"origin_server_id"`
 }
 
 func (q *Queries) GetAllReports(ctx context.Context) ([]GetAllReportsRow, error) {
@@ -140,6 +194,53 @@ func (q *Queries) GetAllReports(ctx context.Context) ([]GetAllReportsRow, error)
 			&i.ReporterID,
 			&i.ReportedUserID,
 			&i.OriginServerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUser = `-- name: GetUser :one
+SELECT user_id FROM users
+WHERE user_id = ?
+`
+
+func (q *Queries) GetUser(ctx context.Context, userID string) (string, error) {
+	row := q.queryRow(ctx, q.getUserStmt, getUser, userID)
+	var user_id string
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const getUserHistory = `-- name: GetUserHistory :many
+SELECT history_id, user_id, username, global_name, changed_at FROM user_history
+WHERE user_id = ?
+ORDER BY changed_at DESC
+`
+
+func (q *Queries) GetUserHistory(ctx context.Context, userID string) ([]UserHistory, error) {
+	rows, err := q.query(ctx, q.getUserHistoryStmt, getUserHistory, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserHistory
+	for rows.Next() {
+		var i UserHistory
+		if err := rows.Scan(
+			&i.HistoryID,
+			&i.UserID,
+			&i.Username,
+			&i.GlobalName,
+			&i.ChangedAt,
 		); err != nil {
 			return nil, err
 		}

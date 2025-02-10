@@ -12,14 +12,14 @@ import (
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	"strconv"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, userClient snitchv1connect.UserHistoryServiceClient) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -31,24 +31,16 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		optionMap[opt.Name] = opt
 	}
 
-	reporterID, err := strconv.Atoi(interaction.Member.User.ID)
-	if err != nil {
-		slogger.ErrorContext(ctx, "Failed to convert reporter ID", "Error", err)
-		return
-	}
+	reporterID := interaction.Member.User.ID
 
 	reportedUserOption, ok := optionMap["reported-user"]
+
 	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error", err)
-		return
+		slogger.ErrorContext(ctx, "Failed to get reported user option", "Error", ok)
 	}
 
 	reportedUser := reportedUserOption.UserValue(session)
-	reportedID, err := strconv.Atoi(reportedUser.ID)
-	if err != nil {
-		slogger.ErrorContext(ctx, "Failed to convert reported ID", "Error", err)
-		return
-	}
+	reportedID := reportedUser.ID
 
 	reportReason := ""
 	reportReasonOption, ok := optionMap["report-reason"]
@@ -56,7 +48,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		reportReason = reportReasonOption.StringValue()
 	}
 
-	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: int32(reporterID), ReportedId: int32(reportedID)})
+	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: reporterID, ReportedId: reportedUser.ID})
 	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
 	if err != nil {
@@ -65,7 +57,16 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
+	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	_, err = userClient.CreateUserHistory(ctx, userRequest)
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
+		return
+	}
+
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
@@ -81,24 +82,17 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		optionMap[opt.Name] = opt
 	}
 
-	var reporterUserID *int32
+	var reporterUserID *string
 	reporterUserOption, ok := optionMap["reporter-user"]
 	if ok {
-		res, err := strconv.Atoi(reporterUserOption.UserValue(session).ID)
-		if err == nil {
-			final := int32(res)
-			reporterUserID = &final
-		}
+		reporterUserID = &reporterUserOption.UserValue(session).ID
 	}
 
-	var reportedUserID *int32
+	var reportedUserID *string
 	reportedUserOption, ok := optionMap["reported-user"]
 	if ok {
-		res, err := strconv.Atoi(reportedUserOption.UserValue(session).ID)
-		if err == nil {
-			final := int32(res)
-			reportedUserID = &final
-		}
+		reportedUserID = &reportedUserOption.UserValue(session).ID
+
 	}
 
 	slogger.InfoContext(ctx, "List Params", "Reporter", reporterUserID, "Reported", reportedUserID)
@@ -141,14 +135,13 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		optionMap[opt.Name] = opt
 	}
 
+	var reportID string
 	reportIDOption, ok := optionMap["report-id"]
-	if !ok {
-		slogger.ErrorContext(ctx, "Failed to get reported user option")
-		return
+	if ok {
+		reportID = reportIDOption.StringValue()
 	}
-	reportID := reportIDOption.IntValue()
 
-	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: int32(reportID)})
+	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
 	deleteReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
 	if err != nil {
@@ -157,7 +150,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		return
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %s", deleteReportResponse.Msg.ReportId))
 }
 
 func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
@@ -177,7 +170,8 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 
 		switch options[0].Name {
 		case "new":
-			handleNewReport(ctx, session, interaction, reportServiceClient)
+			userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
+			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient)
 		case "list":
 			handleListReports(ctx, session, interaction, reportServiceClient)
 		case "delete":

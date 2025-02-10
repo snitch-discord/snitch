@@ -26,8 +26,8 @@ INSERT INTO servers (
 `
 
 type AddServerToGroupParams struct {
-	ServerID int       `json:"server_id"`
-	GroupID  uuid.UUID `json:"group_id"`
+	ServerID interface{} `json:"server_id"`
+	GroupID  uuid.UUID   `json:"group_id"`
 }
 
 func (q *Queries) AddServerToGroup(ctx context.Context, arg AddServerToGroupParams) error {
@@ -68,7 +68,7 @@ FROM servers
 WHERE server_id = ?
 `
 
-func (q *Queries) FindGroupIDByServerID(ctx context.Context, serverID int) (uuid.UUID, error) {
+func (q *Queries) FindGroupIDByServerID(ctx context.Context, serverID interface{}) (uuid.UUID, error) {
 	row := q.queryRow(ctx, q.findGroupIDByServerIDStmt, findGroupIDByServerID, serverID)
 	var group_id uuid.UUID
 	err := row.Scan(&group_id)

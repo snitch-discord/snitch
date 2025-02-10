@@ -5,17 +5,25 @@
 package sqlc
 
 type Report struct {
-	ReportID       int    `json:"report_id"`
+	ReportID       string `json:"report_id"`
 	ReportText     string `json:"report_text"`
-	ReporterID     int    `json:"reporter_id"`
-	ReportedUserID int    `json:"reported_user_id"`
-	OriginServerID int    `json:"origin_server_id"`
+	ReporterID     string `json:"reporter_id"`
+	ReportedUserID string `json:"reported_user_id"`
+	OriginServerID string `json:"origin_server_id"`
 }
 
 type Server struct {
-	ServerID int `json:"server_id"`
+	ServerID string `json:"server_id"`
 }
 
 type User struct {
-	UserID int `json:"user_id"`
+	UserID string `json:"user_id"`
+}
+
+type UserHistory struct {
+	HistoryID  string `json:"history_id"`
+	UserID     string `json:"user_id"`
+	Username   string `json:"username"`
+	GlobalName string `json:"global_name"`
+	ChangedAt  string `json:"changed_at"`
 }

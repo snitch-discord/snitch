@@ -67,6 +67,7 @@ func main() {
 
 	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
 	reportServer := service.NewReportServer(jwtCache, libSQLConfig)
+	userServer := service.NewUserServer(jwtCache, libSQLConfig)
 
 	baseInterceptors := connect.WithInterceptors(
 		interceptor.NewRecoveryInterceptor(),
@@ -77,6 +78,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
 	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),

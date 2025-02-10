@@ -50,3 +50,32 @@ CREATE TABLE IF NOT EXISTS reports (
 ) STRICT;
 
 
+-- name: CreateUserHistoryTable :exec
+CREATE TABLE IF NOT EXISTS user_history (
+    history_id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    global_name TEXT,
+    changed_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+) STRICT;
+
+-- name: CreateUserHistory :one
+INSERT INTO user_history (
+    history_id,
+    user_id,
+    username,
+    global_name,
+    changed_at
+) VALUES (?, ?, ?, ?, ?)
+RETURNING *;
+
+-- name: GetUserHistory :many
+SELECT * FROM user_history
+WHERE user_id = ?
+ORDER BY changed_at DESC;
+
+-- name: GetUser :one
+SELECT * FROM users
+WHERE user_id = ?;
+

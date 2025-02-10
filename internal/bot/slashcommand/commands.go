@@ -44,6 +44,25 @@ func InitializeCommands() []*discordgo.ApplicationCommand {
 			},
 		},
 		{
+			Name:        "user",
+			Description: "User related functionality",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "list",
+					Description: "Lists user history",
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Name:        "user",
+							Type:        discordgo.ApplicationCommandOptionUser,
+							Description: "User ID",
+							Required:    true,
+						},
+					},
+				},
+			},
+		},
+		{
 			Name:        "report",
 			Description: "Reports a user",
 			Options: []*discordgo.ApplicationCommandOption{
@@ -92,7 +111,7 @@ func InitializeCommands() []*discordgo.ApplicationCommand {
 					Options: []*discordgo.ApplicationCommandOption{
 						{
 							Name:        "report-id",
-							Type:        discordgo.ApplicationCommandOptionInteger,
+							Type:        discordgo.ApplicationCommandOptionString,
 							Description: "Report ID",
 							Required:    true,
 						},

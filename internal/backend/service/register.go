@@ -13,7 +13,6 @@ import (
 	metadataSQLc "snitch/internal/backend/metadata/gen/sqlc"
 	"snitch/internal/shared/ctxutil"
 	snitchpb "snitch/pkg/proto/gen/snitch/v1"
-	"strconv"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
@@ -31,15 +30,10 @@ func NewRegisterServer(tokenCache *jwt.TokenCache, metadataDB *sql.DB, libSQLCon
 
 const ServerIDHeader = "X-Server-ID"
 
-func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (int, error) {
-	serverIDStr := r.Header().Get(ServerIDHeader)
-	if serverIDStr == "" {
-		return 0, fmt.Errorf("server ID header is required")
-	}
-
-	serverID, err := strconv.Atoi(serverIDStr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid server ID format")
+func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (string, error) {
+	serverID := r.Header().Get(ServerIDHeader)
+	if serverID == "" {
+		return "", fmt.Errorf("server ID header is required")
 	}
 
 	return serverID, nil
@@ -218,6 +212,11 @@ func (s *RegisterServer) Register(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
+		if err := groupQueries.CreateUserHistoryTable(ctx); err != nil {
+			slogger.Error("Create User History Table", "Error", err)
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+
 		if err := metadataQueries.InsertGroup(ctx, metadataSQLc.InsertGroupParams{
 			GroupID:   groupID,
 			GroupName: *req.Msg.GroupName,
@@ -256,7 +255,7 @@ func (s *RegisterServer) Register(
 		"isNewGroup", req.Msg.GroupId == nil)
 
 	return connect.NewResponse(&snitchpb.RegisterResponse{
-		ServerId: int32(serverID),
+		ServerId: serverID,
 		GroupId:  groupID.String(),
 	}), nil
 }
