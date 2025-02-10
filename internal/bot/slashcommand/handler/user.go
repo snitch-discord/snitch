@@ -14,6 +14,7 @@ import (
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"strconv"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
@@ -45,29 +46,17 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 	}
 
 	reportedUser := reportedUserOption.UserValue(session)
-	reportedID, err := strconv.Atoi(reportedUser.ID)
-	slogger.InfoContext(ctx, "Reported ID", "ID", reportedID)
-	if err != nil {
-		slogger.ErrorContext(ctx, "Failed to convert reported ID", "Error", err)
-		return
-	}
 
-	reportReason := ""
-	reportReasonOption, ok := optionMap["report-reason"]
-	if ok {
-		reportReason = reportReasonOption.StringValue()
-	}
-
-	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: "123", Username: reportedUser.Username, ChangedAt: "123"})
+	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedUser.ID, Username: reportedUser.Username, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
 	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateUserHistory(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't create user history, error: %s", err.Error()))
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.UserId)
+	messageContent := fmt.Sprintf("User history for: %s; User ID: %s", reportedUser.Username, reportResponse.Msg.UserId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
@@ -103,7 +92,7 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
-		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't list reports, error: %s", err.Error()))
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't list user history, error: %s", err.Error()))
 		return
 	}
 
