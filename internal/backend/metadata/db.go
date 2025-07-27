@@ -36,7 +36,7 @@ func NewMetadataDB(ctx context.Context, token string, config dbconfig.LibSQLConf
 		}
 	}
 
-	metadataURL, err := config.MetadataDB()
+	metadataURL, err := config.MetadataURL()
 	if err != nil {
 		return nil, fmt.Errorf("cant get metadata: %w", err)
 	}

@@ -19,17 +19,22 @@ func GetGroupDB(ctx context.Context, token string, config dbconfig.LibSQLConfig,
 		slogger = slog.Default()
 	}
 
-	databaseURL, err := config.NamespaceURL(groupID, token)
+	databaseURL, err := config.NamespaceURL(groupID)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Failed getting group DB URL", "Error", err)
 		return nil, fmt.Errorf("couldnt get group DB URL: %w", err)
 	}
 
-	db, err := sql.Open("libsql", databaseURL.String())
+	// Construct connection string with auth token
+	// The token is only in memory, not logged or exposed in URLs
+	connectionString := fmt.Sprintf("%s?authToken=%s", databaseURL.String(), token)
+	
+	db, err := sql.Open("libsql", connectionString)
 	if err != nil {
-		slogger.ErrorContext(ctx, "Failed creating group DB", "Error", err)
-		return nil, fmt.Errorf("couldnt create group DB: %w", err)
+		// Log error without exposing the connection string that contains the token
+		slogger.ErrorContext(ctx, "Failed opening LibSQL database", "Error", err, "namespace", groupID)
+		return nil, fmt.Errorf("couldnt open LibSQL database: %w", err)
 	}
-
+	
 	return db, nil
 }
