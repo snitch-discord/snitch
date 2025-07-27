@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"snitch/internal/bot/botconfig"
+	"snitch/internal/bot/events"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/bot/slashcommand/handler"
 	"snitch/internal/bot/slashcommand/middleware"
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -71,6 +74,26 @@ func main() {
 	if err = mainSession.Open(); err != nil {
 		log.Panic(err)
 	}
+
+	logger := slog.Default()
+	backendURL, err := config.BackendURL()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	eventClient := events.NewClient(backendURL.String(), mainSession, logger)
+
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(logger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(logger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(logger))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	if err := eventClient.Start(ctx); err != nil {
+		log.Printf("Failed to start event client: %v", err)
+	}
+	defer eventClient.Stop()
 
 	// tells discord about the commands we support
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))

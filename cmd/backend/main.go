@@ -65,8 +65,9 @@ func main() {
 		panic(err)
 	}
 
+	eventService := service.NewEventService()
 	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
-	reportServer := service.NewReportServer(jwtCache, libSQLConfig)
+	reportServer := service.NewReportServer(jwtCache, libSQLConfig, eventService)
 	userServer := service.NewUserServer(jwtCache, libSQLConfig)
 
 	baseInterceptors := connect.WithInterceptors(
@@ -79,13 +80,13 @@ func main() {
 	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
 	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
 	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewEventServiceHandler(eventService, baseInterceptors))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),
 		Handler:           h2c.NewHandler(mux, &http2.Server{}),
-		ReadTimeout:       1 * time.Second,
-		WriteTimeout:      1 * time.Second,
-		ReadHeaderTimeout: 200 * time.Millisecond,
+		ReadHeaderTimeout: 10 * time.Second,
+		// No ReadTimeout/WriteTimeout for streaming support
 	}
 
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
