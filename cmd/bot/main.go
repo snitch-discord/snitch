@@ -24,7 +24,7 @@ func main() {
 
 	config, err := botconfig.FromEnv()
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to load bot configuration from environment: %v", err)
 	}
 
 	httpClient := http.Client{
@@ -50,7 +50,7 @@ func main() {
 
 	mainSession, err := discordgo.New("Bot " + config.DiscordToken)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to create Discord session: %v", err)
 	}
 	defer func() {
 		if err := mainSession.Close(); err != nil {
@@ -76,13 +76,13 @@ func main() {
 	mainSession.AddHandler(slashcommand.SlashCommandHandlerFunc(handler).Adapt())
 
 	if err = mainSession.Open(); err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to open Discord session: %v", err)
 	}
 
 	logger := slog.Default()
 	backendURL, err := config.BackendURL()
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
 	eventClient := events.NewClient(backendURL.String(), mainSession, logger)
@@ -95,7 +95,7 @@ func main() {
 	defer cancel()
 
 	if err := eventClient.Start(ctx); err != nil {
-		log.Printf("Failed to start event client: %v", err)
+		log.Fatalf("Failed to start event client: %v", err)
 	}
 	defer eventClient.Stop()
 
@@ -105,15 +105,12 @@ func main() {
 	for index, applicationCommand := range commands {
 		createdCommand, err := mainSession.ApplicationCommandCreate(mainSession.State.User.ID, testingGuildID, applicationCommand)
 		if err != nil {
-			log.Panicf("Cannot register '%v' command: %v", applicationCommand.Name, err)
+			log.Fatalf("Cannot register '%v' command: %v", applicationCommand.Name, err)
 		}
 
 		registeredCommands[index] = createdCommand
 	}
 
-	if err != nil {
-		log.Panic(err)
-	}
 
 	stopChannel := make(chan os.Signal, 1)
 	signal.Notify(stopChannel, os.Interrupt)
@@ -124,7 +121,7 @@ func main() {
 	// cleanup commands
 	for _, registeredCommand := range registeredCommands {
 		if err = mainSession.ApplicationCommandDelete(mainSession.State.User.ID, testingGuildID, registeredCommand.ID); err != nil {
-			log.Panicf("Cannot delete '%v' command: '%v'", registeredCommand.Name, err)
+			log.Printf("Cannot delete '%v' command: '%v'", registeredCommand.Name, err)
 		}
 	}
 }
