@@ -14,7 +14,7 @@ type Querier interface {
 	AddServerToGroup(ctx context.Context, arg AddServerToGroupParams) error
 	CreateGroupTable(ctx context.Context) error
 	CreateServerTable(ctx context.Context) error
-	FindGroupIDByServerID(ctx context.Context, serverID interface{}) (uuid.UUID, error)
+	FindGroupIDByServerID(ctx context.Context, serverID string) (uuid.UUID, error)
 	InsertGroup(ctx context.Context, arg InsertGroupParams) error
 }
 

@@ -62,11 +62,11 @@ func (q *Queries) CreateReport(ctx context.Context, arg CreateReportParams) (str
 
 const createReportTable = `-- name: CreateReportTable :exec
 CREATE TABLE IF NOT EXISTS reports (
-    report_id INTEGER PRIMARY KEY,
+    report_id TEXT PRIMARY KEY,
     report_text TEXT NOT NULL,
-    reporter_id INTEGER NOT NULL REFERENCES users(user_id),
-    reported_user_id INTEGER NOT NULL REFERENCES users(user_id),
-    origin_server_id INTEGER NOT NULL REFERENCES servers(server_id)
+    reporter_id TEXT NOT NULL REFERENCES users(user_id),
+    reported_user_id TEXT NOT NULL REFERENCES users(user_id),
+    origin_server_id TEXT NOT NULL REFERENCES servers(server_id)
 ) STRICT
 `
 
@@ -77,7 +77,7 @@ func (q *Queries) CreateReportTable(ctx context.Context) error {
 
 const createServerTable = `-- name: CreateServerTable :exec
 CREATE TABLE IF NOT EXISTS servers (
-    server_id INTEGER PRIMARY KEY
+    server_id TEXT PRIMARY KEY
 ) STRICT
 `
 
@@ -127,7 +127,7 @@ func (q *Queries) CreateUserHistory(ctx context.Context, arg CreateUserHistoryPa
 const createUserHistoryTable = `-- name: CreateUserHistoryTable :exec
 CREATE TABLE IF NOT EXISTS user_history (
     history_id TEXT PRIMARY KEY,
-    user_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
     username TEXT NOT NULL,
     global_name TEXT,
     changed_at TEXT NOT NULL,
@@ -142,7 +142,7 @@ func (q *Queries) CreateUserHistoryTable(ctx context.Context) error {
 
 const createUserTable = `-- name: CreateUserTable :exec
 CREATE TABLE IF NOT EXISTS users (
-    user_id INTEGER PRIMARY KEY
+    user_id TEXT PRIMARY KEY
 ) STRICT
 `
 

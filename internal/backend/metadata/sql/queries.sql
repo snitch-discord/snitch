@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS groups (
 
 -- name: CreateServerTable :exec
 CREATE TABLE IF NOT EXISTS servers (
-    server_id INTEGER NOT NULL,
+    server_id TEXT NOT NULL,
     output_channel INTEGER NOT NULL,
     group_id TEXT NOT NULL REFERENCES groups(group_id),
     permission_level INTEGER NOT NULL,

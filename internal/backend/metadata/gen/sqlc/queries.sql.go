@@ -26,8 +26,8 @@ INSERT INTO servers (
 `
 
 type AddServerToGroupParams struct {
-	ServerID interface{} `json:"server_id"`
-	GroupID  uuid.UUID   `json:"group_id"`
+	ServerID string    `json:"server_id"`
+	GroupID  uuid.UUID `json:"group_id"`
 }
 
 func (q *Queries) AddServerToGroup(ctx context.Context, arg AddServerToGroupParams) error {
@@ -49,7 +49,7 @@ func (q *Queries) CreateGroupTable(ctx context.Context) error {
 
 const createServerTable = `-- name: CreateServerTable :exec
 CREATE TABLE IF NOT EXISTS servers (
-    server_id INTEGER NOT NULL,
+    server_id TEXT NOT NULL,
     output_channel INTEGER NOT NULL,
     group_id TEXT NOT NULL REFERENCES groups(group_id),
     permission_level INTEGER NOT NULL,
@@ -68,7 +68,7 @@ FROM servers
 WHERE server_id = ?
 `
 
-func (q *Queries) FindGroupIDByServerID(ctx context.Context, serverID interface{}) (uuid.UUID, error) {
+func (q *Queries) FindGroupIDByServerID(ctx context.Context, serverID string) (uuid.UUID, error) {
 	row := q.queryRow(ctx, q.findGroupIDByServerIDStmt, findGroupIDByServerID, serverID)
 	var group_id uuid.UUID
 	err := row.Scan(&group_id)
