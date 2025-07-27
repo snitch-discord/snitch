@@ -85,7 +85,7 @@ func main() {
 		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, logger)
+	eventClient := events.NewClient(backendURL.String(), mainSession, logger, testingGuildID)
 
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(logger))
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(logger))
