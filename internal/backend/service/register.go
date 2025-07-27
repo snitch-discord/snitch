@@ -105,7 +105,11 @@ func (s *RegisterServer) Register(
 			slogger.ErrorContext(ctx, "Failed to connect to db", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
-		defer newDB.Close()
+		defer func() {
+			if err := newDB.Close(); err != nil {
+				slogger.ErrorContext(ctx, "Failed to close database connection", "error", err)
+			}
+		}()
 
 		groupTx, err := newDB.BeginTx(ctx, nil)
 		if err != nil {
@@ -176,7 +180,11 @@ func (s *RegisterServer) Register(
 			slogger.ErrorContext(ctx, "Failed to connect to db", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
-		defer newDB.Close()
+		defer func() {
+			if err := newDB.Close(); err != nil {
+				slogger.ErrorContext(ctx, "Failed to close database connection", "error", err)
+			}
+		}()
 
 		groupTx, err := newDB.BeginTx(ctx, nil)
 		if err != nil {

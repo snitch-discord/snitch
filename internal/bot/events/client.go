@@ -60,10 +60,7 @@ func (c *Client) Start(ctx context.Context) error {
 	go func() {
 		defer c.logger.Info("Event stream goroutine exiting")
 		
-		for {
-			if !stream.Receive() {
-				break
-			}
+		for stream.Receive() {
 			event := stream.Msg()
 			c.handleEvent(event)
 		}

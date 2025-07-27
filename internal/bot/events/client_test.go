@@ -16,10 +16,6 @@ func TestClient_Creation(t *testing.T) {
 	
 	client := NewClient("http://localhost:4200", session, logger)
 	
-	if client == nil {
-		t.Error("Client should not be nil")
-	}
-	
 	if client.client == nil {
 		t.Error("Connect client should not be nil")
 	}

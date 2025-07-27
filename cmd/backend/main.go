@@ -59,7 +59,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer metadataDb.Close()
+	defer func() {
+		if err := metadataDb.Close(); err != nil {
+			slog.Error("Failed to close metadata database", "error", err)
+		}
+	}()
 
 	if err := metadataDb.PingContext(dbCtx); err != nil {
 		panic(err)

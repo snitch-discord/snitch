@@ -52,7 +52,11 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	defer mainSession.Close()
+	defer func() {
+		if err := mainSession.Close(); err != nil {
+			log.Printf("Failed to close Discord session: %v", err)
+		}
+	}()
 
 	mainSession.AddHandler(func(session *discordgo.Session, _ *discordgo.Ready) {
 		log.Printf("Logged in as: %s#%s", session.State.User.Username, session.State.User.Discriminator)

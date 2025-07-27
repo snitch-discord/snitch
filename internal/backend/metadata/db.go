@@ -15,7 +15,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tursodatabase/go-libsql"
-	_ "github.com/tursodatabase/go-libsql"
 )
 
 func NewMetadataDB(ctx context.Context, token string, config dbconfig.LibSQLConfig) (*sql.DB, error) {
@@ -39,7 +38,7 @@ func NewMetadataDB(ctx context.Context, token string, config dbconfig.LibSQLConf
 
 	metadataURL, err := config.MetadataDB()
 	if err != nil {
-		return nil, fmt.Errorf("Cant get metadata: %w", err)
+		return nil, fmt.Errorf("cant get metadata: %w", err)
 	}
 
 	dbPath := filepath.Join("/localdb", "local.metadata.db")

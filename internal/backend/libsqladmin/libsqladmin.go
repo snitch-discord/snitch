@@ -38,7 +38,11 @@ func CreateNamespace(name string, ctx context.Context, token string, config dbco
 		slogger.ErrorContext(ctx, "Failed executing metadata namespace create request", "Error", err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slogger.ErrorContext(ctx, "Failed to close response body", "error", err)
+		}
+	}()
 
 	if resp.StatusCode >= 300 && resp.StatusCode != http.StatusConflict {
 		slogger.ErrorContext(ctx, "Unexpected status code", "Status", resp.Status)
@@ -75,7 +79,11 @@ func DoesNamespaceExist(name string, ctx context.Context, token string, config d
 		slogger.ErrorContext(ctx, "Failed executing metadata namespace request", "Error", err)
 		return false, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slogger.ErrorContext(ctx, "Failed to close response body", "error", err)
+		}
+	}()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return false, nil
