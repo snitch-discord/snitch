@@ -51,6 +51,7 @@ func (c *Client) Start(ctx context.Context) error {
 
 func (c *Client) maintainConnection(ctx context.Context) {
 	defer c.logger.Info("Event client connection maintenance exiting")
+	retryDelay := 5 * time.Second
 
 	for {
 		select {
@@ -61,11 +62,12 @@ func (c *Client) maintainConnection(ctx context.Context) {
 				if ctx.Err() != nil {
 					return // Context cancelled, exit gracefully
 				}
-				c.logger.Error("Event stream connection failed, retrying in 5 seconds", "error", err)
+				c.logger.Error(fmt.Sprintf("Event stream connection failed, retrying in %f seconds", retryDelay.Seconds()), "error", err)
 				select {
 				case <-ctx.Done():
 					return
-				case <-time.After(5 * time.Second):
+				case <-time.After(retryDelay):
+					retryDelay *= 2
 					continue
 				}
 			}
