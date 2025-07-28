@@ -47,7 +47,7 @@ func TestEventService_PublishEvent(t *testing.T) {
 		Timestamp: timestamppb.Now(),
 	}
 
-	err = service.PublishEvent(testEvent)
+	err = service.PublishEvent(t.Context(), testEvent)
 	if err != nil {
 		t.Errorf("PublishEvent failed: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestEventService_GroupFiltering(t *testing.T) {
 		Timestamp: timestamppb.Now(),
 	}
 
-	err = service.PublishEvent(testEvent)
+	err = service.PublishEvent(t.Context(), testEvent)
 	if err != nil {
 		t.Errorf("PublishEvent failed: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	service.mu.Unlock()
 
 	// This should not block and should return an error indicating dropped events
-	err = service.PublishEvent(testEvent)
+	err = service.PublishEvent(t.Context(), testEvent)
 	if err == nil {
 		t.Error("Expected error for dropped events")
 	}

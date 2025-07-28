@@ -120,7 +120,7 @@ func (s *ReportServer) CreateReport(
 
 	if s.eventService != nil {
 		event := newReportCreatedEvent(serverID, reportID, req.Msg.ReporterId, req.Msg.ReportedId, req.Msg.ReportText, groupID)
-		if err := s.eventService.PublishEvent(event); err != nil {
+		if err := s.eventService.PublishEvent(ctx, event); err != nil {
 			slogger.Error("Failed to publish report created event", "error", err, "report_id", reportID)
 			// Continue with request - event failure shouldn't fail the report creation
 		}
@@ -218,7 +218,7 @@ func (s *ReportServer) DeleteReport(
 			slogger.Error("Failed to get server ID for report deleted event", "error", err, "report_id", deletedReportID)
 		} else {
 			event := newReportDeletedEvent(serverID, deletedReportID, groupID)
-			if err := s.eventService.PublishEvent(event); err != nil {
+			if err := s.eventService.PublishEvent(ctx, event); err != nil {
 				slogger.Error("Failed to publish report deleted event", "error", err, "report_id", deletedReportID)
 				// Continue with request - event failure shouldn't fail the report deletion
 			}

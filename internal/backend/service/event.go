@@ -40,25 +40,25 @@ func (s *EventService) Subscribe(
 	req *connect.Request[snitchv1.SubscribeRequest],
 	stream *connect.ServerStream[snitchv1.Event],
 ) error {
-	logger, ok := ctxutil.Value[*slog.Logger](ctx)
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
-		logger = slog.Default()
+		slogger = slog.Default()
 	}
 
 	// Get server ID from request header and look up group ID
 	serverID := req.Header().Get(interceptor.ServerIDHeader)
 	if serverID == "" {
-		logger.Error("Missing server ID header in subscription request")
+		slogger.Error("Missing server ID header in subscription request")
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("server ID header is required"))
 	}
 
 	groupID, err := metadata.FindGroupIDByServerID(ctx, s.metadataDB, serverID)
 	if err != nil {
-		logger.Error("Failed to find group ID for server", "server_id", serverID, "error", err)
+		slogger.Error("Failed to find group ID for server", "server_id", serverID, "error", err)
 		return connect.NewError(connect.CodeNotFound, err)
 	}
 
-	logger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID.String())
+	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID.String())
 
 	// Create a channel for this subscriber
 	eventChan := make(chan *snitchv1.Event, 256)
@@ -73,14 +73,14 @@ func (s *EventService) Subscribe(
 	s.subscribers[sub] = true
 	s.mu.Unlock()
 
-	logger.Info("Subscribers current", "Subscribers", s.subscribers)
+	slogger.Info("Subscribers current", "Subscribers", s.subscribers)
 	// Clean up on disconnect
 	defer func() {
 		s.mu.Lock()
 		delete(s.subscribers, sub)
 		close(eventChan)
 		s.mu.Unlock()
-		logger.Info("Client unsubscribed from events", "total_subscribers", len(s.subscribers))
+		slogger.Info("Client unsubscribed from events", "total_subscribers", len(s.subscribers))
 	}()
 
 	// Send events to client
@@ -90,7 +90,7 @@ func (s *EventService) Subscribe(
 			return ctx.Err()
 		case event := <-eventChan:
 			if err := stream.Send(event); err != nil {
-				logger.Error("Failed to send event to client", "error", err)
+				slogger.Error("Failed to send event to client", "error", err)
 				return err
 			}
 		}
@@ -98,12 +98,12 @@ func (s *EventService) Subscribe(
 }
 
 // PublishEvent broadcasts an event to all subscribers
-func (s *EventService) PublishEvent(event *snitchv1.Event) error {
-	return s.PublishEventWithRetry(event, 3, time.Millisecond*100)
+func (s *EventService) PublishEvent(ctx context.Context, event *snitchv1.Event) error {
+	return s.PublishEventWithRetry(ctx, event, 3, time.Millisecond*100)
 }
 
 // PublishEventWithRetry broadcasts an event with retry logic
-func (s *EventService) PublishEventWithRetry(event *snitchv1.Event, maxRetries int, retryDelay time.Duration) error {
+func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.Event, maxRetries int, retryDelay time.Duration) error {
 	var lastErr error
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
@@ -112,14 +112,19 @@ func (s *EventService) PublishEventWithRetry(event *snitchv1.Event, maxRetries i
 			retryDelay *= 2 // Exponential backoff
 		}
 
-		err := s.publishEventOnce(event)
+		err := s.publishEventOnce(ctx, event)
 		if err == nil {
 			return nil
 		}
 
 		lastErr = err
-		logger := slog.Default()
-		logger.Warn("Event publish attempt failed",
+
+		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+		if !ok {
+			slogger = slog.Default()
+		}
+
+		slogger.Warn("Event publish attempt failed",
 			"attempt", attempt+1,
 			"max_retries", maxRetries,
 			"error", err,
@@ -130,15 +135,18 @@ func (s *EventService) PublishEventWithRetry(event *snitchv1.Event, maxRetries i
 }
 
 // publishEventOnce attempts to publish an event once
-func (s *EventService) publishEventOnce(event *snitchv1.Event) error {
+func (s *EventService) publishEventOnce(ctx context.Context, event *snitchv1.Event) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	logger := slog.Default()
-	logger.Debug("Publishing event", "type", event.Type, "server_id", event.ServerId)
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+	slogger.Debug("Publishing event", "type", event.Type, "server_id", event.ServerId)
 
 	if len(s.subscribers) == 0 {
-		logger.Debug("No subscribers available for event", "type", event.Type)
+		slogger.Debug("No subscribers available for event", "type", event.Type)
 		return nil // Not an error - bot may not be connected
 	}
 
@@ -147,7 +155,7 @@ func (s *EventService) publishEventOnce(event *snitchv1.Event) error {
 	filteredCount := 0
 
 	for sub := range s.subscribers {
-		logger.Info("Delivering message to subscriber", "Group ID", sub.groupID)
+		slogger.Info("Delivering message to subscriber", "Group ID", sub.groupID)
 		// Filter by group - only send events to subscribers in the same group
 		if sub.groupID != event.GroupId {
 			filteredCount++
@@ -160,12 +168,12 @@ func (s *EventService) publishEventOnce(event *snitchv1.Event) error {
 		default:
 			// Channel full, count dropped events
 			droppedCount++
-			logger.Error("Subscriber channel full, dropping event", "type", event.Type, "server_id", event.ServerId, "group_id", event.GroupId)
+			slogger.Error("Subscriber channel full, dropping event", "type", event.Type, "server_id", event.ServerId, "group_id", event.GroupId)
 		}
 	}
 
 	if droppedCount > 0 {
-		logger.Error("Event delivery failed to some subscribers",
+		slogger.Error("Event delivery failed to some subscribers",
 			"type", event.Type,
 			"delivered", deliveredCount,
 			"dropped", droppedCount,
@@ -173,6 +181,6 @@ func (s *EventService) publishEventOnce(event *snitchv1.Event) error {
 		return fmt.Errorf("event delivery failed: %d delivered, %d dropped", deliveredCount, droppedCount)
 	}
 
-	logger.Debug("Event delivered successfully", "type", event.Type, "delivered", deliveredCount, "filtered", filteredCount)
+	slogger.Debug("Event delivered successfully", "type", event.Type, "delivered", deliveredCount, "filtered", filteredCount)
 	return nil
 }
