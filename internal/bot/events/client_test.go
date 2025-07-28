@@ -9,7 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const TEST_GUILD_ID = "TEST-GUILD-ID"
+const TEST_GUILD_ID = "test-guild-id"
 
 func TestClient_Creation(t *testing.T) {
 	// Test that client can be created without errors

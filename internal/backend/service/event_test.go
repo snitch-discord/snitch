@@ -11,6 +11,9 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const TEST_GROUP_ID = "test-group-id"
+const TEST_SERVER_ID = "test-server-id"
+
 func TestEventService_PublishEvent(t *testing.T) {
 	// Create in-memory SQLite database for testing
 	db, err := sql.Open("libsql", ":memory:")
@@ -32,7 +35,7 @@ func TestEventService_PublishEvent(t *testing.T) {
 	// Create subscriber for group "test-group"
 	sub := &subscriber{
 		eventChan: eventChan,
-		groupID:   "test-group",
+		groupID:   TEST_GROUP_ID,
 	}
 
 	service.mu.Lock()
@@ -42,8 +45,8 @@ func TestEventService_PublishEvent(t *testing.T) {
 	// Test event for same group should be delivered
 	testEvent := &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
-		ServerId:  "test-server",
-		GroupId:   "test-group",
+		ServerId:  TEST_SERVER_ID,
+		GroupId:   TEST_GROUP_ID,
 		Timestamp: timestamppb.Now(),
 	}
 
@@ -55,10 +58,10 @@ func TestEventService_PublishEvent(t *testing.T) {
 	select {
 	case receivedEvent := <-eventChan:
 		if receivedEvent.Type != snitchv1.EventType_EVENT_TYPE_REPORT_CREATED {
-			t.Errorf("Expected EVENT_TYPE_REPORT_CREATED, got %v", receivedEvent.Type)
+			t.Errorf("Expected '%s', got %v", snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, receivedEvent.Type)
 		}
-		if receivedEvent.GroupId != "test-group" {
-			t.Errorf("Expected group_id 'test-group', got %v", receivedEvent.GroupId)
+		if receivedEvent.GroupId != TEST_GROUP_ID {
+			t.Errorf("Expected group_id '%s', got %v", TEST_GROUP_ID, receivedEvent.GroupId)
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Error("Event not received")
@@ -78,6 +81,9 @@ func TestEventService_GroupFiltering(t *testing.T) {
 		}
 	}()
 
+	group1ID := "group-1"
+	group2ID := "group-2"
+
 	service := NewEventService(db)
 
 	// Create subscribers for different groups
@@ -86,12 +92,12 @@ func TestEventService_GroupFiltering(t *testing.T) {
 
 	sub1 := &subscriber{
 		eventChan: group1Chan,
-		groupID:   "group-1",
+		groupID:   group1ID,
 	}
 
 	sub2 := &subscriber{
 		eventChan: group2Chan,
-		groupID:   "group-2",
+		groupID:   group2ID,
 	}
 
 	service.mu.Lock()
@@ -102,8 +108,8 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	// Send event to group-1
 	testEvent := &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
-		ServerId:  "test-server",
-		GroupId:   "group-1",
+		ServerId:  TEST_SERVER_ID,
+		GroupId:   group1ID,
 		Timestamp: timestamppb.Now(),
 	}
 
@@ -115,17 +121,17 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	// group-1 should receive the event
 	select {
 	case receivedEvent := <-group1Chan:
-		if receivedEvent.GroupId != "group-1" {
-			t.Errorf("Expected group_id 'group-1', got %v", receivedEvent.GroupId)
+		if receivedEvent.GroupId != group1ID {
+			t.Errorf("Expected group_id '%s', got %v", group1ID, receivedEvent.GroupId)
 		}
 	case <-time.After(100 * time.Millisecond):
-		t.Error("Event not received by group-1 subscriber")
+		t.Errorf("Event not received by '%s' subscriber", group1ID)
 	}
 
 	// group-2 should NOT receive the event
 	select {
 	case <-group2Chan:
-		t.Error("group-2 should not have received event for group-1")
+		t.Errorf("%s should not have received event for %s", group2ID, group1ID)
 	case <-time.After(50 * time.Millisecond):
 		// This is expected - no event should be received
 	}
@@ -149,7 +155,7 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	// Test that full channels don't block publishing
 	testEvent := &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
-		GroupId:   "test-group",
+		GroupId:   TEST_GROUP_ID,
 		Timestamp: timestamppb.Now(),
 	}
 
@@ -157,7 +163,7 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	fullChan := make(chan *snitchv1.Event)
 	sub := &subscriber{
 		eventChan: fullChan,
-		groupID:   "test-group",
+		groupID:   TEST_GROUP_ID,
 	}
 
 	service.mu.Lock()
