@@ -94,9 +94,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := eventClient.Start(ctx); err != nil {
-		log.Fatalf("Failed to start event client: %v", err)
-	}
+	eventClient.Start(ctx)
 	defer eventClient.Stop()
 
 	// tells discord about the commands we support
@@ -110,7 +108,6 @@ func main() {
 
 		registeredCommands[index] = createdCommand
 	}
-
 
 	stopChannel := make(chan os.Signal, 1)
 	signal.Notify(stopChannel, os.Interrupt)

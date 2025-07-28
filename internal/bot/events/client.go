@@ -43,10 +43,9 @@ func (c *Client) RegisterHandler(eventType snitchv1.EventType, handler EventHand
 	c.handlers[eventType] = handler
 }
 
-func (c *Client) Start(ctx context.Context) error {
+func (c *Client) Start(ctx context.Context) {
 	c.logger.Info("Started listening")
 	go c.maintainConnection(ctx)
-	return nil
 }
 
 func (c *Client) maintainConnection(ctx context.Context) {
