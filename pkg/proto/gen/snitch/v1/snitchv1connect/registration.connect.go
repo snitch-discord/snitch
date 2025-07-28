@@ -36,11 +36,15 @@ const (
 	// RegistrarServiceRegisterProcedure is the fully-qualified name of the RegistrarService's Register
 	// RPC.
 	RegistrarServiceRegisterProcedure = "/snitch.v1.RegistrarService/Register"
+	// RegistrarServiceIsRegisteredProcedure is the fully-qualified name of the RegistrarService's
+	// IsRegistered RPC.
+	RegistrarServiceIsRegisteredProcedure = "/snitch.v1.RegistrarService/IsRegistered"
 )
 
 // RegistrarServiceClient is a client for the snitch.v1.RegistrarService service.
 type RegistrarServiceClient interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
+	IsRegistered(context.Context, *connect.Request[v1.IsRegisteredRequest]) (*connect.Response[v1.IsRegisteredResponse], error)
 }
 
 // NewRegistrarServiceClient constructs a client for the snitch.v1.RegistrarService service. By
@@ -60,12 +64,19 @@ func NewRegistrarServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(registrarServiceMethods.ByName("Register")),
 			connect.WithClientOptions(opts...),
 		),
+		isRegistered: connect.NewClient[v1.IsRegisteredRequest, v1.IsRegisteredResponse](
+			httpClient,
+			baseURL+RegistrarServiceIsRegisteredProcedure,
+			connect.WithSchema(registrarServiceMethods.ByName("IsRegistered")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // registrarServiceClient implements RegistrarServiceClient.
 type registrarServiceClient struct {
-	register *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
+	register     *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
+	isRegistered *connect.Client[v1.IsRegisteredRequest, v1.IsRegisteredResponse]
 }
 
 // Register calls snitch.v1.RegistrarService.Register.
@@ -73,9 +84,15 @@ func (c *registrarServiceClient) Register(ctx context.Context, req *connect.Requ
 	return c.register.CallUnary(ctx, req)
 }
 
+// IsRegistered calls snitch.v1.RegistrarService.IsRegistered.
+func (c *registrarServiceClient) IsRegistered(ctx context.Context, req *connect.Request[v1.IsRegisteredRequest]) (*connect.Response[v1.IsRegisteredResponse], error) {
+	return c.isRegistered.CallUnary(ctx, req)
+}
+
 // RegistrarServiceHandler is an implementation of the snitch.v1.RegistrarService service.
 type RegistrarServiceHandler interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
+	IsRegistered(context.Context, *connect.Request[v1.IsRegisteredRequest]) (*connect.Response[v1.IsRegisteredResponse], error)
 }
 
 // NewRegistrarServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -91,10 +108,18 @@ func NewRegistrarServiceHandler(svc RegistrarServiceHandler, opts ...connect.Han
 		connect.WithSchema(registrarServiceMethods.ByName("Register")),
 		connect.WithHandlerOptions(opts...),
 	)
+	registrarServiceIsRegisteredHandler := connect.NewUnaryHandler(
+		RegistrarServiceIsRegisteredProcedure,
+		svc.IsRegistered,
+		connect.WithSchema(registrarServiceMethods.ByName("IsRegistered")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/snitch.v1.RegistrarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RegistrarServiceRegisterProcedure:
 			registrarServiceRegisterHandler.ServeHTTP(w, r)
+		case RegistrarServiceIsRegisteredProcedure:
+			registrarServiceIsRegisteredHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -106,4 +131,8 @@ type UnimplementedRegistrarServiceHandler struct{}
 
 func (UnimplementedRegistrarServiceHandler) Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.RegistrarService.Register is not implemented"))
+}
+
+func (UnimplementedRegistrarServiceHandler) IsRegistered(context.Context, *connect.Request[v1.IsRegisteredRequest]) (*connect.Response[v1.IsRegisteredResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.RegistrarService.IsRegistered is not implemented"))
 }

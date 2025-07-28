@@ -133,6 +133,86 @@ func (x *RegisterResponse) GetGroupId() string {
 	return ""
 }
 
+type IsRegisteredRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsRegisteredRequest) Reset() {
+	*x = IsRegisteredRequest{}
+	mi := &file_snitch_v1_registration_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsRegisteredRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsRegisteredRequest) ProtoMessage() {}
+
+func (x *IsRegisteredRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_registration_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsRegisteredRequest.ProtoReflect.Descriptor instead.
+func (*IsRegisteredRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_registration_proto_rawDescGZIP(), []int{2}
+}
+
+type IsRegisteredResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsRegistered  bool                   `protobuf:"varint,1,opt,name=is_registered,json=isRegistered,proto3" json:"is_registered,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsRegisteredResponse) Reset() {
+	*x = IsRegisteredResponse{}
+	mi := &file_snitch_v1_registration_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsRegisteredResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsRegisteredResponse) ProtoMessage() {}
+
+func (x *IsRegisteredResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_registration_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsRegisteredResponse.ProtoReflect.Descriptor instead.
+func (*IsRegisteredResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_registration_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *IsRegisteredResponse) GetIsRegistered() bool {
+	if x != nil {
+		return x.IsRegistered
+	}
+	return false
+}
+
 var File_snitch_v1_registration_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_registration_proto_rawDesc = "" +
@@ -147,9 +227,13 @@ const file_snitch_v1_registration_proto_rawDesc = "" +
 	"\v_group_name\"J\n" +
 	"\x10RegisterResponse\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
-	"\bgroup_id\x18\x02 \x01(\tR\agroupId2Y\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"\x15\n" +
+	"\x13IsRegisteredRequest\";\n" +
+	"\x14IsRegisteredResponse\x12#\n" +
+	"\ris_registered\x18\x01 \x01(\bR\fisRegistered2\xac\x01\n" +
 	"\x10RegistrarService\x12E\n" +
-	"\bRegister\x12\x1a.snitch.v1.RegisterRequest\x1a\x1b.snitch.v1.RegisterResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
+	"\bRegister\x12\x1a.snitch.v1.RegisterRequest\x1a\x1b.snitch.v1.RegisterResponse\"\x00\x12Q\n" +
+	"\fIsRegistered\x12\x1e.snitch.v1.IsRegisteredRequest\x1a\x1f.snitch.v1.IsRegisteredResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
 	file_snitch_v1_registration_proto_rawDescOnce sync.Once
@@ -163,16 +247,20 @@ func file_snitch_v1_registration_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_registration_proto_rawDescData
 }
 
-var file_snitch_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_snitch_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_snitch_v1_registration_proto_goTypes = []any{
-	(*RegisterRequest)(nil),  // 0: snitch.v1.RegisterRequest
-	(*RegisterResponse)(nil), // 1: snitch.v1.RegisterResponse
+	(*RegisterRequest)(nil),      // 0: snitch.v1.RegisterRequest
+	(*RegisterResponse)(nil),     // 1: snitch.v1.RegisterResponse
+	(*IsRegisteredRequest)(nil),  // 2: snitch.v1.IsRegisteredRequest
+	(*IsRegisteredResponse)(nil), // 3: snitch.v1.IsRegisteredResponse
 }
 var file_snitch_v1_registration_proto_depIdxs = []int32{
 	0, // 0: snitch.v1.RegistrarService.Register:input_type -> snitch.v1.RegisterRequest
-	1, // 1: snitch.v1.RegistrarService.Register:output_type -> snitch.v1.RegisterResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: snitch.v1.RegistrarService.IsRegistered:input_type -> snitch.v1.IsRegisteredRequest
+	1, // 2: snitch.v1.RegistrarService.Register:output_type -> snitch.v1.RegisterResponse
+	3, // 3: snitch.v1.RegistrarService.IsRegistered:output_type -> snitch.v1.IsRegisteredResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -190,7 +278,7 @@ func file_snitch_v1_registration_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_registration_proto_rawDesc), len(file_snitch_v1_registration_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

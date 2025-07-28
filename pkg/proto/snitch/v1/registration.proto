@@ -14,7 +14,15 @@ message RegisterResponse {
   string group_id = 2;
 }
 
+message IsRegisteredRequest {
+}
+
+message IsRegisteredResponse {
+  bool is_registered = 1;
+}
+
 service RegistrarService {
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
+  rpc IsRegistered(IsRegisteredRequest) returns (IsRegisteredResponse) {}
 }
 

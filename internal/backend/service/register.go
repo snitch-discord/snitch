@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"snitch/internal/backend/dbconfig"
 	groupSQLc "snitch/internal/backend/group/gen/sqlc"
 	"snitch/internal/backend/jwt"
@@ -30,13 +31,50 @@ func NewRegisterServer(tokenCache *jwt.TokenCache, metadataDB *sql.DB, libSQLCon
 
 const ServerIDHeader = "X-Server-ID"
 
-func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (string, error) {
-	serverID := r.Header().Get(ServerIDHeader)
+func getServerIDFromHeader(header http.Header) (string, error) {
+	serverID := header.Get(ServerIDHeader)
 	if serverID == "" {
 		return "", fmt.Errorf("server ID header is required")
 	}
 
 	return serverID, nil
+}
+
+func (s *RegisterServer) IsRegistered(
+	ctx context.Context,
+	req *connect.Request[snitchpb.IsRegisteredRequest],
+) (*connect.Response[snitchpb.IsRegisteredResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	serverID, err := getServerIDFromHeader(req.Header())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	metadataTx, err := s.metadataDB.BeginTx(ctx, nil)
+	if err != nil {
+		slogger.ErrorContext(ctx, "Failed to start metadata transaction", "Error", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	defer func() {
+		if err := metadataTx.Rollback(); !errors.Is(err, sql.ErrTxDone) {
+			slogger.ErrorContext(ctx, "Failed to rollback transaction metadata", "Error", err)
+		}
+	}()
+
+	metadataQueries := metadataSQLc.New(metadataTx)
+	metadataQueries.WithTx(metadataTx)
+
+	_, err = metadataQueries.FindGroupIDByServerID(ctx, serverID)
+	if err == nil {
+		return connect.NewResponse(&snitchpb.IsRegisteredResponse{IsRegistered: true}), nil
+	} else {
+		return connect.NewResponse(&snitchpb.IsRegisteredResponse{IsRegistered: false}), nil
+	}
 }
 
 func (s *RegisterServer) Register(
@@ -47,7 +85,8 @@ func (s *RegisterServer) Register(
 	if !ok {
 		slogger = slog.Default()
 	}
-	serverID, err := getServerIDFromHeader(req)
+
+	serverID, err := getServerIDFromHeader(req.Header())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -102,7 +141,7 @@ func (s *RegisterServer) Register(
 
 		// Construct connection string with auth token securely
 		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
-		
+
 		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())
@@ -180,7 +219,7 @@ func (s *RegisterServer) Register(
 
 		// Construct connection string with auth token securely
 		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
-		
+
 		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())

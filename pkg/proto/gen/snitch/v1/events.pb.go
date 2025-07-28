@@ -79,7 +79,7 @@ type Event struct {
 	Type      EventType              `protobuf:"varint,1,opt,name=type,proto3,enum=snitch.v1.EventType" json:"type,omitempty"`
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	ServerId  string                 `protobuf:"bytes,3,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
-	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // The group this event belongs to
+	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	// Types that are valid to be assigned to Data:
 	//
 	//	*Event_ReportCreated
@@ -379,7 +379,7 @@ func (x *UserBannedEvent) GetReason() string {
 type SubscribeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventTypes    []EventType            `protobuf:"varint,1,rep,packed,name=event_types,json=eventTypes,proto3,enum=snitch.v1.EventType" json:"event_types,omitempty"`
-	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // Only receive events from this group
+	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
