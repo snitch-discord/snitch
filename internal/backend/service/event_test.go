@@ -17,7 +17,12 @@ func TestEventService_PublishEvent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
-	defer db.Close()
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Error("Failed to close database", "error", err)
+		}
+	}()
 
 	service := NewEventService(db)
 
@@ -66,7 +71,12 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
-	defer db.Close()
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Error("Failed to close database", "error", err)
+		}
+	}()
 
 	service := NewEventService(db)
 
@@ -127,7 +137,12 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
-	defer db.Close()
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Error("Failed to close database", "error", err)
+		}
+	}()
 
 	service := NewEventService(db)
 
