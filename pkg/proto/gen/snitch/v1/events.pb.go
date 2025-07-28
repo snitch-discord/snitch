@@ -79,6 +79,7 @@ type Event struct {
 	Type      EventType              `protobuf:"varint,1,opt,name=type,proto3,enum=snitch.v1.EventType" json:"type,omitempty"`
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	ServerId  string                 `protobuf:"bytes,3,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // The group this event belongs to
 	// Types that are valid to be assigned to Data:
 	//
 	//	*Event_ReportCreated
@@ -140,6 +141,13 @@ func (x *Event) GetServerId() string {
 	return ""
 }
 
+func (x *Event) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
 func (x *Event) GetData() isEvent_Data {
 	if x != nil {
 		return x.Data
@@ -179,15 +187,15 @@ type isEvent_Data interface {
 }
 
 type Event_ReportCreated struct {
-	ReportCreated *ReportCreatedEvent `protobuf:"bytes,4,opt,name=report_created,json=reportCreated,proto3,oneof"`
+	ReportCreated *ReportCreatedEvent `protobuf:"bytes,5,opt,name=report_created,json=reportCreated,proto3,oneof"`
 }
 
 type Event_ReportDeleted struct {
-	ReportDeleted *ReportDeletedEvent `protobuf:"bytes,5,opt,name=report_deleted,json=reportDeleted,proto3,oneof"`
+	ReportDeleted *ReportDeletedEvent `protobuf:"bytes,6,opt,name=report_deleted,json=reportDeleted,proto3,oneof"`
 }
 
 type Event_UserBanned struct {
-	UserBanned *UserBannedEvent `protobuf:"bytes,6,opt,name=user_banned,json=userBanned,proto3,oneof"`
+	UserBanned *UserBannedEvent `protobuf:"bytes,7,opt,name=user_banned,json=userBanned,proto3,oneof"`
 }
 
 func (*Event_ReportCreated) isEvent_Data() {}
@@ -371,6 +379,7 @@ func (x *UserBannedEvent) GetReason() string {
 type SubscribeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventTypes    []EventType            `protobuf:"varint,1,rep,packed,name=event_types,json=eventTypes,proto3,enum=snitch.v1.EventType" json:"event_types,omitempty"`
+	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // Only receive events from this group
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -412,18 +421,26 @@ func (x *SubscribeRequest) GetEventTypes() []EventType {
 	return nil
 }
 
+func (x *SubscribeRequest) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
 var File_snitch_v1_events_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_events_proto_rawDesc = "" +
 	"\n" +
-	"\x16snitch/v1/events.proto\x12\tsnitch.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xdf\x02\n" +
+	"\x16snitch/v1/events.proto\x12\tsnitch.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfa\x02\n" +
 	"\x05Event\x12(\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x14.snitch.v1.EventTypeR\x04type\x128\n" +
 	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1b\n" +
-	"\tserver_id\x18\x03 \x01(\tR\bserverId\x12F\n" +
-	"\x0ereport_created\x18\x04 \x01(\v2\x1d.snitch.v1.ReportCreatedEventH\x00R\rreportCreated\x12F\n" +
-	"\x0ereport_deleted\x18\x05 \x01(\v2\x1d.snitch.v1.ReportDeletedEventH\x00R\rreportDeleted\x12=\n" +
-	"\vuser_banned\x18\x06 \x01(\v2\x1a.snitch.v1.UserBannedEventH\x00R\n" +
+	"\tserver_id\x18\x03 \x01(\tR\bserverId\x12\x19\n" +
+	"\bgroup_id\x18\x04 \x01(\tR\agroupId\x12F\n" +
+	"\x0ereport_created\x18\x05 \x01(\v2\x1d.snitch.v1.ReportCreatedEventH\x00R\rreportCreated\x12F\n" +
+	"\x0ereport_deleted\x18\x06 \x01(\v2\x1d.snitch.v1.ReportDeletedEventH\x00R\rreportDeleted\x12=\n" +
+	"\vuser_banned\x18\a \x01(\v2\x1a.snitch.v1.UserBannedEventH\x00R\n" +
 	"userBannedB\x06\n" +
 	"\x04data\"\x94\x01\n" +
 	"\x12ReportCreatedEvent\x12\x1b\n" +
@@ -439,10 +456,11 @@ const file_snitch_v1_events_proto_rawDesc = "" +
 	"\x0fUserBannedEvent\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tserver_id\x18\x02 \x01(\tR\bserverId\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"I\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"d\n" +
 	"\x10SubscribeRequest\x125\n" +
 	"\vevent_types\x18\x01 \x03(\x0e2\x14.snitch.v1.EventTypeR\n" +
-	"eventTypes*\x81\x01\n" +
+	"eventTypes\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId*\x81\x01\n" +
 	"\tEventType\x12\x1a\n" +
 	"\x16EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19EVENT_TYPE_REPORT_CREATED\x10\x01\x12\x1d\n" +

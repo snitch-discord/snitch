@@ -16,10 +16,11 @@ message Event {
   EventType type = 1;
   google.protobuf.Timestamp timestamp = 2;
   string server_id = 3;
+  string group_id = 4;
   oneof data {
-    ReportCreatedEvent report_created = 4;
-    ReportDeletedEvent report_deleted = 5;
-    UserBannedEvent user_banned = 6;
+    ReportCreatedEvent report_created = 5;
+    ReportDeletedEvent report_deleted = 6;
+    UserBannedEvent user_banned = 7;
   }
 }
 
@@ -46,4 +47,5 @@ service EventService {
 
 message SubscribeRequest {
   repeated EventType event_types = 1;
+  string group_id = 2;
 }

@@ -86,7 +86,7 @@ func main() {
 		fatal("Failed to ping metadata database", "error", err)
 	}
 
-	eventService := service.NewEventService()
+	eventService := service.NewEventService(metadataDb)
 	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
 	reportServer := service.NewReportServer(jwtCache, libSQLConfig, eventService)
 	userServer := service.NewUserServer(jwtCache, libSQLConfig)

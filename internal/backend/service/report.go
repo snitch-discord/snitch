@@ -35,11 +35,12 @@ func reportDBtoRPC(reportRow groupSQLc.GetAllReportsRow) *snitchv1.CreateReportR
 	}
 }
 
-func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportText string) *snitchv1.Event {
+func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportText, groupID string) *snitchv1.Event {
 	return &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		Timestamp: timestamppb.New(time.Now()),
 		ServerId:  serverID,
+		GroupId:   groupID,
 		Data: &snitchv1.Event_ReportCreated{
 			ReportCreated: &snitchv1.ReportCreatedEvent{
 				ReportId:   reportID,
@@ -51,11 +52,12 @@ func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportTex
 	}
 }
 
-func newReportDeletedEvent(serverID, reportID string) *snitchv1.Event {
+func newReportDeletedEvent(serverID, reportID, groupID string) *snitchv1.Event {
 	return &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_DELETED,
 		Timestamp: timestamppb.New(time.Now()),
 		ServerId:  serverID,
+		GroupId:   groupID,
 		Data: &snitchv1.Event_ReportDeleted{
 			ReportDeleted: &snitchv1.ReportDeletedEvent{
 				ReportId: reportID,
@@ -117,7 +119,7 @@ func (s *ReportServer) CreateReport(
 	}
 
 	if s.eventService != nil {
-		event := newReportCreatedEvent(serverID, reportID, req.Msg.ReporterId, req.Msg.ReportedId, req.Msg.ReportText)
+		event := newReportCreatedEvent(serverID, reportID, req.Msg.ReporterId, req.Msg.ReportedId, req.Msg.ReportText, groupID)
 		if err := s.eventService.PublishEvent(event); err != nil {
 			slogger.Error("Failed to publish report created event", "error", err, "report_id", reportID)
 			// Continue with request - event failure shouldn't fail the report creation
@@ -215,7 +217,7 @@ func (s *ReportServer) DeleteReport(
 		if err != nil {
 			slogger.Error("Failed to get server ID for report deleted event", "error", err, "report_id", deletedReportID)
 		} else {
-			event := newReportDeletedEvent(serverID, deletedReportID)
+			event := newReportDeletedEvent(serverID, deletedReportID, groupID)
 			if err := s.eventService.PublishEvent(event); err != nil {
 				slogger.Error("Failed to publish report deleted event", "error", err, "report_id", deletedReportID)
 				// Continue with request - event failure shouldn't fail the report deletion

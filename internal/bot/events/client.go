@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
@@ -44,13 +44,14 @@ func (c *Client) RegisterHandler(eventType snitchv1.EventType, handler EventHand
 }
 
 func (c *Client) Start(ctx context.Context) error {
+	c.logger.Info("Started listening")
 	go c.maintainConnection(ctx)
 	return nil
 }
 
 func (c *Client) maintainConnection(ctx context.Context) {
 	defer c.logger.Info("Event client connection maintenance exiting")
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -82,6 +83,9 @@ func (c *Client) connectAndListen(ctx context.Context) error {
 		},
 	})
 
+	// Add server ID header so backend can determine our group
+	req.Header().Add("X-Server-ID", c.guildID)
+
 	stream, err := c.client.Subscribe(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to events: %w", err)
@@ -108,6 +112,8 @@ func (c *Client) Stop() {
 }
 
 func (c *Client) handleEvent(event *snitchv1.Event) {
+	c.logger.Debug("Received event", "type", event.Type, "server_id", event.ServerId)
+
 	// Skip events from our own guild to prevent self-triggering
 	if event.ServerId == c.guildID {
 		c.logger.Debug("Skipping event from own guild", "type", event.Type, "server_id", event.ServerId)
