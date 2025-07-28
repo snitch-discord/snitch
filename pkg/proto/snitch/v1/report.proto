@@ -12,7 +12,7 @@ message CreateReportRequest {
 }
 
 message CreateReportResponse {
-  string report_id = 1;
+  int64 report_id = 1;
 }
 
 message ListReportsRequest {
@@ -25,11 +25,11 @@ message ListReportsResponse {
 }
 
 message DeleteReportRequest {
-  string report_id = 1;
+  int64 report_id = 1;
 }
 
 message DeleteReportResponse {
-  string report_id = 1;
+  int64 report_id = 1;
 }
 
 service ReportService {

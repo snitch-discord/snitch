@@ -12,7 +12,6 @@ import (
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -66,7 +65,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
@@ -107,20 +106,17 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 		return
 	}
 
-	var responseStringBuilder strings.Builder
+	reportEmbed := messageutil.NewEmbed().
+		SetTitle("Reports").
+		SetDescription("Report List")
+
 	reports := listReportResponse.Msg.Reports
 	for index, report := range reports {
-		responseStringBuilder.WriteString(fmt.Sprintf("Report %d: %s\n", index, report))
+		headerField := fmt.Sprintf("%d: Reporter ID: %s, Reported ID: %s", index, report.ReporterId, report.ReportedId)
+		reportEmbed.AddField(headerField, report.ReportText)
 	}
 
-	var messageContent string
-	if responseStringBuilder.Len() == 0 {
-		messageContent = "No reports found!"
-	} else {
-		messageContent = responseStringBuilder.String()
-	}
-
-	messageutil.EmbedRespondContext(ctx, session, interaction, messageContent, "Listed Reports")
+	messageutil.EmbedRespondContext(ctx, session, interaction, []*discordgo.MessageEmbed{reportEmbed.MessageEmbed})
 }
 
 func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
@@ -135,10 +131,10 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		optionMap[opt.Name] = opt
 	}
 
-	var reportID string
+	var reportID int64
 	reportIDOption, ok := optionMap["report-id"]
 	if ok {
-		reportID = reportIDOption.StringValue()
+		reportID = reportIDOption.IntValue()
 	}
 
 	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
@@ -150,7 +146,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		return
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %s", deleteReportResponse.Msg.ReportId))
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
 }
 
 func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
@@ -159,6 +155,7 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 		log.Fatal(backendURL)
 	}
 	reportServiceClient := snitchv1connect.NewReportServiceClient(&httpClient, backendURL.String())
+	userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
@@ -170,7 +167,6 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 
 		switch options[0].Name {
 		case "new":
-			userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
 			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient)
 		case "list":
 			handleListReports(ctx, session, interaction, reportServiceClient)

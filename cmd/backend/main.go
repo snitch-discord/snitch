@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"snitch/internal/backend/dbconfig"
@@ -26,22 +27,38 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+func fatal(msg string, args ...any) {
+	slog.Error(msg, args...)
+	os.Exit(1)
+}
+
 func main() {
 	port := flag.Int("port", 4200, "port to listen on")
 	flag.Parse()
 
 	libSQLConfig, err := dbconfig.LibSQLConfigFromEnv()
 	if err != nil {
-		panic(err)
+		fatal("Failed to load LibSQL configuration from environment", "error", err)
 	}
 
 	pemKey, err := base64.StdEncoding.DecodeString(libSQLConfig.AuthKey)
 	if err != nil {
-		panic(err)
+		fatal("Failed to decode LibSQL auth key", "error", err)
 	}
 	block, _ := pem.Decode([]byte(pemKey))
-	parseResult, _ := x509.ParsePKCS8PrivateKey(block.Bytes)
-	key := parseResult.(ed25519.PrivateKey)
+	if block == nil {
+		fatal("Failed to decode PEM block from auth key")
+	}
+
+	parseResult, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		fatal("Failed to parse PKCS8 private key", "error", err)
+	}
+
+	key, ok := parseResult.(ed25519.PrivateKey)
+	if !ok {
+		fatal("Auth key is not an Ed25519 private key")
+	}
 
 	jwtDuration := 10 * time.Minute
 	jwtCache := &jwt.TokenCache{}
@@ -49,7 +66,7 @@ func main() {
 
 	dbJwt, err := jwt.CreateToken(key)
 	if err != nil {
-		panic(err)
+		fatal("Failed to create JWT token for database", "error", err)
 	}
 
 	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -57,16 +74,21 @@ func main() {
 
 	metadataDb, err := metadata.NewMetadataDB(dbCtx, dbJwt, libSQLConfig)
 	if err != nil {
-		panic(err)
+		fatal("Failed to initialize metadata database", "error", err)
 	}
-	defer metadataDb.Close()
+	defer func() {
+		if err := metadataDb.Close(); err != nil {
+			slog.Error("Failed to close metadata database", "error", err)
+		}
+	}()
 
 	if err := metadataDb.PingContext(dbCtx); err != nil {
-		panic(err)
+		fatal("Failed to ping metadata database", "error", err)
 	}
 
+	eventService := service.NewEventService(metadataDb)
 	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
-	reportServer := service.NewReportServer(jwtCache, libSQLConfig)
+	reportServer := service.NewReportServer(jwtCache, libSQLConfig, eventService)
 	userServer := service.NewUserServer(jwtCache, libSQLConfig)
 
 	baseInterceptors := connect.WithInterceptors(
@@ -79,13 +101,13 @@ func main() {
 	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
 	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
 	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewEventServiceHandler(eventService, baseInterceptors))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),
 		Handler:           h2c.NewHandler(mux, &http2.Server{}),
-		ReadTimeout:       1 * time.Second,
-		WriteTimeout:      1 * time.Second,
-		ReadHeaderTimeout: 200 * time.Millisecond,
+		ReadHeaderTimeout: 10 * time.Second,
+		// No ReadTimeout/WriteTimeout for streaming support
 	}
 
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {

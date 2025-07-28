@@ -37,11 +37,13 @@ func LibSQLConfigFromEnv() (LibSQLConfig, error) {
 	return cfg, nil
 }
 
-func (libSQLConfig LibSQLConfig) NamespaceURL(namespace string, token string) (*url.URL, error) {
-	return url.Parse(fmt.Sprintf("http://%s.%s:%s?authToken=%s", namespace, libSQLConfig.Host, libSQLConfig.Port, token))
+// NamespaceURL returns the URL for a namespace without auth token
+func (libSQLConfig LibSQLConfig) NamespaceURL(namespace string) (*url.URL, error) {
+	return url.Parse(fmt.Sprintf("http://%s.%s:%s", namespace, libSQLConfig.Host, libSQLConfig.Port))
 }
 
-func (libSQLConfig LibSQLConfig) MetadataDB() (*url.URL, error) {
+// MetadataURL returns the URL for the metadata database without auth token
+func (libSQLConfig LibSQLConfig) MetadataURL() (*url.URL, error) {
 	return url.Parse(fmt.Sprintf("http://metadata.%s:%s", libSQLConfig.Host, libSQLConfig.Port))
 }
 
@@ -49,6 +51,7 @@ func (libSQLConfig LibSQLConfig) AdminURL() (*url.URL, error) {
 	return url.Parse(fmt.Sprintf("http://%s:%s", libSQLConfig.Host, libSQLConfig.AdminPort))
 }
 
-func (libSQLConfig LibSQLConfig) DatabaseURL(token string) (*url.URL, error) {
-	return url.Parse(fmt.Sprintf("http://%s:%s?authToken=%s", libSQLConfig.Host, libSQLConfig.Port, token))
+// DatabaseURL returns the URL for the main database without auth token  
+func (libSQLConfig LibSQLConfig) DatabaseURL() (*url.URL, error) {
+	return url.Parse(fmt.Sprintf("http://%s:%s", libSQLConfig.Host, libSQLConfig.Port))
 }

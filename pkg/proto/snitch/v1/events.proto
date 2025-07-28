@@ -1,0 +1,51 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+import "google/protobuf/timestamp.proto";
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_REPORT_CREATED = 1;
+  EVENT_TYPE_REPORT_DELETED = 2;
+  EVENT_TYPE_USER_BANNED = 3;
+}
+
+message Event {
+  EventType type = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string server_id = 3;
+  string group_id = 4;
+  oneof data {
+    ReportCreatedEvent report_created = 5;
+    ReportDeletedEvent report_deleted = 6;
+    UserBannedEvent user_banned = 7;
+  }
+}
+
+message ReportCreatedEvent {
+  int64 report_id = 1;
+  string reporter_id = 2;
+  string reported_id = 3;
+  string report_text = 4;
+}
+
+message ReportDeletedEvent {
+  int64 report_id = 1;
+}
+
+message UserBannedEvent {
+  string user_id = 1;
+  string server_id = 2;
+  string reason = 3;
+}
+
+service EventService {
+  rpc Subscribe(SubscribeRequest) returns (stream Event);
+}
+
+message SubscribeRequest {
+  repeated EventType event_types = 1;
+  string group_id = 2;
+}

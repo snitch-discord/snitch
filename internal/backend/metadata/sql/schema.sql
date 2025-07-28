@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS groups (
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS servers (
-    server_id STRING NOT NULL,
+    server_id TEXT NOT NULL,
     output_channel INTEGER NOT NULL,
     group_id TEXT NOT NULL REFERENCES groups(group_id),
     permission_level INTEGER NOT NULL,

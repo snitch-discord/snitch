@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"snitch/internal/bot/botconfig"
+	"snitch/internal/bot/events"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/bot/slashcommand/handler"
 	"snitch/internal/bot/slashcommand/middleware"
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -21,7 +24,7 @@ func main() {
 
 	config, err := botconfig.FromEnv()
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to load bot configuration from environment: %v", err)
 	}
 
 	httpClient := http.Client{
@@ -47,9 +50,13 @@ func main() {
 
 	mainSession, err := discordgo.New("Bot " + config.DiscordToken)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to create Discord session: %v", err)
 	}
-	defer mainSession.Close()
+	defer func() {
+		if err := mainSession.Close(); err != nil {
+			log.Printf("Failed to close Discord session: %v", err)
+		}
+	}()
 
 	mainSession.AddHandler(func(session *discordgo.Session, _ *discordgo.Ready) {
 		log.Printf("Logged in as: %s#%s", session.State.User.Username, session.State.User.Discriminator)
@@ -69,8 +76,26 @@ func main() {
 	mainSession.AddHandler(slashcommand.SlashCommandHandlerFunc(handler).Adapt())
 
 	if err = mainSession.Open(); err != nil {
-		log.Panic(err)
+		log.Fatalf("Failed to open Discord session: %v", err)
 	}
+
+	slogger := slog.Default()
+	backendURL, err := config.BackendURL()
+	if err != nil {
+		log.Fatalf("Failed to get backend URL: %v", err)
+	}
+
+	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, testingGuildID)
+
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(slogger))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	eventClient.Start(ctx)
+	defer eventClient.Stop()
 
 	// tells discord about the commands we support
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
@@ -78,14 +103,10 @@ func main() {
 	for index, applicationCommand := range commands {
 		createdCommand, err := mainSession.ApplicationCommandCreate(mainSession.State.User.ID, testingGuildID, applicationCommand)
 		if err != nil {
-			log.Panicf("Cannot register '%v' command: %v", applicationCommand.Name, err)
+			log.Fatalf("Cannot register '%v' command: %v", applicationCommand.Name, err)
 		}
 
 		registeredCommands[index] = createdCommand
-	}
-
-	if err != nil {
-		log.Panic(err)
 	}
 
 	stopChannel := make(chan os.Signal, 1)
@@ -97,7 +118,7 @@ func main() {
 	// cleanup commands
 	for _, registeredCommand := range registeredCommands {
 		if err = mainSession.ApplicationCommandDelete(mainSession.State.User.ID, testingGuildID, registeredCommand.ID); err != nil {
-			log.Panicf("Cannot delete '%v' command: '%v'", registeredCommand.Name, err)
+			log.Printf("Cannot delete '%v' command: '%v'", registeredCommand.Name, err)
 		}
 	}
 }

@@ -13,7 +13,6 @@ services:
       - SQLD_HTTP_LISTEN_ADDR=0.0.0.0:8080
       - SQLD_ADMIN_LISTEN_ADDR=0.0.0.0:9090
       - SQLD_DB_PATH=snitch.db
-      # - RUST_LOG=debug
       - SQL_AUTH_JWT_KEY="${PUBLIC_KEY}"
     ports:
       - ":8080"
@@ -23,10 +22,11 @@ services:
     networks:
       - snitch-network
 
-  dnsmasq:
-    image: strm/dnsmasq
+  coredns:
+    image: coredns/coredns:1.12.2
+    command: -conf /etc/coredns/Corefile
     volumes:
-      - ./proxy/dnsmasq.conf:/etc/dnsmasq.conf
+      - ./proxy/Corefile:/etc/coredns/Corefile:ro
     cap_add:
       - NET_ADMIN
     networks:
@@ -37,7 +37,7 @@ services:
     image: nginx:alpine
     depends_on:
       - snitch-sqld
-      - dnsmasq
+      - coredns
     ports:
       - 80:80
       - 90:90
@@ -76,7 +76,7 @@ services:
     networks:
       - snitch-network
     dns:
-      - 219.219.219.126 # dnsmasq
+      - 219.219.219.126 # CoreDNS
 
   snitch-bot:
     build:

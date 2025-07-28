@@ -95,17 +95,22 @@ func (s *RegisterServer) Register(
 			return nil, connect.NewError(connect.CodeNotFound, err)
 		}
 
-		dbURL, err := s.libSQLConfig.NamespaceURL(groupID.String(), s.tokenCache.Get())
+		dbURL, err := s.libSQLConfig.NamespaceURL(groupID.String())
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		newDB, err := sql.Open("libsql", dbURL.String())
+		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
+		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
-			slogger.ErrorContext(ctx, "Failed to connect to db", "Error", err)
+			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
-		defer newDB.Close()
+		defer func() {
+			if err := newDB.Close(); err != nil {
+				slogger.ErrorContext(ctx, "Failed to close database connection", "error", err)
+			}
+		}()
 
 		groupTx, err := newDB.BeginTx(ctx, nil)
 		if err != nil {
@@ -164,19 +169,24 @@ func (s *RegisterServer) Register(
 			}
 		}
 
-		dbURL, err := s.libSQLConfig.NamespaceURL(groupID.String(), s.tokenCache.Get())
+		dbURL, err := s.libSQLConfig.NamespaceURL(groupID.String())
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
 		slogger.InfoContext(ctx, "DB URL", "URL", dbURL.String())
 
-		newDB, err := sql.Open("libsql", dbURL.String())
+		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
+		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
-			slogger.ErrorContext(ctx, "Failed to connect to db", "Error", err)
+			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
-		defer newDB.Close()
+		defer func() {
+			if err := newDB.Close(); err != nil {
+				slogger.ErrorContext(ctx, "Failed to close database connection", "error", err)
+			}
+		}()
 
 		groupTx, err := newDB.BeginTx(ctx, nil)
 		if err != nil {

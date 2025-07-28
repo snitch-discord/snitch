@@ -14,15 +14,17 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ReportServer struct {
 	tokenCache   *jwt.TokenCache
 	libSQLConfig dbconfig.LibSQLConfig
+	eventService *EventService
 }
 
-func NewReportServer(tokenCache *jwt.TokenCache, libSQLConfig dbconfig.LibSQLConfig) *ReportServer {
-	return &ReportServer{tokenCache: tokenCache, libSQLConfig: libSQLConfig}
+func NewReportServer(tokenCache *jwt.TokenCache, libSQLConfig dbconfig.LibSQLConfig, eventService *EventService) *ReportServer {
+	return &ReportServer{tokenCache: tokenCache, libSQLConfig: libSQLConfig, eventService: eventService}
 }
 
 func reportDBtoRPC(reportRow groupSQLc.GetAllReportsRow) *snitchv1.CreateReportRequest {
@@ -30,6 +32,37 @@ func reportDBtoRPC(reportRow groupSQLc.GetAllReportsRow) *snitchv1.CreateReportR
 		ReportText: reportRow.ReportText,
 		ReporterId: reportRow.ReporterID,
 		ReportedId: reportRow.ReportedUserID,
+	}
+}
+
+func newReportCreatedEvent(serverID string, reportID int, reporterID, reportedID, reportText, groupID string) *snitchv1.Event {
+	return &snitchv1.Event{
+		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
+		Timestamp: timestamppb.New(time.Now()),
+		ServerId:  serverID,
+		GroupId:   groupID,
+		Data: &snitchv1.Event_ReportCreated{
+			ReportCreated: &snitchv1.ReportCreatedEvent{
+				ReportId:   int64(reportID),
+				ReporterId: reporterID,
+				ReportedId: reportedID,
+				ReportText: reportText,
+			},
+		},
+	}
+}
+
+func newReportDeletedEvent(serverID string, reportID int, groupID string) *snitchv1.Event {
+	return &snitchv1.Event{
+		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_DELETED,
+		Timestamp: timestamppb.New(time.Now()),
+		ServerId:  serverID,
+		GroupId:   groupID,
+		Data: &snitchv1.Event_ReportDeleted{
+			ReportDeleted: &snitchv1.ReportDeletedEvent{
+				ReportId: int64(reportID),
+			},
+		},
 	}
 }
 
@@ -85,8 +118,16 @@ func (s *ReportServer) CreateReport(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	if s.eventService != nil {
+		event := newReportCreatedEvent(serverID, reportID, req.Msg.ReporterId, req.Msg.ReportedId, req.Msg.ReportText, groupID)
+		if err := s.eventService.PublishEvent(ctx, event); err != nil {
+			slogger.Error("Failed to publish report created event", "error", err, "report_id", reportID)
+			// Continue with request - event failure shouldn't fail the report creation
+		}
+	}
+
 	return connect.NewResponse(&snitchv1.CreateReportResponse{
-		ReportId: reportID,
+		ReportId: int64(reportID),
 	}), nil
 }
 
@@ -165,11 +206,24 @@ func (s *ReportServer) DeleteReport(
 	}
 
 	queries := groupSQLc.New(db)
-	deletedReportID, err := queries.DeleteReport(ctx, req.Msg.ReportId)
+	deletedReportID, err := queries.DeleteReport(ctx, int(req.Msg.ReportId))
 	if err != nil {
 		slogger.Error("failed to delete report", "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: deletedReportID}), nil
+	if s.eventService != nil {
+		serverID, err := interceptor.GetServerID(ctx)
+		if err != nil {
+			slogger.Error("Failed to get server ID for report deleted event", "error", err, "report_id", deletedReportID)
+		} else {
+			event := newReportDeletedEvent(serverID, deletedReportID, groupID)
+			if err := s.eventService.PublishEvent(ctx, event); err != nil {
+				slogger.Error("Failed to publish report deleted event", "error", err, "report_id", deletedReportID)
+				// Continue with request - event failure shouldn't fail the report deletion
+			}
+		}
+	}
+
+	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: int64(deletedReportID)}), nil
 }
