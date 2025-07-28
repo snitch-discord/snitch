@@ -119,7 +119,7 @@ func (x *CreateReportRequest) GetReportedId() string {
 
 type CreateReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,11 +154,11 @@ func (*CreateReportResponse) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_report_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CreateReportResponse) GetReportId() string {
+func (x *CreateReportResponse) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
-	return ""
+	return 0
 }
 
 type ListReportsRequest struct {
@@ -259,7 +259,7 @@ func (x *ListReportsResponse) GetReports() []*CreateReportRequest {
 
 type DeleteReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -294,16 +294,16 @@ func (*DeleteReportRequest) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_report_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DeleteReportRequest) GetReportId() string {
+func (x *DeleteReportRequest) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
-	return ""
+	return 0
 }
 
 type DeleteReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -338,11 +338,11 @@ func (*DeleteReportResponse) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_report_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DeleteReportResponse) GetReportId() string {
+func (x *DeleteReportResponse) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
-	return ""
+	return 0
 }
 
 var File_snitch_v1_report_proto protoreflect.FileDescriptor
@@ -359,7 +359,7 @@ const file_snitch_v1_report_proto_rawDesc = "" +
 	"\vreported_id\x18\x03 \x01(\tR\n" +
 	"reportedId\"3\n" +
 	"\x14CreateReportResponse\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\tR\breportId\"\x80\x01\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\"\x80\x01\n" +
 	"\x12ListReportsRequest\x12$\n" +
 	"\vreporter_id\x18\x01 \x01(\tH\x00R\n" +
 	"reporterId\x88\x01\x01\x12$\n" +
@@ -370,9 +370,9 @@ const file_snitch_v1_report_proto_rawDesc = "" +
 	"\x13ListReportsResponse\x128\n" +
 	"\areports\x18\x01 \x03(\v2\x1e.snitch.v1.CreateReportRequestR\areports\"2\n" +
 	"\x13DeleteReportRequest\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\tR\breportId\"3\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\"3\n" +
 	"\x14DeleteReportResponse\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\tR\breportId2\x85\x02\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId2\x85\x02\n" +
 	"\rReportService\x12Q\n" +
 	"\fCreateReport\x12\x1e.snitch.v1.CreateReportRequest\x1a\x1f.snitch.v1.CreateReportResponse\"\x00\x12N\n" +
 	"\vListReports\x12\x1d.snitch.v1.ListReportsRequest\x1a\x1e.snitch.v1.ListReportsResponse\"\x00\x12Q\n" +

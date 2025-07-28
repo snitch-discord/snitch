@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS servers (
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS reports (
-    report_id TEXT PRIMARY KEY,
+    report_id INTEGER PRIMARY KEY,
     report_text TEXT NOT NULL,
     reporter_id TEXT NOT NULL REFERENCES users(user_id),
     reported_user_id TEXT NOT NULL REFERENCES users(user_id),

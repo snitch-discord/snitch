@@ -35,7 +35,7 @@ func reportDBtoRPC(reportRow groupSQLc.GetAllReportsRow) *snitchv1.CreateReportR
 	}
 }
 
-func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportText, groupID string) *snitchv1.Event {
+func newReportCreatedEvent(serverID string, reportID int, reporterID, reportedID, reportText, groupID string) *snitchv1.Event {
 	return &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		Timestamp: timestamppb.New(time.Now()),
@@ -43,7 +43,7 @@ func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportTex
 		GroupId:   groupID,
 		Data: &snitchv1.Event_ReportCreated{
 			ReportCreated: &snitchv1.ReportCreatedEvent{
-				ReportId:   reportID,
+				ReportId:   int64(reportID),
 				ReporterId: reporterID,
 				ReportedId: reportedID,
 				ReportText: reportText,
@@ -52,7 +52,7 @@ func newReportCreatedEvent(serverID, reportID, reporterID, reportedID, reportTex
 	}
 }
 
-func newReportDeletedEvent(serverID, reportID, groupID string) *snitchv1.Event {
+func newReportDeletedEvent(serverID string, reportID int, groupID string) *snitchv1.Event {
 	return &snitchv1.Event{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_DELETED,
 		Timestamp: timestamppb.New(time.Now()),
@@ -60,7 +60,7 @@ func newReportDeletedEvent(serverID, reportID, groupID string) *snitchv1.Event {
 		GroupId:   groupID,
 		Data: &snitchv1.Event_ReportDeleted{
 			ReportDeleted: &snitchv1.ReportDeletedEvent{
-				ReportId: reportID,
+				ReportId: int64(reportID),
 			},
 		},
 	}
@@ -127,7 +127,7 @@ func (s *ReportServer) CreateReport(
 	}
 
 	return connect.NewResponse(&snitchv1.CreateReportResponse{
-		ReportId: reportID,
+		ReportId: int64(reportID),
 	}), nil
 }
 
@@ -206,7 +206,7 @@ func (s *ReportServer) DeleteReport(
 	}
 
 	queries := groupSQLc.New(db)
-	deletedReportID, err := queries.DeleteReport(ctx, req.Msg.ReportId)
+	deletedReportID, err := queries.DeleteReport(ctx, int(req.Msg.ReportId))
 	if err != nil {
 		slogger.Error("failed to delete report", "Error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -225,5 +225,5 @@ func (s *ReportServer) DeleteReport(
 		}
 	}
 
-	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: deletedReportID}), nil
+	return connect.NewResponse(&snitchv1.DeleteReportResponse{ReportId: int64(deletedReportID)}), nil
 }

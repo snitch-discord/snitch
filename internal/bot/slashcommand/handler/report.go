@@ -65,7 +65,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 		return
 	}
 
-	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %s", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
@@ -131,10 +131,10 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		optionMap[opt.Name] = opt
 	}
 
-	var reportID string
+	var reportID int64
 	reportIDOption, ok := optionMap["report-id"]
 	if ok {
-		reportID = reportIDOption.StringValue()
+		reportID = reportIDOption.IntValue()
 	}
 
 	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
@@ -146,7 +146,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 		return
 	}
 
-	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %s", deleteReportResponse.Msg.ReportId))
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
 }
 
 func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {

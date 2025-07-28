@@ -79,7 +79,7 @@ type Event struct {
 	Type      EventType              `protobuf:"varint,1,opt,name=type,proto3,enum=snitch.v1.EventType" json:"type,omitempty"`
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	ServerId  string                 `protobuf:"bytes,3,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
-	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // The group this event belongs to
+	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	// Types that are valid to be assigned to Data:
 	//
 	//	*Event_ReportCreated
@@ -206,7 +206,7 @@ func (*Event_UserBanned) isEvent_Data() {}
 
 type ReportCreatedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	ReporterId    string                 `protobuf:"bytes,2,opt,name=reporter_id,json=reporterId,proto3" json:"reporter_id,omitempty"`
 	ReportedId    string                 `protobuf:"bytes,3,opt,name=reported_id,json=reportedId,proto3" json:"reported_id,omitempty"`
 	ReportText    string                 `protobuf:"bytes,4,opt,name=report_text,json=reportText,proto3" json:"report_text,omitempty"`
@@ -244,11 +244,11 @@ func (*ReportCreatedEvent) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_events_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ReportCreatedEvent) GetReportId() string {
+func (x *ReportCreatedEvent) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
-	return ""
+	return 0
 }
 
 func (x *ReportCreatedEvent) GetReporterId() string {
@@ -274,7 +274,7 @@ func (x *ReportCreatedEvent) GetReportText() string {
 
 type ReportDeletedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -309,11 +309,11 @@ func (*ReportDeletedEvent) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_events_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ReportDeletedEvent) GetReportId() string {
+func (x *ReportDeletedEvent) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
-	return ""
+	return 0
 }
 
 type UserBannedEvent struct {
@@ -379,7 +379,7 @@ func (x *UserBannedEvent) GetReason() string {
 type SubscribeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventTypes    []EventType            `protobuf:"varint,1,rep,packed,name=event_types,json=eventTypes,proto3,enum=snitch.v1.EventType" json:"event_types,omitempty"`
-	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // Only receive events from this group
+	GroupId       string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -444,7 +444,7 @@ const file_snitch_v1_events_proto_rawDesc = "" +
 	"userBannedB\x06\n" +
 	"\x04data\"\x94\x01\n" +
 	"\x12ReportCreatedEvent\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\tR\breportId\x12\x1f\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\x12\x1f\n" +
 	"\vreporter_id\x18\x02 \x01(\tR\n" +
 	"reporterId\x12\x1f\n" +
 	"\vreported_id\x18\x03 \x01(\tR\n" +
@@ -452,7 +452,7 @@ const file_snitch_v1_events_proto_rawDesc = "" +
 	"\vreport_text\x18\x04 \x01(\tR\n" +
 	"reportText\"1\n" +
 	"\x12ReportDeletedEvent\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\tR\breportId\"_\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\"_\n" +
 	"\x0fUserBannedEvent\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tserver_id\x18\x02 \x01(\tR\bserverId\x12\x16\n" +
