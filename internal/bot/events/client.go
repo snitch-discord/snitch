@@ -15,7 +15,7 @@ import (
 
 type Client struct {
 	client   snitchv1connect.EventServiceClient
-	logger   *slog.Logger
+	slogger  *slog.Logger
 	session  *discordgo.Session
 	handlers map[snitchv1.EventType]EventHandler
 	guildID  string // The guild this bot instance operates in
@@ -23,7 +23,7 @@ type Client struct {
 
 type EventHandler func(session *discordgo.Session, event *snitchv1.Event) error
 
-func NewClient(backendURL string, session *discordgo.Session, logger *slog.Logger, guildID string) *Client {
+func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, guildID string) *Client {
 	httpClient := &http.Client{
 		Timeout: 0, // No timeout for streaming connections
 	}
@@ -32,7 +32,7 @@ func NewClient(backendURL string, session *discordgo.Session, logger *slog.Logge
 
 	return &Client{
 		client:   client,
-		logger:   logger,
+		slogger:  slogger,
 		session:  session,
 		handlers: make(map[snitchv1.EventType]EventHandler),
 		guildID:  guildID,
@@ -44,12 +44,12 @@ func (c *Client) RegisterHandler(eventType snitchv1.EventType, handler EventHand
 }
 
 func (c *Client) Start(ctx context.Context) {
-	c.logger.Info("Started listening")
+	c.slogger.DebugContext(ctx, "Started listening")
 	go c.maintainConnection(ctx)
 }
 
 func (c *Client) maintainConnection(ctx context.Context) {
-	defer c.logger.Info("Event client connection maintenance exiting")
+	defer c.slogger.Info("Event client connection maintenance exiting")
 	retryDelay := 5 * time.Second
 
 	for {
@@ -61,7 +61,7 @@ func (c *Client) maintainConnection(ctx context.Context) {
 				if ctx.Err() != nil {
 					return // Context cancelled, exit gracefully
 				}
-				c.logger.Error(fmt.Sprintf("Event stream connection failed, retrying in %f seconds", retryDelay.Seconds()), "error", err)
+				c.slogger.Error(fmt.Sprintf("Event stream connection failed, retrying in %f seconds", retryDelay.Seconds()), "error", err)
 				select {
 				case <-ctx.Done():
 					return
@@ -92,7 +92,7 @@ func (c *Client) connectAndListen(ctx context.Context) error {
 		return fmt.Errorf("failed to subscribe to events: %w", err)
 	}
 
-	c.logger.Info("Connected to event stream")
+	c.slogger.Info("Connected to event stream")
 
 	for stream.Receive() {
 		event := stream.Msg()
@@ -100,7 +100,7 @@ func (c *Client) connectAndListen(ctx context.Context) error {
 	}
 
 	if err := stream.Err(); err != nil && ctx.Err() == nil {
-		c.logger.Error("Event stream disconnected", "error", err)
+		c.slogger.Error("Event stream disconnected", "error", err)
 		return err
 	}
 
@@ -109,25 +109,25 @@ func (c *Client) connectAndListen(ctx context.Context) error {
 
 func (c *Client) Stop() {
 	// Connect streams are automatically closed when context is cancelled
-	c.logger.Info("Event client stopped")
+	c.slogger.Info("Event client stopped")
 }
 
 func (c *Client) handleEvent(event *snitchv1.Event) {
-	c.logger.Debug("Received event", "type", event.Type, "server_id", event.ServerId)
+	c.slogger.Debug("Received event", "type", event.Type, "server_id", event.ServerId)
 
 	// Skip events from our own guild to prevent self-triggering
 	if event.ServerId == c.guildID {
-		c.logger.Debug("Skipping event from own guild", "type", event.Type, "server_id", event.ServerId)
+		c.slogger.Debug("Skipping event from own guild", "type", event.Type, "server_id", event.ServerId)
 		return
 	}
 
 	handler, exists := c.handlers[event.Type]
 	if !exists {
-		c.logger.Debug("No handler registered for event type", "type", event.Type)
+		c.slogger.Debug("No handler registered for event type", "type", event.Type)
 		return
 	}
 
 	if err := handler(c.session, event); err != nil {
-		c.logger.Error("Event handler error", "type", event.Type, "error", err)
+		c.slogger.Error("Event handler error", "type", event.Type, "error", err)
 	}
 }

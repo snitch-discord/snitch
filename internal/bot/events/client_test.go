@@ -14,15 +14,15 @@ const TEST_GUILD_ID = "test-guild-id"
 func TestClient_Creation(t *testing.T) {
 	// Test that client can be created without errors
 	session := &discordgo.Session{}
-	logger := slog.Default()
+	slogger := slog.Default()
 
-	client := NewClient("http://localhost:4200", session, logger, TEST_GUILD_ID)
+	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
 
 	if client.client == nil {
 		t.Error("Connect client should not be nil")
 	}
 
-	if client.logger != logger {
+	if client.slogger != slogger {
 		t.Error("Logger should be set correctly")
 	}
 
@@ -37,8 +37,8 @@ func TestClient_Creation(t *testing.T) {
 
 func TestClient_RegisterHandler(t *testing.T) {
 	session := &discordgo.Session{}
-	logger := slog.Default()
-	client := NewClient("http://localhost:4200", session, logger, TEST_GUILD_ID)
+	slogger := slog.Default()
+	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
 
 	// Test handler registration
 	handlerCalled := false
@@ -68,8 +68,8 @@ func TestClient_RegisterHandler(t *testing.T) {
 
 func TestClient_HandlerNotFound(t *testing.T) {
 	session := &discordgo.Session{}
-	logger := slog.Default()
-	client := NewClient("http://localhost:4200", session, logger, TEST_GUILD_ID)
+	slogger := slog.Default()
+	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
 
 	// Test handling an event type with no registered handler
 	testEvent := &snitchv1.Event{
@@ -84,8 +84,8 @@ func TestClient_HandlerNotFound(t *testing.T) {
 
 func TestClient_MultipleHandlers(t *testing.T) {
 	session := &discordgo.Session{}
-	logger := slog.Default()
-	client := NewClient("http://localhost:4200", session, logger, TEST_GUILD_ID)
+	slogger := slog.Default()
+	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
 
 	// Register multiple handlers
 	handler1Called := false

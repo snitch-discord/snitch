@@ -79,17 +79,17 @@ func main() {
 		log.Fatalf("Failed to open Discord session: %v", err)
 	}
 
-	logger := slog.Default()
+	slogger := slog.Default()
 	backendURL, err := config.BackendURL()
 	if err != nil {
 		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, logger, testingGuildID)
+	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, testingGuildID)
 
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(logger))
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(logger))
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(logger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(slogger))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
