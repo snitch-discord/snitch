@@ -155,6 +155,7 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 		log.Fatal(backendURL)
 	}
 	reportServiceClient := snitchv1connect.NewReportServiceClient(&httpClient, backendURL.String())
+	userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
@@ -166,7 +167,6 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 
 		switch options[0].Name {
 		case "new":
-			userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
 			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient)
 		case "list":
 			handleListReports(ctx, session, interaction, reportServiceClient)

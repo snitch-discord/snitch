@@ -24,5 +24,3 @@ tmp/
 bin/
 bruno/
 .env
-backend
-bot
