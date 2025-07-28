@@ -100,9 +100,7 @@ func (s *RegisterServer) Register(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		// Construct connection string with auth token securely
 		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
-		
 		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())
@@ -178,9 +176,7 @@ func (s *RegisterServer) Register(
 
 		slogger.InfoContext(ctx, "DB URL", "URL", dbURL.String())
 
-		// Construct connection string with auth token securely
 		connectionString := fmt.Sprintf("%s?authToken=%s", dbURL.String(), s.tokenCache.Get())
-		
 		newDB, err := sql.Open("libsql", connectionString)
 		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to connect to database", "Error", err, "namespace", groupID.String())
