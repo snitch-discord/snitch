@@ -133,6 +133,94 @@ func (x *RegisterResponse) GetGroupId() string {
 	return ""
 }
 
+type GetGroupForServerRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServerId      string                 `protobuf:"bytes,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGroupForServerRequest) Reset() {
+	*x = GetGroupForServerRequest{}
+	mi := &file_snitch_v1_registration_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGroupForServerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGroupForServerRequest) ProtoMessage() {}
+
+func (x *GetGroupForServerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_registration_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGroupForServerRequest.ProtoReflect.Descriptor instead.
+func (*GetGroupForServerRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_registration_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetGroupForServerRequest) GetServerId() string {
+	if x != nil {
+		return x.ServerId
+	}
+	return ""
+}
+
+type GetGroupForServerResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGroupForServerResponse) Reset() {
+	*x = GetGroupForServerResponse{}
+	mi := &file_snitch_v1_registration_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGroupForServerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGroupForServerResponse) ProtoMessage() {}
+
+func (x *GetGroupForServerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_registration_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGroupForServerResponse.ProtoReflect.Descriptor instead.
+func (*GetGroupForServerResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_registration_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetGroupForServerResponse) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
 var File_snitch_v1_registration_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_registration_proto_rawDesc = "" +
@@ -147,9 +235,14 @@ const file_snitch_v1_registration_proto_rawDesc = "" +
 	"\v_group_name\"J\n" +
 	"\x10RegisterResponse\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
-	"\bgroup_id\x18\x02 \x01(\tR\agroupId2Y\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"7\n" +
+	"\x18GetGroupForServerRequest\x12\x1b\n" +
+	"\tserver_id\x18\x01 \x01(\tR\bserverId\"6\n" +
+	"\x19GetGroupForServerResponse\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId2\xbb\x01\n" +
 	"\x10RegistrarService\x12E\n" +
-	"\bRegister\x12\x1a.snitch.v1.RegisterRequest\x1a\x1b.snitch.v1.RegisterResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
+	"\bRegister\x12\x1a.snitch.v1.RegisterRequest\x1a\x1b.snitch.v1.RegisterResponse\"\x00\x12`\n" +
+	"\x11GetGroupForServer\x12#.snitch.v1.GetGroupForServerRequest\x1a$.snitch.v1.GetGroupForServerResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
 	file_snitch_v1_registration_proto_rawDescOnce sync.Once
@@ -163,16 +256,20 @@ func file_snitch_v1_registration_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_registration_proto_rawDescData
 }
 
-var file_snitch_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_snitch_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_snitch_v1_registration_proto_goTypes = []any{
-	(*RegisterRequest)(nil),  // 0: snitch.v1.RegisterRequest
-	(*RegisterResponse)(nil), // 1: snitch.v1.RegisterResponse
+	(*RegisterRequest)(nil),           // 0: snitch.v1.RegisterRequest
+	(*RegisterResponse)(nil),          // 1: snitch.v1.RegisterResponse
+	(*GetGroupForServerRequest)(nil),  // 2: snitch.v1.GetGroupForServerRequest
+	(*GetGroupForServerResponse)(nil), // 3: snitch.v1.GetGroupForServerResponse
 }
 var file_snitch_v1_registration_proto_depIdxs = []int32{
 	0, // 0: snitch.v1.RegistrarService.Register:input_type -> snitch.v1.RegisterRequest
-	1, // 1: snitch.v1.RegistrarService.Register:output_type -> snitch.v1.RegisterResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: snitch.v1.RegistrarService.GetGroupForServer:input_type -> snitch.v1.GetGroupForServerRequest
+	1, // 2: snitch.v1.RegistrarService.Register:output_type -> snitch.v1.RegisterResponse
+	3, // 3: snitch.v1.RegistrarService.GetGroupForServer:output_type -> snitch.v1.GetGroupForServerResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -190,7 +287,7 @@ func file_snitch_v1_registration_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_registration_proto_rawDesc), len(file_snitch_v1_registration_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

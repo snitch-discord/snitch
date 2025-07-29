@@ -22,8 +22,6 @@ import (
 )
 
 func main() {
-	testingGuildID := "1315524176936964117"
-
 	config, err := botconfig.FromEnv()
 	if err != nil {
 		log.Fatalf("Failed to load bot configuration from environment: %v", err)
@@ -76,8 +74,36 @@ func main() {
 		}
 	}()
 
-	mainSession.AddHandler(func(session *discordgo.Session, _ *discordgo.Ready) {
+	slogger := slog.Default()
+	backendURL, err := config.BackendURL()
+	if err != nil {
+		log.Fatalf("Failed to get backend URL: %v", err)
+	}
+
+	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, &httpClient)
+
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))
+	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(slogger))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	eventClient.Start(ctx)
+	defer eventClient.Stop()
+
+	mainSession.AddHandler(func(session *discordgo.Session, ready *discordgo.Ready) {
 		log.Printf("Logged in as: %s#%s", session.State.User.Username, session.State.User.Discriminator)
+
+		// Initialize event subscriptions for all guilds the bot is already in
+		slogger.Info("Initializing event subscriptions for existing guilds", "guild_count", len(ready.Guilds))
+		for _, guild := range ready.Guilds {
+			if err := eventClient.AddServer(ctx, guild.ID); err != nil {
+				slogger.Error("Failed to initialize server subscription", "guild_id", guild.ID, "error", err)
+			} else {
+				slogger.Debug("Initialized server subscription", "guild_id", guild.ID)
+			}
+		}
 	})
 	// setup our listeners for interaction events (a user using a slash command)
 
@@ -97,45 +123,43 @@ func main() {
 		log.Fatalf("Failed to open Discord session: %v", err)
 	}
 
-	slogger := slog.Default()
-	backendURL, err := config.BackendURL()
-	if err != nil {
-		log.Fatalf("Failed to get backend URL: %v", err)
-	}
+	// Add event handlers for when bot joins/leaves servers
+	mainSession.AddHandler(func(s *discordgo.Session, g *discordgo.GuildCreate) {
+		slogger.Info("Bot joined server", "guild_id", g.Guild.ID, "guild_name", g.Guild.Name)
+		if err := eventClient.AddServer(ctx, g.Guild.ID); err != nil {
+			slogger.Error("Failed to add server to event subscription", "guild_id", g.Guild.ID, "error", err)
+		}
+	})
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, testingGuildID, &httpClient)
+	mainSession.AddHandler(func(s *discordgo.Session, g *discordgo.GuildDelete) {
+		slogger.Info("Bot left server", "guild_id", g.Guild.ID)
+		eventClient.RemoveServer(g.Guild.ID)
+	})
 
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))
-	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_USER_BANNED, events.CreateUserBannedHandler(slogger))
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	eventClient.Start(ctx)
-	defer eventClient.Stop()
-
-	// tells discord about the commands we support
+	// Register commands globally (works across all servers)
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
 
+	slogger.Info("Registering global slash commands", "command_count", len(commands))
 	for index, applicationCommand := range commands {
-		createdCommand, err := mainSession.ApplicationCommandCreate(mainSession.State.User.ID, testingGuildID, applicationCommand)
+		createdCommand, err := mainSession.ApplicationCommandCreate(mainSession.State.User.ID, "", applicationCommand)
 		if err != nil {
 			log.Fatalf("Cannot register '%v' command: %v", applicationCommand.Name, err)
 		}
 
 		registeredCommands[index] = createdCommand
+		slogger.Info("Registered command", "command_name", applicationCommand.Name)
 	}
 
 	stopChannel := make(chan os.Signal, 1)
 	signal.Notify(stopChannel, os.Interrupt)
 	<-stopChannel
 
-	log.Println("Shutting down gracefully...")
+	slogger.Info("Shutting down gracefully...")
 
-	// cleanup commands
+	// cleanup global commands
+	slogger.Info("Cleaning up global slash commands")
 	for _, registeredCommand := range registeredCommands {
-		if err = mainSession.ApplicationCommandDelete(mainSession.State.User.ID, testingGuildID, registeredCommand.ID); err != nil {
+		if err = mainSession.ApplicationCommandDelete(mainSession.State.User.ID, "", registeredCommand.ID); err != nil {
 			log.Printf("Cannot delete '%v' command: '%v'", registeredCommand.Name, err)
 		}
 	}

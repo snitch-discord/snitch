@@ -163,7 +163,7 @@ func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) e
 }
 
 // getGroupDB returns an existing group database or error if it doesn't exist
-func (s *DatabaseService) getGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
+func (s *DatabaseService) getGroupDB(_ context.Context, groupID string) (*sql.DB, error) {
 	s.groupDBMutex.RLock()
 	defer s.groupDBMutex.RUnlock()
 

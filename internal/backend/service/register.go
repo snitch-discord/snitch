@@ -31,6 +31,27 @@ func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (string
 	return serverID, nil
 }
 
+func (s *RegisterServer) GetGroupForServer(ctx context.Context, req *connect.Request[snitchpb.GetGroupForServerRequest]) (*connect.Response[snitchpb.GetGroupForServerResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	findGroupReq := &snitchpb.FindGroupByServerRequest{
+		ServerId: req.Msg.ServerId,
+	}
+
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	if err != nil {
+		slogger.ErrorContext(ctx, "group not found for server", "server ID", req.Msg.ServerId)
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("group now found"))
+	}
+
+	return connect.NewResponse(&snitchpb.GetGroupForServerResponse{
+		GroupId: findGroupResp.Msg.GroupId,
+	}), nil
+}
+
 func (s *RegisterServer) Register(
 	ctx context.Context,
 	req *connect.Request[snitchpb.RegisterRequest],

@@ -14,7 +14,15 @@ message RegisterResponse {
   string group_id = 2;
 }
 
-service RegistrarService {
-  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+message GetGroupForServerRequest {
+  string server_id = 1;
 }
 
+message GetGroupForServerResponse {
+  string group_id = 1;
+}
+
+service RegistrarService {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+  rpc GetGroupForServer(GetGroupForServerRequest) returns (GetGroupForServerResponse) {}
+}
