@@ -1,4 +1,4 @@
-FROM golang:1.24 AS builder
+FROM golang:1.24-bookworm AS builder
 
 WORKDIR /app
 
@@ -9,16 +9,25 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy go mod files
+# Set up build environment for performance
+ENV CGO_ENABLED=1
+ENV CGO_CFLAGS="-O3"
+ENV GOCACHE=/root/.cache/go-build
+
+# Copy go mod files first for better layer caching
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 # Copy source code
 COPY . .
 
-# Build the database service with CGO enabled
-ENV CGO_ENABLED=1
-RUN go build -o db-service ./cmd/db
+# Build with performance optimizations and caching
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go build \
+    -ldflags="-s -w" \
+    -gcflags="-l=4" \
+    -o db-service ./cmd/db
 
 FROM debian:bookworm-slim
 
@@ -32,6 +41,7 @@ COPY --from=builder /app/db-service .
 
 # Create data directory
 RUN mkdir -p /app/data
+
 
 # Expose port
 EXPOSE 5200
