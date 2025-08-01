@@ -1,12 +1,6 @@
 package main
 
 import (
-	"context"
-	"crypto/ed25519"
-	"crypto/x509"
-	_ "embed"
-	"encoding/base64"
-	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,9 +9,8 @@ import (
 	"os"
 	"time"
 
+	"snitch/internal/backend/dbclient"
 	"snitch/internal/backend/dbconfig"
-	"snitch/internal/backend/jwt"
-	"snitch/internal/backend/metadata"
 	"snitch/internal/backend/service"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -36,60 +29,20 @@ func main() {
 	port := flag.Int("port", 4200, "port to listen on")
 	flag.Parse()
 
-	libSQLConfig, err := dbconfig.LibSQLConfigFromEnv()
+	dbConfig, err := dbconfig.DatabaseConfigFromEnv()
 	if err != nil {
-		fatal("Failed to load LibSQL configuration from environment", "error", err)
+		fatal("Failed to load database configuration from environment", "error", err)
 	}
 
-	pemKey, err := base64.StdEncoding.DecodeString(libSQLConfig.AuthKey)
-	if err != nil {
-		fatal("Failed to decode LibSQL auth key", "error", err)
-	}
-	block, _ := pem.Decode([]byte(pemKey))
-	if block == nil {
-		fatal("Failed to decode PEM block from auth key")
-	}
+	dbClient := dbclient.New(dbclient.Config{
+		Host: dbConfig.Host,
+		Port: dbConfig.Port,
+	})
 
-	parseResult, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		fatal("Failed to parse PKCS8 private key", "error", err)
-	}
-
-	key, ok := parseResult.(ed25519.PrivateKey)
-	if !ok {
-		fatal("Auth key is not an Ed25519 private key")
-	}
-
-	jwtDuration := 10 * time.Minute
-	jwtCache := &jwt.TokenCache{}
-	jwt.StartGenerator(jwtDuration, jwtCache, key)
-
-	dbJwt, err := jwt.CreateToken(key)
-	if err != nil {
-		fatal("Failed to create JWT token for database", "error", err)
-	}
-
-	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	metadataDb, err := metadata.NewMetadataDB(dbCtx, dbJwt, libSQLConfig)
-	if err != nil {
-		fatal("Failed to initialize metadata database", "error", err)
-	}
-	defer func() {
-		if err := metadataDb.Close(); err != nil {
-			slog.Error("Failed to close metadata database", "error", err)
-		}
-	}()
-
-	if err := metadataDb.PingContext(dbCtx); err != nil {
-		fatal("Failed to ping metadata database", "error", err)
-	}
-
-	eventService := service.NewEventService(metadataDb)
-	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
-	reportServer := service.NewReportServer(jwtCache, libSQLConfig, eventService)
-	userServer := service.NewUserServer(jwtCache, libSQLConfig)
+	eventService := service.NewEventService(dbClient)
+	registrar := service.NewRegisterServer(dbClient)
+	reportServer := service.NewReportServer(dbClient, eventService)
+	userServer := service.NewUserServer(dbClient)
 
 	baseInterceptors := connect.WithInterceptors(
 		interceptor.NewRecoveryInterceptor(),
@@ -99,8 +52,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
-	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
-	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors))
+	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors))
 	mux.Handle(snitchv1connect.NewEventServiceHandler(eventService, baseInterceptors))
 
 	server := &http.Server{

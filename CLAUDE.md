@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Snitch is a Discord bot system for cross-server user reporting and management. It consists of two main services:
+Snitch is a Discord bot system for cross-server user reporting and management. It consists of three main services:
 
+- **Database Service** (port 5200): Dedicated database service using embedded libSQL
 - **Backend API Server** (port 4200): Connect RPC service with real-time WebSocket events
 - **Discord Bot**: Slash command interface with real-time event handling
 
@@ -18,6 +19,7 @@ Snitch is a Discord bot system for cross-server user reporting and management. I
 ./run.sh
 
 # Individual service builds
+go build ./cmd/db
 go build ./cmd/backend
 go build ./cmd/bot
 
@@ -42,17 +44,25 @@ go test ./internal/backend/service
 
 ### Multi-Database Design
 
-- **Metadata Database**: Group metadata and server associations
-- **Group Databases**: Individual namespaced databases per Discord server group
+- **Database Service**: Dedicated service managing all database operations via gRPC
+- **Metadata Database**: Group metadata and server associations (embedded libSQL)
+- **Group Databases**: Individual database files per Discord server group (embedded libSQL)
 - Each group database contains: users, servers, reports, user_history tables
 
 ### Key Components
 
+#### Database Service (Connect RPC)
+
+- `DatabaseService`: All database operations via gRPC
+  - Metadata operations (groups, servers)
+  - Report CRUD operations
+  - User history tracking
+
 #### Backend Services (Connect RPC)
 
-- `RegistrarService`: Server group registration
-- `ReportService`: User reporting CRUD operations
-- `UserHistoryService`: User history tracking
+- `RegistrarService`: Server group registration (proxies to database service)
+- `ReportService`: User reporting operations (proxies to database service)
+- `UserHistoryService`: User history operations (proxies to database service)
 - `EventService`: Real-time event streaming via Connect RPC
 
 #### Event System
@@ -64,55 +74,55 @@ go test ./internal/backend/service
 
 #### Authentication
 
-- Ed25519 JWT tokens for service authentication
 - Server ID headers for request authorization
-- Group-based multi-tenancy via LibSQL namespaces
+- Group-based multi-tenancy via separate database files
 
 ### Database Technology
 
-- **LibSQL (Turso)** with SQLite compatibility
-- **SQLC** for type-safe query generation
-- Multi-tenancy through database namespaces
+- **libSQL embedded** with SQLite compatibility
+- Dedicated database service with gRPC API
+- Multi-tenancy through separate database files per group
 
 ### Configuration
 
 Required environment variables:
 
 - `SNITCH_DISCORD_TOKEN`: Discord bot token
-- `LIBSQL_HOST/PORT`: Database connection
-- `LIBSQL_AUTH_KEY`: Ed25519 private key (base64)
-- `PUBLIC_KEY`: Ed25519 public key (base64)
+- `SNITCH_DB_HOST/PORT`: Database service connection (for backend service)
 
 ## File Structure Notes
 
 ### Entry Points
 
+- `/cmd/db/main.go`: Database service
 - `/cmd/backend/main.go`: Backend API server
 - `/cmd/bot/main.go`: Discord bot service
 
 ### Code Organization
 
-- `/internal/backend/`: Backend service code (service, jwt, metadata, etc.)
+- `/internal/db/`: Database service code (embedded libSQL operations)
+- `/internal/backend/`: Backend service code (gRPC client, service proxies)
 - `/internal/bot/`: Discord bot code (commands, middleware, events)
 - `/pkg/proto/`: Protocol buffer definitions and generated code
 
 ### Development Tools
 
-- `compose.yml`: Complete Docker development environment
+- `compose.yml`: Complete Docker development environment (3 services)
 - `buf.yaml`: Protocol buffer configuration
-- `sqlc.yml`: Database code generation
+- `db.Containerfile`: Database service container
 - `/bruno/`: API testing collection
 
 ## Development Workflow
 
-1. Use `./run.sh` for development (includes key generation and auto-rebuild)
+1. Use `./run.sh` for development (simplified setup with auto-rebuild)
 2. Protocol buffer changes require `buf generate`
-3. Database schema changes require `sqlc generate`
-4. Both services communicate via gRPC and real-time Connect streaming events
+3. Database schema changes are handled in the database service
+4. All services communicate via gRPC and real-time Connect streaming events
 
 ## Key Patterns
 
-- **Multi-tenancy**: Each Discord server group uses isolated database namespace
+- **Multi-tenancy**: Each Discord server group uses separate database files
 - **Event-driven**: Real-time updates via Connect RPC streaming between services
-- **Type Safety**: Generated code for both database queries (SQLC) and gRPC services (Buf)
+- **Type Safety**: Generated code for gRPC services (Buf)
+- **Service-oriented**: Dedicated database service with gRPC API
 - **Container-first**: Docker Compose development with watch mode for hot reloading

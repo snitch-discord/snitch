@@ -1,0 +1,144 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+import "google/protobuf/empty.proto";
+
+// Metadata database operations
+message CreateGroupRequest {
+  string group_id = 1;
+  string group_name = 2;
+}
+
+message FindGroupByServerRequest {
+  string server_id = 1;
+}
+
+message FindGroupByServerResponse {
+  string group_id = 1;
+}
+
+message AddServerToGroupRequest {
+  string server_id = 1;
+  string group_id = 2;
+}
+
+// Group database operations
+message CreateGroupDatabaseRequest {
+  string group_id = 1;
+}
+
+message DbCreateReportRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string reporter_id = 3;
+  string server_id = 4;
+  string reason = 5;
+  optional string evidence_url = 6;
+}
+
+message DbCreateReportResponse {
+  int64 report_id = 1;
+}
+
+message DbGetReportRequest {
+  string group_id = 1;
+  int64 report_id = 2;
+}
+
+message DbGetReportResponse {
+  int64 id = 1;
+  string user_id = 2;
+  string reporter_id = 3;
+  string server_id = 4;
+  string reason = 5;
+  optional string evidence_url = 6;
+  string created_at = 7;
+}
+
+message DbListReportsRequest {
+  string group_id = 1;
+  optional string user_id = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message DbListReportsResponse {
+  repeated DbGetReportResponse reports = 1;
+}
+
+message DbDeleteReportRequest {
+  string group_id = 1;
+  int64 report_id = 2;
+}
+
+message DbCreateUserHistoryRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string server_id = 3;
+  string action = 4;
+  optional string reason = 5;
+  optional string evidence_url = 6;
+}
+
+message DbCreateUserHistoryResponse {
+  int64 history_id = 1;
+}
+
+message DbGetUserHistoryRequest {
+  string group_id = 1;
+  string user_id = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message DbUserHistoryEntry {
+  int64 id = 1;
+  string user_id = 2;
+  string server_id = 3;
+  string action = 4;
+  optional string reason = 5;
+  optional string evidence_url = 6;
+  string created_at = 7;
+}
+
+message DbGetUserHistoryResponse {
+  repeated DbUserHistoryEntry entries = 1;
+}
+
+message ListServersRequest {
+  string group_id = 1;
+}
+
+message ServerEntry {
+  string server_id = 1;
+  string group_id = 2;
+}
+
+message ListServersResponse {
+  repeated ServerEntry servers = 1;
+}
+
+service DatabaseService {
+  // Metadata operations
+  rpc CreateGroup(CreateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc FindGroupByServer(FindGroupByServerRequest) returns (FindGroupByServerResponse) {}
+  rpc AddServerToGroup(AddServerToGroupRequest) returns (google.protobuf.Empty) {}
+  
+  // Group database operations
+  rpc CreateGroupDatabase(CreateGroupDatabaseRequest) returns (google.protobuf.Empty) {}
+  
+  // Report operations
+  rpc CreateReport(DbCreateReportRequest) returns (DbCreateReportResponse) {}
+  rpc GetReport(DbGetReportRequest) returns (DbGetReportResponse) {}
+  rpc ListReports(DbListReportsRequest) returns (DbListReportsResponse) {}
+  rpc DeleteReport(DbDeleteReportRequest) returns (google.protobuf.Empty) {}
+  
+  // User history operations
+  rpc CreateUserHistory(DbCreateUserHistoryRequest) returns (DbCreateUserHistoryResponse) {}
+  rpc GetUserHistory(DbGetUserHistoryRequest) returns (DbGetUserHistoryResponse) {}
+  
+  // Server operations
+  rpc ListServers(ListServersRequest) returns (ListServersResponse) {}
+}

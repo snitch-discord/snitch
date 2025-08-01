@@ -4,26 +4,22 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"snitch/internal/backend/dbconfig"
-	"snitch/internal/backend/group"
-	groupSQLc "snitch/internal/backend/group/gen/sqlc"
-	"snitch/internal/backend/jwt"
-	"snitch/internal/backend/service/interceptor"
+
+	"snitch/internal/backend/dbclient"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
-	"time"
 
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
 )
 
 type UserServer struct {
-	tokenCache   *jwt.TokenCache
-	libSQLConfig dbconfig.LibSQLConfig
+	dbClient *dbclient.Client
 }
 
-func NewUserServer(tokenCache *jwt.TokenCache, libSQLConfig dbconfig.LibSQLConfig) *UserServer {
-	return &UserServer{tokenCache: tokenCache, libSQLConfig: libSQLConfig}
+func NewUserServer(dbClient *dbclient.Client) *UserServer {
+	return &UserServer{
+		dbClient: dbClient,
+	}
 }
 
 func (s *UserServer) CreateUserHistory(
@@ -34,53 +30,33 @@ func (s *UserServer) CreateUserHistory(
 	if !ok {
 		slogger = slog.Default()
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
-	defer cancel()
 
-	groupID, err := interceptor.GetGroupID(ctx)
+	// Get server ID from header
+	serverID := req.Header().Get(ServerIDHeader)
+	if serverID == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, 
+			fmt.Errorf("server ID header is required"))
+	}
+
+	// Find group ID for this server
+	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
 	if err != nil {
-		slogger.Error("Couldn't get group id", "Error", err)
+		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	// Create user history entry - adapting old format to new
+	historyID, err := s.dbClient.CreateUserHistory(ctx, groupID, req.Msg.UserId, serverID, 
+		"username_change", &req.Msg.Username, nil)
+	if err != nil {
+		slogger.Error("Failed to create user history", "group_id", groupID, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	db, err := group.GetGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
-	if err != nil {
-		slogger.Error("Failed creating group db", "Error", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
-
-	queries := groupSQLc.New(db)
-
-	userHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
-	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to get user history %s", req.Msg.UserId), "Error", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
-
-	// loop through all user history and check if username or globalname changed. if not do not update
-	for _, history := range userHistory {
-		if history.Username == req.Msg.Username && history.GlobalName == req.Msg.GlobalName {
-			return connect.NewResponse(&snitchv1.CreateUserHistoryResponse{
-				UserId: history.UserID,
-			}), nil
-		}
-	}
-
-	userHistoryID, err := queries.CreateUserHistory(ctx, groupSQLc.CreateUserHistoryParams{
-		HistoryID:  uuid.New().String(),
-		UserID:     req.Msg.UserId,
-		Username:   req.Msg.Username,
-		GlobalName: req.Msg.GlobalName,
-		ChangedAt:  req.Msg.ChangedAt,
-	})
-
-	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to add user history %s", req.Msg.UserId), "Error", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
+	slogger.Info("User history created", "history_id", historyID, "group_id", groupID, "user_id", req.Msg.UserId)
 
 	return connect.NewResponse(&snitchv1.CreateUserHistoryResponse{
-		UserId: userHistoryID.UserID,
+		UserId: req.Msg.UserId,
 	}), nil
 }
 
@@ -93,40 +69,45 @@ func (s *UserServer) ListUserHistory(
 		slogger = slog.Default()
 	}
 
-	groupID, err := interceptor.GetGroupID(ctx)
+	// Get server ID from header
+	serverID := req.Header().Get(ServerIDHeader)
+	if serverID == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, 
+			fmt.Errorf("server ID header is required"))
+	}
+
+	// Find group ID for this server
+	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
 	if err != nil {
-		slogger.Error("Couldn't get group id", "Error", err)
+		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	// Get user history
+	dbEntries, err := s.dbClient.GetUserHistory(ctx, groupID, req.Msg.UserId, nil, nil)
+	if err != nil {
+		slogger.Error("Failed to get user history", "group_id", groupID, "user_id", req.Msg.UserId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	slogger.Info("Group ID", "ID", groupID)
-
-	db, err := group.GetGroupDB(ctx, s.tokenCache.Get(), s.libSQLConfig, groupID)
-	if err != nil {
-		slogger.Error("Failed getting group db", "Error", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
-	queries := groupSQLc.New(db)
-
-	dbUserHistory, err := queries.GetUserHistory(ctx, req.Msg.UserId)
-
-	if err != nil {
-		slogger.Error(fmt.Sprintf("failed to get user history %s", req.Msg.UserId), "Error", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
-
-	rpcHistory := make([]*snitchv1.CreateUserHistoryRequest, 0, len(dbUserHistory))
-
-	for _, userHistory := range dbUserHistory {
-		rpcHistory = append(rpcHistory, &snitchv1.CreateUserHistoryRequest{
-			Username:   userHistory.Username,
-			ChangedAt:  userHistory.ChangedAt,
-			UserId:     userHistory.UserID,
-			GlobalName: userHistory.GlobalName,
+	// Convert to old API format (temporarily)
+	var userHistory []*snitchv1.CreateUserHistoryRequest
+	for _, entry := range dbEntries {
+		// Extract username from reason field as a workaround
+		username := ""
+		if entry.Reason != nil {
+			username = *entry.Reason
+		}
+		
+		userHistory = append(userHistory, &snitchv1.CreateUserHistoryRequest{
+			UserId:     entry.UserId,
+			Username:   username,
+			GlobalName: "", // Not available in new format
+			ChangedAt:  entry.CreatedAt,
 		})
 	}
 
 	return connect.NewResponse(&snitchv1.ListUserHistoryResponse{
-		UserHistory: rpcHistory,
+		UserHistory: userHistory,
 	}), nil
 }

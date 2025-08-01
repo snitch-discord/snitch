@@ -2,13 +2,12 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"sync"
 	"time"
 
-	"snitch/internal/backend/metadata"
+	"snitch/internal/backend/dbclient"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
@@ -24,13 +23,13 @@ type subscriber struct {
 type EventService struct {
 	subscribers map[*subscriber]bool
 	mu          sync.RWMutex
-	metadataDB  *sql.DB
+	dbClient    *dbclient.Client
 }
 
-func NewEventService(metadataDB *sql.DB) *EventService {
+func NewEventService(dbClient *dbclient.Client) *EventService {
 	return &EventService{
 		subscribers: make(map[*subscriber]bool),
-		metadataDB:  metadataDB,
+		dbClient:    dbClient,
 	}
 }
 
@@ -52,20 +51,20 @@ func (s *EventService) Subscribe(
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("server ID header is required"))
 	}
 
-	groupID, err := metadata.FindGroupIDByServerID(ctx, s.metadataDB, serverID)
+	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
 	if err != nil {
 		slogger.Error("Failed to find group ID for server", "server_id", serverID, "error", err)
 		return connect.NewError(connect.CodeNotFound, err)
 	}
 
-	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID.String())
+	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID)
 
 	// Create a channel for this subscriber
 	eventChan := make(chan *snitchv1.Event, 256)
 
 	sub := &subscriber{
 		eventChan: eventChan,
-		groupID:   groupID.String(),
+		groupID:   groupID,
 	}
 
 	// Register subscriber
