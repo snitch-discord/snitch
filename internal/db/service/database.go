@@ -33,6 +33,12 @@ func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) 
 		return nil, fmt.Errorf("failed to open metadata database: %w", err)
 	}
 
+	// Configure metadata database with optimized PRAGMA settings
+	if err := configureConnection(ctx, metadataDB, logger); err != nil {
+		metadataDB.Close()
+		return nil, fmt.Errorf("failed to configure metadata database: %w", err)
+	}
+
 	// Create metadata tables
 	if err := createMetadataTables(ctx, metadataDB); err != nil {
 		metadataDB.Close()
@@ -93,6 +99,38 @@ func createMetadataTables(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
+// configureConnection applies Rails-inspired PRAGMA settings for optimal SQLite performance
+func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) error {
+	pragmas := []string{
+		"PRAGMA foreign_keys=ON",              // Enable foreign key constraints for data integrity
+		"PRAGMA journal_mode=WAL",             // Enable WAL mode for better concurrency
+		"PRAGMA synchronous=NORMAL",           // Balance between safety and performance
+		"PRAGMA mmap_size=134217728",          // 128MB memory mapping
+		"PRAGMA journal_size_limit=67108864", // 64MB WAL file limit (triggers auto-checkpoint)
+		"PRAGMA cache_size=2000",              // 2000 pages cache (~8MB with 4KB pages)
+	}
+
+	for _, pragma := range pragmas {
+		// Use QueryContext for PRAGMA statements as they return results
+		rows, err := db.QueryContext(ctx, pragma)
+		if err != nil {
+			// Log the error but continue with other pragmas
+			logger.Warn("Failed to execute PRAGMA", "pragma", pragma, "error", err)
+			
+			// Only fail on critical pragmas
+			if pragma == "PRAGMA foreign_keys=ON" || pragma == "PRAGMA journal_mode=WAL" {
+				return fmt.Errorf("failed to execute critical pragma %q: %w", pragma, err)
+			}
+		} else {
+			// Close the result set immediately
+			rows.Close()
+			logger.Debug("Applied PRAGMA successfully", "pragma", pragma)
+		}
+	}
+
+	return nil
+}
+
 func (s *DatabaseService) getOrCreateGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
 	s.groupDBMutex.RLock()
 	if db, exists := s.groupDBs[groupID]; exists {
@@ -114,6 +152,12 @@ func (s *DatabaseService) getOrCreateGroupDB(ctx context.Context, groupID string
 	db, err := sql.Open("libsql", "file:"+groupPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open group database for %s: %w", groupID, err)
+	}
+
+	// Configure group database with optimized PRAGMA settings
+	if err := configureConnection(ctx, db, s.logger); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to configure group database for %s: %w", groupID, err)
 	}
 
 	// Create group tables
