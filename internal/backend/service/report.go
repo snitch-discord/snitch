@@ -68,7 +68,9 @@ func (s *ReportServer) CreateReport(
 			},
 		},
 	}
-	s.eventService.PublishEvent(ctx, event)
+	if err := s.eventService.PublishEvent(ctx, event); err != nil {
+		slogger.Warn("Failed to publish event", "error", err)
+	}
 
 	slogger.Info("Report created", "report_id", reportID, "group_id", groupID)
 
@@ -162,7 +164,9 @@ func (s *ReportServer) DeleteReport(
 			},
 		},
 	}
-	s.eventService.PublishEvent(ctx, event)
+	if err := s.eventService.PublishEvent(ctx, event); err != nil {
+		slogger.Warn("Failed to publish event", "error", err)
+	}
 
 	slogger.Info("Report deleted", "report_id", req.Msg.ReportId, "group_id", groupID)
 

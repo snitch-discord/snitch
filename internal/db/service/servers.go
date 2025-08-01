@@ -21,7 +21,11 @@ func (s *DatabaseService) ListServers(
 		s.logger.Error("Failed to list servers", "group_id", req.Msg.GroupId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to list servers: %w", err))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			s.logger.Warn("Failed to close rows", "error", err)
+		}
+	}()
 
 	var servers []*snitchv1.ServerEntry
 	for rows.Next() {

@@ -139,7 +139,11 @@ func (s *DatabaseService) ListReports(
 		s.logger.Error("Failed to list reports", "group_id", req.Msg.GroupId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to list reports: %w", err))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			s.logger.Warn("Failed to close rows", "error", err)
+		}
+	}()
 
 	var reports []*snitchv1.DbGetReportResponse
 	for rows.Next() {

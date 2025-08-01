@@ -36,7 +36,11 @@ func main() {
 	if err != nil {
 		fatal("Failed to initialize database service", "error", err)
 	}
-	defer dbService.Close()
+	defer func() {
+		if err := dbService.Close(); err != nil {
+			slogger.Error("Failed to close database service", "error", err)
+		}
+	}()
 
 	// Setup gRPC handlers
 	mux := http.NewServeMux()

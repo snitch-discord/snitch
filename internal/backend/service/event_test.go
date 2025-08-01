@@ -1,13 +1,11 @@
 package service
 
 import (
-	"database/sql"
 	"testing"
 	"time"
 
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
-	_ "github.com/tursodatabase/go-libsql"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -15,19 +13,8 @@ const TEST_GROUP_ID = "test-group-id"
 const TEST_SERVER_ID = "test-server-id"
 
 func TestEventService_PublishEvent(t *testing.T) {
-	// Create in-memory SQLite database for testing
-	db, err := sql.Open("libsql", ":memory:")
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
-
-	defer func() {
-		if err := db.Close(); err != nil {
-			t.Error("Failed to close database", "error", err)
-		}
-	}()
-
-	service := NewEventService(db)
+	// PublishEvent doesn't use dbClient, so we can pass nil
+	service := NewEventService(nil)
 
 	// Test event publishing to subscribers with group filtering
 	eventChan := make(chan *snitchv1.Event, 10)
@@ -50,7 +37,7 @@ func TestEventService_PublishEvent(t *testing.T) {
 		Timestamp: timestamppb.Now(),
 	}
 
-	err = service.PublishEvent(t.Context(), testEvent)
+	err := service.PublishEvent(t.Context(), testEvent)
 	if err != nil {
 		t.Errorf("PublishEvent failed: %v", err)
 	}
@@ -69,22 +56,11 @@ func TestEventService_PublishEvent(t *testing.T) {
 }
 
 func TestEventService_GroupFiltering(t *testing.T) {
-	// Create in-memory SQLite database for testing
-	db, err := sql.Open("libsql", ":memory:")
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
-
-	defer func() {
-		if err := db.Close(); err != nil {
-			t.Error("Failed to close database", "error", err)
-		}
-	}()
-
 	group1ID := "group-1"
 	group2ID := "group-2"
 
-	service := NewEventService(db)
+	// PublishEvent doesn't use dbClient, so we can pass nil
+	service := NewEventService(nil)
 
 	// Create subscribers for different groups
 	group1Chan := make(chan *snitchv1.Event, 10)
@@ -113,7 +89,7 @@ func TestEventService_GroupFiltering(t *testing.T) {
 		Timestamp: timestamppb.Now(),
 	}
 
-	err = service.PublishEvent(t.Context(), testEvent)
+	err := service.PublishEvent(t.Context(), testEvent)
 	if err != nil {
 		t.Errorf("PublishEvent failed: %v", err)
 	}
@@ -138,19 +114,8 @@ func TestEventService_GroupFiltering(t *testing.T) {
 }
 
 func TestEventService_ChannelFullHandling(t *testing.T) {
-	// Create in-memory SQLite database for testing
-	db, err := sql.Open("libsql", ":memory:")
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
-
-	defer func() {
-		if err := db.Close(); err != nil {
-			t.Error("Failed to close database", "error", err)
-		}
-	}()
-
-	service := NewEventService(db)
+	// PublishEvent doesn't use dbClient, so we can pass nil
+	service := NewEventService(nil)
 
 	// Test that full channels don't block publishing
 	testEvent := &snitchv1.Event{
@@ -171,7 +136,7 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	service.mu.Unlock()
 
 	// This should not block and should return an error indicating dropped events
-	err = service.PublishEvent(t.Context(), testEvent)
+	err := service.PublishEvent(t.Context(), testEvent)
 	if err == nil {
 		t.Error("Expected error for dropped events")
 	}

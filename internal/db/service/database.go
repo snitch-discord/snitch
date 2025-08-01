@@ -35,13 +35,17 @@ func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) 
 
 	// Configure metadata database with optimized PRAGMA settings
 	if err := configureConnection(ctx, metadataDB, logger); err != nil {
-		metadataDB.Close()
+		if closeErr := metadataDB.Close(); closeErr != nil {
+			logger.Warn("Failed to close metadata database during error cleanup", "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to configure metadata database: %w", err)
 	}
 
 	// Create metadata tables
 	if err := createMetadataTables(ctx, metadataDB); err != nil {
-		metadataDB.Close()
+		if closeErr := metadataDB.Close(); closeErr != nil {
+			logger.Warn("Failed to close metadata database during error cleanup", "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to create metadata tables: %w", err)
 	}
 
@@ -123,7 +127,9 @@ func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) e
 			}
 		} else {
 			// Close the result set immediately
-			rows.Close()
+			if err := rows.Close(); err != nil {
+				logger.Warn("Failed to close rows", "error", err)
+			}
 			logger.Debug("Applied PRAGMA successfully", "pragma", pragma)
 		}
 	}
@@ -156,13 +162,17 @@ func (s *DatabaseService) getOrCreateGroupDB(ctx context.Context, groupID string
 
 	// Configure group database with optimized PRAGMA settings
 	if err := configureConnection(ctx, db, s.logger); err != nil {
-		db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			s.logger.Warn("Failed to close group database during error cleanup", "group_id", groupID, "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to configure group database for %s: %w", groupID, err)
 	}
 
 	// Create group tables
 	if err := s.createGroupTables(ctx, db); err != nil {
-		db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			s.logger.Warn("Failed to close group database during error cleanup", "group_id", groupID, "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to create group tables for %s: %w", groupID, err)
 	}
 

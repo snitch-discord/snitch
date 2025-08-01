@@ -87,7 +87,11 @@ func (s *DatabaseService) GetUserHistory(
 		s.logger.Error("Failed to get user history", "group_id", req.Msg.GroupId, "user_id", req.Msg.UserId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get user history: %w", err))
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			s.logger.Warn("Failed to close rows", "error", err)
+		}
+	}()
 
 	var entries []*snitchv1.DbUserHistoryEntry
 	for rows.Next() {
