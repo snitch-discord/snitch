@@ -2,9 +2,10 @@ package interceptor
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"snitch/internal/backend/metadata"
+
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 )
@@ -26,7 +27,7 @@ func getServerID(req connect.AnyRequest) (string, error) {
 	return serverID, nil
 }
 
-func NewGroupContextInterceptor(metadataDB *sql.DB) connect.UnaryInterceptorFunc {
+func NewGroupContextInterceptor(dbClient snitchv1connect.DatabaseServiceClient) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			serverID, err := getServerID(req)
@@ -34,13 +35,17 @@ func NewGroupContextInterceptor(metadataDB *sql.DB) connect.UnaryInterceptorFunc
 				return nil, connect.NewError(connect.CodeInternal, err)
 			}
 
-			groupID, err := metadata.FindGroupIDByServerID(ctx, metadataDB, serverID)
+			// Find group ID using database service
+			findGroupReq := &snitchv1.FindGroupByServerRequest{
+				ServerId: serverID,
+			}
+			findGroupResp, err := dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 			if err != nil {
 				return nil, connect.NewError(connect.CodeNotFound, err)
 			}
 
 			ctx = context.WithValue(ctx, serverIDContextKey, serverID)
-			ctx = context.WithValue(ctx, groupIDContextKey, groupID.String())
+			ctx = context.WithValue(ctx, groupIDContextKey, findGroupResp.Msg.GroupId)
 
 			return next(ctx, req)
 		})

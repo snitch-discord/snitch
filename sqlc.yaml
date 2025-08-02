@@ -1,0 +1,24 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "internal/db/queries/metadata.sql"
+    schema: "internal/db/schemas/metadata.sql"
+    gen:
+      go:
+        package: "metadata"
+        out: "internal/db/sqlcgen/metadata"
+        sql_package: "database/sql"
+        emit_interface: true
+        emit_json_tags: true
+        emit_empty_slices: true
+  - engine: "sqlite"
+    queries: "internal/db/queries/group.sql"
+    schema: "internal/db/schemas/group_tables.sql"
+    gen:
+      go:
+        package: "groupdb"
+        out: "internal/db/sqlcgen/groupdb"
+        sql_package: "database/sql"
+        emit_interface: true
+        emit_json_tags: true
+        emit_empty_slices: true

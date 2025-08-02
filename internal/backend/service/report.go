@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"log/slog"
 
-	"snitch/internal/backend/dbclient"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 )
 
 type ReportServer struct {
-	dbClient     *dbclient.Client
+	dbClient     snitchv1connect.DatabaseServiceClient
 	eventService *EventService
 }
 
-func NewReportServer(dbClient *dbclient.Client, eventService *EventService) *ReportServer {
+func NewReportServer(dbClient snitchv1connect.DatabaseServiceClient, eventService *EventService) *ReportServer {
 	return &ReportServer{
 		dbClient:     dbClient,
 		eventService: eventService,
@@ -41,18 +41,31 @@ func (s *ReportServer) CreateReport(
 	}
 
 	// Find group ID for this server
-	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
+	findGroupReq := &snitchv1.FindGroupByServerRequest{
+		ServerId: serverID,
+	}
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err != nil {
 		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
+	groupID := findGroupResp.Msg.GroupId
 
 	// Create the report
-	reportID, err := s.dbClient.CreateReport(ctx, groupID, req.Msg.ReportedId, req.Msg.ReporterId, serverID, req.Msg.ReportText, nil)
+	createReportReq := &snitchv1.DbCreateReportRequest{
+		GroupId:    groupID,
+		UserId:     req.Msg.ReportedId,
+		ReporterId: req.Msg.ReporterId,
+		ServerId:   serverID,
+		Reason:     req.Msg.ReportText,
+	}
+	createReportResp, err := s.dbClient.CreateReport(ctx, connect.NewRequest(createReportReq))
 	if err != nil {
 		slogger.Error("Failed to create report", "group_id", groupID, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
+
+	reportID := createReportResp.Msg.ReportId
 
 	// Emit event
 	event := &snitchv1.Event{
@@ -96,14 +109,24 @@ func (s *ReportServer) ListReports(
 	}
 
 	// Find group ID for this server
-	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
+	findGroupReq := &snitchv1.FindGroupByServerRequest{
+		ServerId: serverID,
+	}
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err != nil {
 		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
+	groupID := findGroupResp.Msg.GroupId
 
 	// List reports - convert from old protobuf format to new format for now
-	dbReports, err := s.dbClient.ListReports(ctx, groupID, req.Msg.ReportedId, nil, nil)
+	listReportsReq := &snitchv1.DbListReportsRequest{
+		GroupId: groupID,
+		UserId:  req.Msg.ReportedId,
+		Limit:   nil,
+		Offset:  nil,
+	}
+	listReportsResp, err := s.dbClient.ListReports(ctx, connect.NewRequest(listReportsReq))
 	if err != nil {
 		slogger.Error("Failed to list reports", "group_id", groupID, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -111,7 +134,7 @@ func (s *ReportServer) ListReports(
 
 	// Convert from database format to API format
 	var reports []*snitchv1.CreateReportRequest
-	for _, dbReport := range dbReports {
+	for _, dbReport := range listReportsResp.Msg.Reports {
 		reports = append(reports, &snitchv1.CreateReportRequest{
 			ReportText: dbReport.Reason,
 			ReporterId: dbReport.ReporterId,
@@ -141,14 +164,23 @@ func (s *ReportServer) DeleteReport(
 	}
 
 	// Find group ID for this server
-	groupID, err := s.dbClient.FindGroupByServer(ctx, serverID)
+	findGroupReq := &snitchv1.FindGroupByServerRequest{
+		ServerId: serverID,
+	}
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err != nil {
 		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
+	groupID := findGroupResp.Msg.GroupId
 
 	// Delete the report
-	if err := s.dbClient.DeleteReport(ctx, groupID, req.Msg.ReportId); err != nil {
+	deleteReportReq := &snitchv1.DbDeleteReportRequest{
+		GroupId:  groupID,
+		ReportId: req.Msg.ReportId,
+	}
+	_, err = s.dbClient.DeleteReport(ctx, connect.NewRequest(deleteReportReq))
+	if err != nil {
 		slogger.Error("Failed to delete report", "group_id", groupID, "report_id", req.Msg.ReportId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

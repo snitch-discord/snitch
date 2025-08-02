@@ -21,6 +21,11 @@
 go.work
 tmp/
 
+# Built binaries
+/db
+/backend  
+/bot
+
 bin/
 data/
 bruno/

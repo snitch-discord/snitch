@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"snitch/internal/backend/dbclient"
 	"snitch/internal/shared/ctxutil"
 	snitchpb "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
 )
 
 type RegisterServer struct {
-	dbClient *dbclient.Client
+	dbClient snitchv1connect.DatabaseServiceClient
 }
 
-func NewRegisterServer(dbClient *dbclient.Client) *RegisterServer {
+func NewRegisterServer(dbClient snitchv1connect.DatabaseServiceClient) *RegisterServer {
 	return &RegisterServer{dbClient: dbClient}
 }
 
@@ -46,7 +46,10 @@ func (s *RegisterServer) Register(
 	}
 
 	// Check if server is already registered
-	_, err = s.dbClient.FindGroupByServer(ctx, serverID)
+	findGroupReq := &snitchpb.FindGroupByServerRequest{
+		ServerId: serverID,
+	}
+	_, err = s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err == nil {
 		slogger.ErrorContext(ctx, "Server is already registered")
 		return nil, connect.NewError(connect.CodeAlreadyExists, fmt.Errorf("server already registered"))
@@ -63,7 +66,12 @@ func (s *RegisterServer) Register(
 		}
 
 		// Add server to existing group
-		if err := s.dbClient.AddServerToGroup(ctx, serverID, groupID.String()); err != nil {
+		addServerReq := &snitchpb.AddServerToGroupRequest{
+			ServerId: serverID,
+			GroupId:  groupID.String(),
+		}
+		_, err := s.dbClient.AddServerToGroup(ctx, connect.NewRequest(addServerReq))
+		if err != nil {
 			slogger.ErrorContext(ctx, "Failed adding server to group", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
@@ -77,19 +85,33 @@ func (s *RegisterServer) Register(
 		groupID = uuid.New()
 		
 		// Create the group
-		if err := s.dbClient.CreateGroup(ctx, groupID.String(), *req.Msg.GroupName); err != nil {
+		createGroupReq := &snitchpb.CreateGroupRequest{
+			GroupId:   groupID.String(),
+			GroupName: *req.Msg.GroupName,
+		}
+		_, err := s.dbClient.CreateGroup(ctx, connect.NewRequest(createGroupReq))
+		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to create group", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
 		// Create the group database
-		if err := s.dbClient.CreateGroupDatabase(ctx, groupID.String()); err != nil {
+		createGroupDbReq := &snitchpb.CreateGroupDatabaseRequest{
+			GroupId: groupID.String(),
+		}
+		_, err = s.dbClient.CreateGroupDatabase(ctx, connect.NewRequest(createGroupDbReq))
+		if err != nil {
 			slogger.ErrorContext(ctx, "Failed to create group database", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
 		// Add server to the new group
-		if err := s.dbClient.AddServerToGroup(ctx, serverID, groupID.String()); err != nil {
+		addServerToNewGroupReq := &snitchpb.AddServerToGroupRequest{
+			ServerId: serverID,
+			GroupId:  groupID.String(),
+		}
+		_, err = s.dbClient.AddServerToGroup(ctx, connect.NewRequest(addServerToNewGroupReq))
+		if err != nil {
 			slogger.ErrorContext(ctx, "Failed adding server to group", "Error", err)
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}

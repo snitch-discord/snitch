@@ -3,32 +3,51 @@ package service
 import (
 	"context"
 	"database/sql"
-	_ "embed"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"snitch/internal/db/sqlcgen/groupdb"
+	"snitch/internal/db/sqlcgen/metadata"
+
 	_ "github.com/tursodatabase/go-libsql"
 )
 
-//go:embed ../schemas/metadata.sql
-var metadataSchema string
+// Schema file paths for loading at runtime
+const (
+	metadataSchemaPath = "/app/internal/db/schemas/metadata.sql"
+	groupSchemaPath    = "/app/internal/db/schemas/group_tables.sql"
+)
 
-//go:embed ../schemas/group_tables.sql
-var groupTablesSchema string
+// loadSchemaFile loads SQL schema from file
+func loadSchemaFile(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open schema file %s: %w", filePath, err)
+	}
+	defer file.Close()
 
-//go:embed ../schemas/group_indexes.sql
-var groupIndexesSchema string
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to read schema file %s: %w", filePath, err)
+	}
+
+	return string(content), nil
+}
+
 
 type DatabaseService struct {
-	metadataDB   *sql.DB
-	groupDBs     map[string]*sql.DB
-	groupDBMutex sync.RWMutex
-	dbDir        string
-	logger       *slog.Logger
+	metadataDB     *sql.DB
+	metadataQueries *metadata.Queries
+	groupDBs       map[string]*sql.DB
+	groupQueries   map[string]*groupdb.Queries
+	groupDBMutex   sync.RWMutex
+	dbDir          string
+	logger         *slog.Logger
 }
 
 func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) (*DatabaseService, error) {
@@ -61,10 +80,12 @@ func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) 
 	}
 
 	service := &DatabaseService{
-		metadataDB: metadataDB,
-		groupDBs:   make(map[string]*sql.DB),
-		dbDir:      dbDir,
-		logger:     logger,
+		metadataDB:      metadataDB,
+		metadataQueries: metadata.New(metadataDB),
+		groupDBs:        make(map[string]*sql.DB),
+		groupQueries:    make(map[string]*groupdb.Queries),
+		dbDir:           dbDir,
+		logger:          logger,
 	}
 
 	return service, nil
@@ -91,7 +112,12 @@ func (s *DatabaseService) Close() error {
 }
 
 func createMetadataTables(ctx context.Context, db *sql.DB) error {
-	queries := strings.Split(strings.TrimSpace(metadataSchema), ";")
+	schema, err := loadSchemaFile(metadataSchemaPath)
+	if err != nil {
+		return fmt.Errorf("failed to load metadata schema: %w", err)
+	}
+
+	queries := strings.Split(strings.TrimSpace(schema), ";")
 	
 	for _, query := range queries {
 		query = strings.TrimSpace(query)
@@ -186,33 +212,28 @@ func (s *DatabaseService) createGroupDB(ctx context.Context, groupID string) (*s
 	}
 
 	s.groupDBs[groupID] = db
+	s.groupQueries[groupID] = groupdb.New(db)
 	s.logger.Info("Created new group database", "group_id", groupID)
 
 	return db, nil
 }
 
 func (s *DatabaseService) createGroupTables(ctx context.Context, db *sql.DB) error {
-	// Execute table creation statements
-	tableQueries := strings.Split(strings.TrimSpace(groupTablesSchema), ";")
-	for _, query := range tableQueries {
-		query = strings.TrimSpace(query)
-		if query == "" {
-			continue
-		}
-		if _, err := db.ExecContext(ctx, query); err != nil {
-			return fmt.Errorf("failed to execute table query %q: %w", query, err)
-		}
+	// Load complete group schema (tables + indexes)
+	schema, err := loadSchemaFile(groupSchemaPath)
+	if err != nil {
+		return fmt.Errorf("failed to load group schema: %w", err)
 	}
-	
-	// Execute index creation statements
-	indexQueries := strings.Split(strings.TrimSpace(groupIndexesSchema), ";")
-	for _, query := range indexQueries {
+
+	// Execute all schema statements
+	queries := strings.Split(strings.TrimSpace(schema), ";")
+	for _, query := range queries {
 		query = strings.TrimSpace(query)
 		if query == "" {
 			continue
 		}
 		if _, err := db.ExecContext(ctx, query); err != nil {
-			return fmt.Errorf("failed to execute index query %q: %w", query, err)
+			return fmt.Errorf("failed to execute query %q: %w", query, err)
 		}
 	}
 

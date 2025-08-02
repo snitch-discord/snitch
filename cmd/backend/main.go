@@ -9,8 +9,6 @@ import (
 	"os"
 	"time"
 
-	"snitch/internal/backend/dbclient"
-	"snitch/internal/backend/dbconfig"
 	"snitch/internal/backend/service"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -29,15 +27,24 @@ func main() {
 	port := flag.Int("port", 4200, "port to listen on")
 	flag.Parse()
 
-	dbConfig, err := dbconfig.DatabaseConfigFromEnv()
-	if err != nil {
-		fatal("Failed to load database configuration from environment", "error", err)
+	// Get database service connection details from environment
+	dbHost := os.Getenv("SNITCH_DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+	dbPort := os.Getenv("SNITCH_DB_PORT")
+	if dbPort == "" {
+		dbPort = "5200"
 	}
 
-	dbClient := dbclient.New(dbclient.Config{
-		Host: dbConfig.Host,
-		Port: dbConfig.Port,
-	})
+	// Create database service client (Connect RPC over HTTP)
+	dbServiceURL := fmt.Sprintf("http://%s:%s", dbHost, dbPort)
+	dbClient := snitchv1connect.NewDatabaseServiceClient(
+		&http.Client{
+			Timeout: 30 * time.Second,
+		}, 
+		dbServiceURL,
+	)
 
 	eventService := service.NewEventService(dbClient)
 	registrar := service.NewRegisterServer(dbClient)
