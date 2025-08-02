@@ -246,14 +246,18 @@ func (s *DatabaseService) RunMigrationsOnAllTenants(ctx context.Context) error {
 		// Configure connection
 		if err := configureConnection(ctx, db, s.logger); err != nil {
 			s.logger.Error("Failed to configure tenant database connection", "group_id", groupID, "error", err)
-			db.Close()
+			if closeErr := db.Close(); closeErr != nil {
+				s.logger.Error("Failed to close tenant database after configuration error", "group_id", groupID, "error", closeErr)
+			}
 			continue
 		}
 
 		// Run migrations
 		if err := s.runTenantMigrations(ctx, db, groupID); err != nil {
 			s.logger.Error("Failed to migrate tenant database", "group_id", groupID, "error", err)
-			db.Close()
+			if closeErr := db.Close(); closeErr != nil {
+				s.logger.Error("Failed to close tenant database after migration error", "group_id", groupID, "error", closeErr)
+			}
 			continue
 		}
 

@@ -18,11 +18,6 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-func fatal(msg string, args ...any) {
-	slog.Error(msg, args...)
-	os.Exit(1)
-}
-
 func main() {
 	port := flag.Int("port", 4200, "port to listen on")
 	flag.Parse()
