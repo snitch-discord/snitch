@@ -2,7 +2,7 @@ version: "2"
 sql:
   - engine: "sqlite"
     queries: "internal/db/queries/metadata.sql"
-    schema: "internal/db/schemas/metadata.sql"
+    schema: "internal/db/migrations/metadata"
     gen:
       go:
         package: "metadata"
@@ -13,7 +13,7 @@ sql:
         emit_empty_slices: true
   - engine: "sqlite"
     queries: "internal/db/queries/group.sql"
-    schema: "internal/db/schemas/group_tables.sql"
+    schema: "internal/db/migrations/tenant"
     gen:
       go:
         package: "groupdb"

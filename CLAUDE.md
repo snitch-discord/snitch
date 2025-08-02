@@ -30,6 +30,29 @@ buf generate
 sqlc generate
 ```
 
+### Database Migrations
+
+```bash
+# Create new metadata migration (for groups, servers tables)
+goose -dir internal/db/migrations/metadata create -s migration_name sql
+
+# Create new tenant migration (for users, reports, user_history tables)  
+goose -dir internal/db/migrations/tenant create -s migration_name sql
+
+# IMPORTANT: Always use -s flag for sequential numbering (required for sqlc compatibility)
+
+# Migrations run automatically on service startup
+# - Metadata migrations apply to the single metadata database
+# - Tenant migrations apply to all existing tenant databases
+
+# Manual migration testing (if needed)
+goose -dir internal/db/migrations/metadata sqlite3 ./data/metadata.db up
+goose -dir internal/db/migrations/tenant sqlite3 ./data/group_<GROUP_ID>.db up
+
+# Generate sqlc after schema changes
+sqlc generate
+```
+
 ### Testing
 
 ```bash
@@ -82,6 +105,17 @@ go test ./internal/backend/service
 - **libSQL embedded** with SQLite compatibility
 - Dedicated database service with gRPC API
 - Multi-tenancy through separate database files per group
+
+#### Migration System
+
+- **Goose-based migrations** with embedded migration files
+- **Dual migration structure**:
+  - `migrations/metadata/` - for metadata database (groups, servers)
+  - `migrations/tenant/` - for tenant databases (users, reports, user_history)
+- **Sequential migration numbering** (00001_, 00002_, etc.) for sqlc compatibility
+- **Automatic migration execution** on service startup
+- **Embedded migrations** compiled into binary using Go embed
+- **Tenant discovery** - automatically finds and migrates all existing tenant databases
 
 ### Configuration
 

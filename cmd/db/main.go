@@ -42,6 +42,11 @@ func main() {
 		}
 	}()
 
+	// Run migrations on all existing tenant databases
+	if err := dbService.RunMigrationsOnAllTenants(ctx); err != nil {
+		slogger.Warn("Failed to migrate some tenant databases", "error", err)
+	}
+
 	// Setup gRPC handlers
 	mux := http.NewServeMux()
 	mux.Handle(snitchv1connect.NewDatabaseServiceHandler(dbService, connect.WithInterceptors()))

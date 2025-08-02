@@ -4,40 +4,25 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"snitch/internal/db/migrations"
 	"snitch/internal/db/sqlcgen/groupdb"
 	"snitch/internal/db/sqlcgen/metadata"
 
+	"github.com/pressly/goose/v3"
 	_ "github.com/tursodatabase/go-libsql"
 )
 
-// Schema file paths for loading at runtime
+// Migration directory paths within embedded filesystem
 const (
-	metadataSchemaPath = "/app/internal/db/schemas/metadata.sql"
-	groupSchemaPath    = "/app/internal/db/schemas/group_tables.sql"
+	metadataMigrationsPath = "metadata"
+	tenantMigrationsPath   = "tenant"
 )
-
-// loadSchemaFile loads SQL schema from file
-func loadSchemaFile(filePath string) (string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open schema file %s: %w", filePath, err)
-	}
-	defer file.Close()
-
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return "", fmt.Errorf("failed to read schema file %s: %w", filePath, err)
-	}
-
-	return string(content), nil
-}
 
 
 type DatabaseService struct {
@@ -71,12 +56,12 @@ func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) 
 		return nil, fmt.Errorf("failed to configure metadata database: %w", err)
 	}
 
-	// Create metadata tables
-	if err := createMetadataTables(ctx, metadataDB); err != nil {
+	// Run metadata migrations
+	if err := runMetadataMigrations(ctx, metadataDB, logger); err != nil {
 		if closeErr := metadataDB.Close(); closeErr != nil {
 			logger.Warn("Failed to close metadata database during error cleanup", "error", closeErr)
 		}
-		return nil, fmt.Errorf("failed to create metadata tables: %w", err)
+		return nil, fmt.Errorf("failed to run metadata migrations: %w", err)
 	}
 
 	service := &DatabaseService{
@@ -111,24 +96,22 @@ func (s *DatabaseService) Close() error {
 	return nil
 }
 
-func createMetadataTables(ctx context.Context, db *sql.DB) error {
-	schema, err := loadSchemaFile(metadataSchemaPath)
-	if err != nil {
-		return fmt.Errorf("failed to load metadata schema: %w", err)
+// runMetadataMigrations applies metadata database migrations using goose
+func runMetadataMigrations(ctx context.Context, db *sql.DB, logger *slog.Logger) error {
+	// Set goose to use the embedded migration files
+	goose.SetBaseFS(migrations.MetadataMigrations)
+
+	// Set SQLite dialect for goose
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return fmt.Errorf("failed to set goose dialect: %w", err)
 	}
 
-	queries := strings.Split(strings.TrimSpace(schema), ";")
-	
-	for _, query := range queries {
-		query = strings.TrimSpace(query)
-		if query == "" {
-			continue
-		}
-		if _, err := db.ExecContext(ctx, query); err != nil {
-			return fmt.Errorf("failed to execute query %q: %w", query, err)
-		}
+	// Run migrations up to the latest version
+	if err := goose.UpContext(ctx, db, metadataMigrationsPath); err != nil {
+		return fmt.Errorf("failed to run metadata migrations: %w", err)
 	}
 
+	logger.Info("Successfully applied metadata migrations")
 	return nil
 }
 
@@ -203,12 +186,12 @@ func (s *DatabaseService) createGroupDB(ctx context.Context, groupID string) (*s
 		return nil, fmt.Errorf("failed to configure group database for %s: %w", groupID, err)
 	}
 
-	// Create group tables
-	if err := s.createGroupTables(ctx, db); err != nil {
+	// Run tenant migrations
+	if err := s.runTenantMigrations(ctx, db, groupID); err != nil {
 		if closeErr := db.Close(); closeErr != nil {
 			s.logger.Warn("Failed to close group database during error cleanup", "group_id", groupID, "error", closeErr)
 		}
-		return nil, fmt.Errorf("failed to create group tables for %s: %w", groupID, err)
+		return nil, fmt.Errorf("failed to run tenant migrations for %s: %w", groupID, err)
 	}
 
 	s.groupDBs[groupID] = db
@@ -218,23 +201,69 @@ func (s *DatabaseService) createGroupDB(ctx context.Context, groupID string) (*s
 	return db, nil
 }
 
-func (s *DatabaseService) createGroupTables(ctx context.Context, db *sql.DB) error {
-	// Load complete group schema (tables + indexes)
-	schema, err := loadSchemaFile(groupSchemaPath)
-	if err != nil {
-		return fmt.Errorf("failed to load group schema: %w", err)
+// runTenantMigrations applies tenant database migrations using goose
+func (s *DatabaseService) runTenantMigrations(ctx context.Context, db *sql.DB, groupID string) error {
+	// Set goose to use the embedded migration files
+	goose.SetBaseFS(migrations.TenantMigrations)
+
+	// Set SQLite dialect for goose
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return fmt.Errorf("failed to set goose dialect: %w", err)
 	}
 
-	// Execute all schema statements
-	queries := strings.Split(strings.TrimSpace(schema), ";")
-	for _, query := range queries {
-		query = strings.TrimSpace(query)
-		if query == "" {
+	// Run migrations up to the latest version
+	if err := goose.UpContext(ctx, db, tenantMigrationsPath); err != nil {
+		return fmt.Errorf("failed to run tenant migrations for group %s: %w", groupID, err)
+	}
+
+	s.logger.Info("Successfully applied tenant migrations", "group_id", groupID)
+	return nil
+}
+
+// RunMigrationsOnAllTenants discovers and migrates all existing tenant databases
+func (s *DatabaseService) RunMigrationsOnAllTenants(ctx context.Context) error {
+	// Find all existing tenant database files
+	files, err := filepath.Glob(filepath.Join(s.dbDir, "group_*.db"))
+	if err != nil {
+		return fmt.Errorf("failed to discover tenant databases: %w", err)
+	}
+
+	for _, file := range files {
+		// Extract group ID from filename
+		basename := filepath.Base(file)
+		if !strings.HasPrefix(basename, "group_") || !strings.HasSuffix(basename, ".db") {
 			continue
 		}
-		if _, err := db.ExecContext(ctx, query); err != nil {
-			return fmt.Errorf("failed to execute query %q: %w", query, err)
+		groupID := strings.TrimSuffix(strings.TrimPrefix(basename, "group_"), ".db")
+
+		// Open database connection
+		db, err := sql.Open("libsql", "file:"+file)
+		if err != nil {
+			s.logger.Error("Failed to open tenant database for migration", "group_id", groupID, "error", err)
+			continue
 		}
+
+		// Configure connection
+		if err := configureConnection(ctx, db, s.logger); err != nil {
+			s.logger.Error("Failed to configure tenant database connection", "group_id", groupID, "error", err)
+			db.Close()
+			continue
+		}
+
+		// Run migrations
+		if err := s.runTenantMigrations(ctx, db, groupID); err != nil {
+			s.logger.Error("Failed to migrate tenant database", "group_id", groupID, "error", err)
+			db.Close()
+			continue
+		}
+
+		// Store the connection for future use
+		s.groupDBMutex.Lock()
+		s.groupDBs[groupID] = db
+		s.groupQueries[groupID] = groupdb.New(db)
+		s.groupDBMutex.Unlock()
+
+		s.logger.Info("Successfully migrated tenant database", "group_id", groupID)
 	}
 
 	return nil

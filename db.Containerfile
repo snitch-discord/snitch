@@ -45,9 +45,8 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 
 WORKDIR /app
 
-# Copy the built binary and schema files
+# Copy the built binary (migrations are embedded in the binary via Go embed)
 COPY --from=builder /app/db-service .
-COPY --from=builder /app/internal/db/schemas/ ./internal/db/schemas/
 
 # Create data directory
 RUN mkdir -p /app/data
