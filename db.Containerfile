@@ -29,10 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -gcflags="-l=4" \
     -o db-service ./cmd/db
 
-FROM debian:bookworm-slim
-
-# Install ca-certificates for HTTPS requests
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/static-debian12
 
 WORKDIR /app
 

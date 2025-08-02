@@ -45,7 +45,7 @@ func (s *UserServer) CreateUserHistory(
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 
-	// Create user history entry - adapting old format to new
+	// Create user history entry
 	historyID, err := s.dbClient.CreateUserHistory(ctx, groupID, req.Msg.UserId, serverID, 
 		"username_change", &req.Msg.Username, nil)
 	if err != nil {
@@ -90,7 +90,7 @@ func (s *UserServer) ListUserHistory(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	// Convert to old API format (temporarily)
+	// Convert to API format
 	var userHistory []*snitchv1.CreateUserHistoryRequest
 	for _, entry := range dbEntries {
 		// Extract username from reason field as a workaround

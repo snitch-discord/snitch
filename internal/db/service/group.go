@@ -17,7 +17,7 @@ func (s *DatabaseService) CreateGroupDatabase(
 	ctx context.Context,
 	req *connect.Request[snitchv1.CreateGroupDatabaseRequest],
 ) (*connect.Response[emptypb.Empty], error) {
-	_, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	_, err := s.createGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		s.logger.Error("Failed to create group database", "group_id", req.Msg.GroupId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to create group database: %w", err))
@@ -31,7 +31,7 @@ func (s *DatabaseService) CreateReport(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbCreateReportRequest],
 ) (*connect.Response[snitchv1.DbCreateReportResponse], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}
@@ -70,7 +70,7 @@ func (s *DatabaseService) GetReport(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbGetReportRequest],
 ) (*connect.Response[snitchv1.DbGetReportResponse], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}
@@ -108,7 +108,7 @@ func (s *DatabaseService) ListReports(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbListReportsRequest],
 ) (*connect.Response[snitchv1.DbListReportsResponse], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}
@@ -184,7 +184,7 @@ func (s *DatabaseService) DeleteReport(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbDeleteReportRequest],
 ) (*connect.Response[emptypb.Empty], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}

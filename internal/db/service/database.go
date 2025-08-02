@@ -3,14 +3,25 @@ package service
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	_ "github.com/tursodatabase/go-libsql"
 )
+
+//go:embed ../schemas/metadata.sql
+var metadataSchema string
+
+//go:embed ../schemas/group_tables.sql
+var groupTablesSchema string
+
+//go:embed ../schemas/group_indexes.sql
+var groupIndexesSchema string
 
 type DatabaseService struct {
 	metadataDB   *sql.DB
@@ -80,21 +91,13 @@ func (s *DatabaseService) Close() error {
 }
 
 func createMetadataTables(ctx context.Context, db *sql.DB) error {
-	queries := []string{
-		`CREATE TABLE IF NOT EXISTS groups (
-			group_id TEXT PRIMARY KEY,
-			group_name TEXT NOT NULL
-		) STRICT`,
-		`CREATE TABLE IF NOT EXISTS servers (
-			server_id TEXT NOT NULL,
-			output_channel INTEGER NOT NULL,
-			group_id TEXT NOT NULL REFERENCES groups(group_id),
-			permission_level INTEGER NOT NULL,
-			PRIMARY KEY (server_id, group_id)
-		) STRICT`,
-	}
-
+	queries := strings.Split(strings.TrimSpace(metadataSchema), ";")
+	
 	for _, query := range queries {
+		query = strings.TrimSpace(query)
+		if query == "" {
+			continue
+		}
 		if _, err := db.ExecContext(ctx, query); err != nil {
 			return fmt.Errorf("failed to execute query %q: %w", query, err)
 		}
@@ -137,18 +140,24 @@ func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) e
 	return nil
 }
 
-func (s *DatabaseService) getOrCreateGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
+// getGroupDB returns an existing group database or error if it doesn't exist
+func (s *DatabaseService) getGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
 	s.groupDBMutex.RLock()
+	defer s.groupDBMutex.RUnlock()
+	
 	if db, exists := s.groupDBs[groupID]; exists {
-		s.groupDBMutex.RUnlock()
 		return db, nil
 	}
-	s.groupDBMutex.RUnlock()
+	
+	return nil, fmt.Errorf("group database not found for group %s", groupID)
+}
 
+// createGroupDB explicitly creates a new group database
+func (s *DatabaseService) createGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
 	s.groupDBMutex.Lock()
 	defer s.groupDBMutex.Unlock()
 
-	// Double-check after acquiring write lock
+	// Check if it already exists
 	if db, exists := s.groupDBs[groupID]; exists {
 		return db, nil
 	}
@@ -183,46 +192,27 @@ func (s *DatabaseService) getOrCreateGroupDB(ctx context.Context, groupID string
 }
 
 func (s *DatabaseService) createGroupTables(ctx context.Context, db *sql.DB) error {
-	queries := []string{
-		`CREATE TABLE IF NOT EXISTS users (
-			user_id TEXT PRIMARY KEY
-		) STRICT`,
-		`CREATE TABLE IF NOT EXISTS servers (
-			server_id TEXT PRIMARY KEY
-		) STRICT`,
-		`CREATE TABLE IF NOT EXISTS reports (
-			report_id INTEGER PRIMARY KEY,
-			report_text TEXT NOT NULL CHECK(length(report_text) <= 2000 AND length(report_text) > 0),
-			reporter_id TEXT NOT NULL REFERENCES users(user_id),
-			reported_user_id TEXT NOT NULL REFERENCES users(user_id),
-			origin_server_id TEXT NOT NULL REFERENCES servers(server_id),
-			created_at TEXT DEFAULT CURRENT_TIMESTAMP
-		) STRICT`,
-		`CREATE TABLE IF NOT EXISTS user_history (
-			history_id INTEGER PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			server_id TEXT NOT NULL,
-			action TEXT NOT NULL CHECK(length(action) <= 100),
-			reason TEXT CHECK(reason IS NULL OR length(reason) <= 1000),
-			evidence_url TEXT CHECK(evidence_url IS NULL OR length(evidence_url) <= 500),
-			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (user_id) REFERENCES users(user_id),
-			FOREIGN KEY (server_id) REFERENCES servers(server_id)
-		) STRICT`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_reporter_id ON reports(reporter_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_reported_user_id ON reports(reported_user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports(created_at)`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_origin_server_id ON reports(origin_server_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_user_history_user_id ON user_history(user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_user_history_server_id ON user_history(server_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_user_history_created_at ON user_history(created_at)`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_user_date ON reports(reported_user_id, created_at)`,
-		`CREATE INDEX IF NOT EXISTS idx_reports_server_date ON reports(origin_server_id, created_at)`,
-	}
-
-	for _, query := range queries {
+	// Execute table creation statements
+	tableQueries := strings.Split(strings.TrimSpace(groupTablesSchema), ";")
+	for _, query := range tableQueries {
+		query = strings.TrimSpace(query)
+		if query == "" {
+			continue
+		}
 		if _, err := db.ExecContext(ctx, query); err != nil {
-			return fmt.Errorf("failed to execute query %q: %w", query, err)
+			return fmt.Errorf("failed to execute table query %q: %w", query, err)
+		}
+	}
+	
+	// Execute index creation statements
+	indexQueries := strings.Split(strings.TrimSpace(groupIndexesSchema), ";")
+	for _, query := range indexQueries {
+		query = strings.TrimSpace(query)
+		if query == "" {
+			continue
+		}
+		if _, err := db.ExecContext(ctx, query); err != nil {
+			return fmt.Errorf("failed to execute index query %q: %w", query, err)
 		}
 	}
 

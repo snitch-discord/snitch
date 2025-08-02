@@ -109,7 +109,7 @@ func (s *ReportServer) ListReports(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	// Convert from database format to API format (temporarily using old request format)
+	// Convert from database format to API format
 	var reports []*snitchv1.CreateReportRequest
 	for _, dbReport := range dbReports {
 		reports = append(reports, &snitchv1.CreateReportRequest{

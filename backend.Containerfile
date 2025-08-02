@@ -17,13 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -gcflags="-l=4" \
     -o /bin/backend ./cmd/backend
 
-# Create localdb directory for runtime
-RUN mkdir -p /localdb && chmod 777 /localdb
-
 FROM gcr.io/distroless/static-debian12
 
-
 COPY --from=build /bin/backend /bin/backend
-COPY --from=build /localdb /localdb
 
 CMD ["/bin/backend"]

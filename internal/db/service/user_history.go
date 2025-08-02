@@ -16,7 +16,7 @@ func (s *DatabaseService) CreateUserHistory(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbCreateUserHistoryRequest],
 ) (*connect.Response[snitchv1.DbCreateUserHistoryResponse], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}
@@ -63,7 +63,7 @@ func (s *DatabaseService) GetUserHistory(
 	ctx context.Context,
 	req *connect.Request[snitchv1.DbGetUserHistoryRequest],
 ) (*connect.Response[snitchv1.DbGetUserHistoryResponse], error) {
-	db, err := s.getOrCreateGroupDB(ctx, req.Msg.GroupId)
+	db, err := s.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
 	}
