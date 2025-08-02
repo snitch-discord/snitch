@@ -117,6 +117,21 @@ go test ./internal/backend/service
 - **Embedded migrations** compiled into binary using Go embed
 - **Tenant discovery** - automatically finds and migrates all existing tenant databases
 
+### Container Images
+
+**Service-specific base image choices:**
+
+- **Database Service**: `gcr.io/distroless/cc-debian12`
+  - Requires CGO and GCC runtime libraries for libSQL/SQLite
+  - Includes glibc + libgcc_s.so.1 + libstdc++.so.6
+  
+- **Backend/Bot Services**: `gcr.io/distroless/static-debian12`  
+  - Pure Go with static linking (`CGO_ENABLED=0`)
+  - No runtime dependencies needed
+  - Size: ~2MB (maximum security)
+
+**Security benefit**: Distroless images contain no shell, package manager, or unnecessary utilities, significantly reducing attack surface.
+
 ### Configuration
 
 Required environment variables:

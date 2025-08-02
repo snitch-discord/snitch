@@ -38,18 +38,18 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -gcflags="-l=4" \
     -o db-service ./cmd/db
 
-FROM debian:bookworm-slim
+# Create data directory for distroless copying
+RUN mkdir -p /app/data
 
-# Install ca-certificates for HTTPS requests
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/cc-debian12
 
 WORKDIR /app
 
 # Copy the built binary (migrations are embedded in the binary via Go embed)
 COPY --from=builder /app/db-service .
 
-# Create data directory
-RUN mkdir -p /app/data
+# Create data directory (distroless doesn't have mkdir, so we copy from builder)
+COPY --from=builder /app/data /app/data
 
 # Expose port
 EXPOSE 5200
