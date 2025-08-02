@@ -2,18 +2,24 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"snitch/internal/db/migrations"
 	"snitch/internal/db/sqlcgen/groupdb"
 	"snitch/internal/db/sqlcgen/metadata"
+	"snitch/pkg/proto/gen/snitch/v1"
 
+	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"github.com/pressly/goose/v3"
 	_ "github.com/tursodatabase/go-libsql"
 )
@@ -271,4 +277,162 @@ func (s *DatabaseService) RunMigrationsOnAllTenants(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+
+
+
+
+// Backup file creation methods
+
+func (s *DatabaseService) CreateBackupFiles(ctx context.Context, req *connect.Request[snitchv1.CreateBackupFilesRequest]) (*connect.Response[snitchv1.CreateBackupFilesResponse], error) {
+	tempDir := req.Msg.TempDir
+	timestamp := time.Now().UTC().Format("2006-01-02-15-04")
+	
+	s.logger.Info("Creating backup files", "temp_dir", tempDir, "timestamp", timestamp)
+	
+	// Ensure the temp directory exists (it should be mounted as a shared volume)
+	if err := os.MkdirAll(tempDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	
+	var backupFiles []*snitchv1.BackupFile
+	
+	// Backup metadata database
+	metadataFile := fmt.Sprintf("metadata_%s.db", timestamp)
+	metadataPath := filepath.Join(tempDir, metadataFile)
+	
+	err := s.createDatabaseBackup(ctx, s.metadataDB, metadataPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to backup metadata database: %w", err)
+	}
+	
+	fileInfo, err := os.Stat(metadataPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to stat metadata backup: %w", err)
+	}
+	
+	checksum, err := s.calculateFileChecksum(metadataPath)
+	if err != nil {
+		s.logger.Warn("Failed to calculate checksum for metadata", "error", err)
+	}
+	
+	backupFiles = append(backupFiles, &snitchv1.BackupFile{
+		DatabaseName: "metadata",
+		FilePath:     metadataPath,
+		FileSize:     fileInfo.Size(),
+		Checksum:     checksum,
+	})
+	
+	s.logger.Info("Created metadata backup", "path", metadataPath, "size_mb", fileInfo.Size()/(1024*1024))
+	
+	// Backup all group databases
+	s.groupDBMutex.RLock()
+	for groupID, groupDB := range s.groupDBs {
+		groupFile := fmt.Sprintf("group_%s_%s.db", groupID, timestamp)
+		groupPath := filepath.Join(tempDir, groupFile)
+		
+		err := s.createDatabaseBackup(ctx, groupDB, groupPath)
+		if err != nil {
+			s.logger.Error("Failed to backup group database", "group_id", groupID, "error", err)
+			continue
+		}
+		
+		fileInfo, err := os.Stat(groupPath)
+		if err != nil {
+			s.logger.Error("Failed to stat group backup", "group_id", groupID, "error", err)
+			continue
+		}
+		
+		checksum, err := s.calculateFileChecksum(groupPath)
+		if err != nil {
+			s.logger.Warn("Failed to calculate checksum for group", "group_id", groupID, "error", err)
+		}
+		
+		backupFiles = append(backupFiles, &snitchv1.BackupFile{
+			DatabaseName: fmt.Sprintf("group_%s", groupID),
+			FilePath:     groupPath,
+			FileSize:     fileInfo.Size(),
+			Checksum:     checksum,
+		})
+		
+		s.logger.Info("Created group backup", "group_id", groupID, "path", groupPath, "size_mb", fileInfo.Size()/(1024*1024))
+	}
+	s.groupDBMutex.RUnlock()
+	
+	s.logger.Info("All backup files created", "count", len(backupFiles))
+	
+	return connect.NewResponse(&snitchv1.CreateBackupFilesResponse{
+		Files: backupFiles,
+	}), nil
+}
+
+func (s *DatabaseService) CleanupBackupFiles(ctx context.Context, req *connect.Request[snitchv1.CleanupBackupFilesRequest]) (*connect.Response[emptypb.Empty], error) {
+	filePaths := req.Msg.FilePaths
+	
+	s.logger.Info("Cleaning up backup files", "count", len(filePaths))
+	
+	for _, filePath := range filePaths {
+		if err := os.Remove(filePath); err != nil {
+			s.logger.Warn("Failed to remove backup file", "path", filePath, "error", err)
+		} else {
+			s.logger.Debug("Removed backup file", "path", filePath)
+		}
+	}
+	
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (s *DatabaseService) createDatabaseBackup(ctx context.Context, db *sql.DB, backupPath string) error {
+	// Check source database size first
+	var pageCount, pageSize int
+	err := db.QueryRowContext(ctx, "PRAGMA page_count").Scan(&pageCount)
+	if err != nil {
+		s.logger.Warn("Failed to get page count", "error", err)
+	}
+	err = db.QueryRowContext(ctx, "PRAGMA page_size").Scan(&pageSize)
+	if err != nil {
+		s.logger.Warn("Failed to get page size", "error", err)
+	}
+	
+	sourceSize := int64(pageCount * pageSize)
+	s.logger.Info("Source database info", 
+		"backup_path", backupPath,
+		"page_count", pageCount, 
+		"page_size", pageSize, 
+		"estimated_size_bytes", sourceSize)
+	
+	// Use VACUUM INTO for atomic backup
+	s.logger.Info("Starting VACUUM INTO", "target_path", backupPath)
+	_, err = db.ExecContext(ctx, "VACUUM INTO ?", backupPath)
+	if err != nil {
+		return fmt.Errorf("VACUUM INTO failed: %w", err)
+	}
+	
+	// Check if backup file was created and has expected size
+	if stat, err := os.Stat(backupPath); err == nil {
+		s.logger.Info("Backup file created", 
+			"path", backupPath, 
+			"actual_size_bytes", stat.Size(),
+			"expected_size_bytes", sourceSize)
+	} else {
+		s.logger.Error("Backup file not found after VACUUM INTO", "path", backupPath, "error", err)
+	}
+	
+	return nil
+}
+
+func (s *DatabaseService) calculateFileChecksum(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+import "google/protobuf/empty.proto";
+
+// Backup service for orchestrating database backups to S3-compatible storage
+
+message TriggerBackupRequest {
+  // Empty - triggers backup of all databases
+}
+
+message TriggerBackupResponse {
+  string backup_timestamp = 1;
+  int32 files_backed_up = 2;
+  repeated string database_names = 3;
+}
+
+service BackupService {
+  rpc TriggerBackup(TriggerBackupRequest) returns (TriggerBackupResponse) {}
+}

@@ -120,6 +120,27 @@ message ListServersResponse {
   repeated ServerEntry servers = 1;
 }
 
+// Backup file operations
+message CreateBackupFilesRequest {
+  string temp_dir = 1;
+}
+
+message BackupFile {
+  string database_name = 1;
+  string file_path = 2;
+  int64 file_size = 3;
+  string checksum = 4;
+}
+
+message CreateBackupFilesResponse {
+  repeated BackupFile files = 1;
+}
+
+message CleanupBackupFilesRequest {
+  repeated string file_paths = 1;
+}
+
+
 service DatabaseService {
   // Metadata operations
   rpc CreateGroup(CreateGroupRequest) returns (google.protobuf.Empty) {}
@@ -141,4 +162,8 @@ service DatabaseService {
   
   // Server operations
   rpc ListServers(ListServersRequest) returns (ListServersResponse) {}
+  
+  // Backup file operations
+  rpc CreateBackupFiles(CreateBackupFilesRequest) returns (CreateBackupFilesResponse) {}
+  rpc CleanupBackupFiles(CleanupBackupFilesRequest) returns (google.protobuf.Empty) {}
 }

@@ -20,6 +20,7 @@ services:
       - 5200:5200
     volumes:
       - ./data:/app/data
+      - backup-temp:/tmp/snitch-backups
 
   snitch-backend:
     build:
@@ -40,11 +41,47 @@ services:
     image: snitch-backend
     depends_on:
       - snitch-db
+      - snitch-backup
     environment:
       - SNITCH_DB_HOST=snitch-db
       - SNITCH_DB_PORT=5200
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE}
+      - SNITCH_BACKUP_HOST=snitch-backup
+      - SNITCH_BACKUP_PORT=5300
     ports:
       - 4200:4200
+
+  snitch-backup:
+    build:
+      dockerfile: backup.Containerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: go.mod
+        - action: rebuild
+          path: pkg
+        - action: rebuild
+          path: cmd/backup
+        - action: rebuild
+          path: internal/backup
+        - action: rebuild
+          path: internal/shared
+    restart: unless-stopped
+    image: snitch-backup
+    depends_on:
+      - snitch-db
+    environment:
+      - SNITCH_DB_HOST=snitch-db
+      - SNITCH_DB_PORT=5200
+      - BACKUP_BUCKET_ENDPOINT=${BACKUP_BUCKET_ENDPOINT}
+      - BACKUP_BUCKET_NAME=${BACKUP_BUCKET_NAME}
+      - BACKUP_BUCKET_ACCESS_KEY=${BACKUP_BUCKET_ACCESS_KEY}
+      - BACKUP_BUCKET_SECRET_KEY=${BACKUP_BUCKET_SECRET_KEY}
+      - BACKUP_BUCKET_REGION=${BACKUP_BUCKET_REGION:-auto}
+    ports:
+      - 5300:5300
+    volumes:
+      - backup-temp:/tmp/snitch-backups
 
   snitch-bot:
     build:
@@ -69,4 +106,7 @@ services:
       - SNITCH_DISCORD_TOKEN=${SNITCH_DISCORD_TOKEN}
       - SNITCH_BACKEND_HOST=snitch-backend
       - SNITCH_BACKEND_PORT=4200
+
+volumes:
+  backup-temp:
 

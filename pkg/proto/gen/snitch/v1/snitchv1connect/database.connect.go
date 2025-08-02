@@ -67,6 +67,12 @@ const (
 	// DatabaseServiceListServersProcedure is the fully-qualified name of the DatabaseService's
 	// ListServers RPC.
 	DatabaseServiceListServersProcedure = "/snitch.v1.DatabaseService/ListServers"
+	// DatabaseServiceCreateBackupFilesProcedure is the fully-qualified name of the DatabaseService's
+	// CreateBackupFiles RPC.
+	DatabaseServiceCreateBackupFilesProcedure = "/snitch.v1.DatabaseService/CreateBackupFiles"
+	// DatabaseServiceCleanupBackupFilesProcedure is the fully-qualified name of the DatabaseService's
+	// CleanupBackupFiles RPC.
+	DatabaseServiceCleanupBackupFilesProcedure = "/snitch.v1.DatabaseService/CleanupBackupFiles"
 )
 
 // DatabaseServiceClient is a client for the snitch.v1.DatabaseService service.
@@ -87,6 +93,9 @@ type DatabaseServiceClient interface {
 	GetUserHistory(context.Context, *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error)
 	// Server operations
 	ListServers(context.Context, *connect.Request[v1.ListServersRequest]) (*connect.Response[v1.ListServersResponse], error)
+	// Backup file operations
+	CreateBackupFiles(context.Context, *connect.Request[v1.CreateBackupFilesRequest]) (*connect.Response[v1.CreateBackupFilesResponse], error)
+	CleanupBackupFiles(context.Context, *connect.Request[v1.CleanupBackupFilesRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDatabaseServiceClient constructs a client for the snitch.v1.DatabaseService service. By
@@ -166,6 +175,18 @@ func NewDatabaseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(databaseServiceMethods.ByName("ListServers")),
 			connect.WithClientOptions(opts...),
 		),
+		createBackupFiles: connect.NewClient[v1.CreateBackupFilesRequest, v1.CreateBackupFilesResponse](
+			httpClient,
+			baseURL+DatabaseServiceCreateBackupFilesProcedure,
+			connect.WithSchema(databaseServiceMethods.ByName("CreateBackupFiles")),
+			connect.WithClientOptions(opts...),
+		),
+		cleanupBackupFiles: connect.NewClient[v1.CleanupBackupFilesRequest, emptypb.Empty](
+			httpClient,
+			baseURL+DatabaseServiceCleanupBackupFilesProcedure,
+			connect.WithSchema(databaseServiceMethods.ByName("CleanupBackupFiles")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -182,6 +203,8 @@ type databaseServiceClient struct {
 	createUserHistory   *connect.Client[v1.DbCreateUserHistoryRequest, v1.DbCreateUserHistoryResponse]
 	getUserHistory      *connect.Client[v1.DbGetUserHistoryRequest, v1.DbGetUserHistoryResponse]
 	listServers         *connect.Client[v1.ListServersRequest, v1.ListServersResponse]
+	createBackupFiles   *connect.Client[v1.CreateBackupFilesRequest, v1.CreateBackupFilesResponse]
+	cleanupBackupFiles  *connect.Client[v1.CleanupBackupFilesRequest, emptypb.Empty]
 }
 
 // CreateGroup calls snitch.v1.DatabaseService.CreateGroup.
@@ -239,6 +262,16 @@ func (c *databaseServiceClient) ListServers(ctx context.Context, req *connect.Re
 	return c.listServers.CallUnary(ctx, req)
 }
 
+// CreateBackupFiles calls snitch.v1.DatabaseService.CreateBackupFiles.
+func (c *databaseServiceClient) CreateBackupFiles(ctx context.Context, req *connect.Request[v1.CreateBackupFilesRequest]) (*connect.Response[v1.CreateBackupFilesResponse], error) {
+	return c.createBackupFiles.CallUnary(ctx, req)
+}
+
+// CleanupBackupFiles calls snitch.v1.DatabaseService.CleanupBackupFiles.
+func (c *databaseServiceClient) CleanupBackupFiles(ctx context.Context, req *connect.Request[v1.CleanupBackupFilesRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.cleanupBackupFiles.CallUnary(ctx, req)
+}
+
 // DatabaseServiceHandler is an implementation of the snitch.v1.DatabaseService service.
 type DatabaseServiceHandler interface {
 	// Metadata operations
@@ -257,6 +290,9 @@ type DatabaseServiceHandler interface {
 	GetUserHistory(context.Context, *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error)
 	// Server operations
 	ListServers(context.Context, *connect.Request[v1.ListServersRequest]) (*connect.Response[v1.ListServersResponse], error)
+	// Backup file operations
+	CreateBackupFiles(context.Context, *connect.Request[v1.CreateBackupFilesRequest]) (*connect.Response[v1.CreateBackupFilesResponse], error)
+	CleanupBackupFiles(context.Context, *connect.Request[v1.CleanupBackupFilesRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDatabaseServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -332,6 +368,18 @@ func NewDatabaseServiceHandler(svc DatabaseServiceHandler, opts ...connect.Handl
 		connect.WithSchema(databaseServiceMethods.ByName("ListServers")),
 		connect.WithHandlerOptions(opts...),
 	)
+	databaseServiceCreateBackupFilesHandler := connect.NewUnaryHandler(
+		DatabaseServiceCreateBackupFilesProcedure,
+		svc.CreateBackupFiles,
+		connect.WithSchema(databaseServiceMethods.ByName("CreateBackupFiles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	databaseServiceCleanupBackupFilesHandler := connect.NewUnaryHandler(
+		DatabaseServiceCleanupBackupFilesProcedure,
+		svc.CleanupBackupFiles,
+		connect.WithSchema(databaseServiceMethods.ByName("CleanupBackupFiles")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/snitch.v1.DatabaseService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DatabaseServiceCreateGroupProcedure:
@@ -356,6 +404,10 @@ func NewDatabaseServiceHandler(svc DatabaseServiceHandler, opts ...connect.Handl
 			databaseServiceGetUserHistoryHandler.ServeHTTP(w, r)
 		case DatabaseServiceListServersProcedure:
 			databaseServiceListServersHandler.ServeHTTP(w, r)
+		case DatabaseServiceCreateBackupFilesProcedure:
+			databaseServiceCreateBackupFilesHandler.ServeHTTP(w, r)
+		case DatabaseServiceCleanupBackupFilesProcedure:
+			databaseServiceCleanupBackupFilesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -407,4 +459,12 @@ func (UnimplementedDatabaseServiceHandler) GetUserHistory(context.Context, *conn
 
 func (UnimplementedDatabaseServiceHandler) ListServers(context.Context, *connect.Request[v1.ListServersRequest]) (*connect.Response[v1.ListServersResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.ListServers is not implemented"))
+}
+
+func (UnimplementedDatabaseServiceHandler) CreateBackupFiles(context.Context, *connect.Request[v1.CreateBackupFilesRequest]) (*connect.Response[v1.CreateBackupFilesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CreateBackupFiles is not implemented"))
+}
+
+func (UnimplementedDatabaseServiceHandler) CleanupBackupFiles(context.Context, *connect.Request[v1.CleanupBackupFilesRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CleanupBackupFiles is not implemented"))
 }

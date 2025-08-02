@@ -1168,6 +1168,207 @@ func (x *ListServersResponse) GetServers() []*ServerEntry {
 	return nil
 }
 
+// Backup file operations
+type CreateBackupFilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TempDir       string                 `protobuf:"bytes,1,opt,name=temp_dir,json=tempDir,proto3" json:"temp_dir,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupFilesRequest) Reset() {
+	*x = CreateBackupFilesRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupFilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupFilesRequest) ProtoMessage() {}
+
+func (x *CreateBackupFilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupFilesRequest.ProtoReflect.Descriptor instead.
+func (*CreateBackupFilesRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *CreateBackupFilesRequest) GetTempDir() string {
+	if x != nil {
+		return x.TempDir
+	}
+	return ""
+}
+
+type BackupFile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseName  string                 `protobuf:"bytes,1,opt,name=database_name,json=databaseName,proto3" json:"database_name,omitempty"`
+	FilePath      string                 `protobuf:"bytes,2,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	FileSize      int64                  `protobuf:"varint,3,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
+	Checksum      string                 `protobuf:"bytes,4,opt,name=checksum,proto3" json:"checksum,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BackupFile) Reset() {
+	*x = BackupFile{}
+	mi := &file_snitch_v1_database_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackupFile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackupFile) ProtoMessage() {}
+
+func (x *BackupFile) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackupFile.ProtoReflect.Descriptor instead.
+func (*BackupFile) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *BackupFile) GetDatabaseName() string {
+	if x != nil {
+		return x.DatabaseName
+	}
+	return ""
+}
+
+func (x *BackupFile) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
+}
+
+func (x *BackupFile) GetFileSize() int64 {
+	if x != nil {
+		return x.FileSize
+	}
+	return 0
+}
+
+func (x *BackupFile) GetChecksum() string {
+	if x != nil {
+		return x.Checksum
+	}
+	return ""
+}
+
+type CreateBackupFilesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Files         []*BackupFile          `protobuf:"bytes,1,rep,name=files,proto3" json:"files,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupFilesResponse) Reset() {
+	*x = CreateBackupFilesResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupFilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupFilesResponse) ProtoMessage() {}
+
+func (x *CreateBackupFilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupFilesResponse.ProtoReflect.Descriptor instead.
+func (*CreateBackupFilesResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *CreateBackupFilesResponse) GetFiles() []*BackupFile {
+	if x != nil {
+		return x.Files
+	}
+	return nil
+}
+
+type CleanupBackupFilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FilePaths     []string               `protobuf:"bytes,1,rep,name=file_paths,json=filePaths,proto3" json:"file_paths,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CleanupBackupFilesRequest) Reset() {
+	*x = CleanupBackupFilesRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CleanupBackupFilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CleanupBackupFilesRequest) ProtoMessage() {}
+
+func (x *CleanupBackupFilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CleanupBackupFilesRequest.ProtoReflect.Descriptor instead.
+func (*CleanupBackupFilesRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *CleanupBackupFilesRequest) GetFilePaths() []string {
+	if x != nil {
+		return x.FilePaths
+	}
+	return nil
+}
+
 var File_snitch_v1_database_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_database_proto_rawDesc = "" +
@@ -1263,7 +1464,20 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"G\n" +
 	"\x13ListServersResponse\x120\n" +
-	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers2\xbd\a\n" +
+	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers\"5\n" +
+	"\x18CreateBackupFilesRequest\x12\x19\n" +
+	"\btemp_dir\x18\x01 \x01(\tR\atempDir\"\x87\x01\n" +
+	"\n" +
+	"BackupFile\x12#\n" +
+	"\rdatabase_name\x18\x01 \x01(\tR\fdatabaseName\x12\x1b\n" +
+	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x1b\n" +
+	"\tfile_size\x18\x03 \x01(\x03R\bfileSize\x12\x1a\n" +
+	"\bchecksum\x18\x04 \x01(\tR\bchecksum\"H\n" +
+	"\x19CreateBackupFilesResponse\x12+\n" +
+	"\x05files\x18\x01 \x03(\v2\x15.snitch.v1.BackupFileR\x05files\":\n" +
+	"\x19CleanupBackupFilesRequest\x12\x1d\n" +
+	"\n" +
+	"file_paths\x18\x01 \x03(\tR\tfilePaths2\xf5\b\n" +
 	"\x0fDatabaseService\x12F\n" +
 	"\vCreateGroup\x12\x1d.snitch.v1.CreateGroupRequest\x1a\x16.google.protobuf.Empty\"\x00\x12`\n" +
 	"\x11FindGroupByServer\x12#.snitch.v1.FindGroupByServerRequest\x1a$.snitch.v1.FindGroupByServerResponse\"\x00\x12P\n" +
@@ -1275,7 +1489,9 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\fDeleteReport\x12 .snitch.v1.DbDeleteReportRequest\x1a\x16.google.protobuf.Empty\"\x00\x12d\n" +
 	"\x11CreateUserHistory\x12%.snitch.v1.DbCreateUserHistoryRequest\x1a&.snitch.v1.DbCreateUserHistoryResponse\"\x00\x12[\n" +
 	"\x0eGetUserHistory\x12\".snitch.v1.DbGetUserHistoryRequest\x1a#.snitch.v1.DbGetUserHistoryResponse\"\x00\x12N\n" +
-	"\vListServers\x12\x1d.snitch.v1.ListServersRequest\x1a\x1e.snitch.v1.ListServersResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
+	"\vListServers\x12\x1d.snitch.v1.ListServersRequest\x1a\x1e.snitch.v1.ListServersResponse\"\x00\x12`\n" +
+	"\x11CreateBackupFiles\x12#.snitch.v1.CreateBackupFilesRequest\x1a$.snitch.v1.CreateBackupFilesResponse\"\x00\x12T\n" +
+	"\x12CleanupBackupFiles\x12$.snitch.v1.CleanupBackupFilesRequest\x1a\x16.google.protobuf.Empty\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
 	file_snitch_v1_database_proto_rawDescOnce sync.Once
@@ -1289,7 +1505,7 @@ func file_snitch_v1_database_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_database_proto_rawDescData
 }
 
-var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_snitch_v1_database_proto_goTypes = []any{
 	(*CreateGroupRequest)(nil),          // 0: snitch.v1.CreateGroupRequest
 	(*FindGroupByServerRequest)(nil),    // 1: snitch.v1.FindGroupByServerRequest
@@ -1311,39 +1527,48 @@ var file_snitch_v1_database_proto_goTypes = []any{
 	(*ListServersRequest)(nil),          // 17: snitch.v1.ListServersRequest
 	(*ServerEntry)(nil),                 // 18: snitch.v1.ServerEntry
 	(*ListServersResponse)(nil),         // 19: snitch.v1.ListServersResponse
-	(*emptypb.Empty)(nil),               // 20: google.protobuf.Empty
+	(*CreateBackupFilesRequest)(nil),    // 20: snitch.v1.CreateBackupFilesRequest
+	(*BackupFile)(nil),                  // 21: snitch.v1.BackupFile
+	(*CreateBackupFilesResponse)(nil),   // 22: snitch.v1.CreateBackupFilesResponse
+	(*CleanupBackupFilesRequest)(nil),   // 23: snitch.v1.CleanupBackupFilesRequest
+	(*emptypb.Empty)(nil),               // 24: google.protobuf.Empty
 }
 var file_snitch_v1_database_proto_depIdxs = []int32{
 	8,  // 0: snitch.v1.DbListReportsResponse.reports:type_name -> snitch.v1.DbGetReportResponse
 	15, // 1: snitch.v1.DbGetUserHistoryResponse.entries:type_name -> snitch.v1.DbUserHistoryEntry
 	18, // 2: snitch.v1.ListServersResponse.servers:type_name -> snitch.v1.ServerEntry
-	0,  // 3: snitch.v1.DatabaseService.CreateGroup:input_type -> snitch.v1.CreateGroupRequest
-	1,  // 4: snitch.v1.DatabaseService.FindGroupByServer:input_type -> snitch.v1.FindGroupByServerRequest
-	3,  // 5: snitch.v1.DatabaseService.AddServerToGroup:input_type -> snitch.v1.AddServerToGroupRequest
-	4,  // 6: snitch.v1.DatabaseService.CreateGroupDatabase:input_type -> snitch.v1.CreateGroupDatabaseRequest
-	5,  // 7: snitch.v1.DatabaseService.CreateReport:input_type -> snitch.v1.DbCreateReportRequest
-	7,  // 8: snitch.v1.DatabaseService.GetReport:input_type -> snitch.v1.DbGetReportRequest
-	9,  // 9: snitch.v1.DatabaseService.ListReports:input_type -> snitch.v1.DbListReportsRequest
-	11, // 10: snitch.v1.DatabaseService.DeleteReport:input_type -> snitch.v1.DbDeleteReportRequest
-	12, // 11: snitch.v1.DatabaseService.CreateUserHistory:input_type -> snitch.v1.DbCreateUserHistoryRequest
-	14, // 12: snitch.v1.DatabaseService.GetUserHistory:input_type -> snitch.v1.DbGetUserHistoryRequest
-	17, // 13: snitch.v1.DatabaseService.ListServers:input_type -> snitch.v1.ListServersRequest
-	20, // 14: snitch.v1.DatabaseService.CreateGroup:output_type -> google.protobuf.Empty
-	2,  // 15: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
-	20, // 16: snitch.v1.DatabaseService.AddServerToGroup:output_type -> google.protobuf.Empty
-	20, // 17: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> google.protobuf.Empty
-	6,  // 18: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DbCreateReportResponse
-	8,  // 19: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DbGetReportResponse
-	10, // 20: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DbListReportsResponse
-	20, // 21: snitch.v1.DatabaseService.DeleteReport:output_type -> google.protobuf.Empty
-	13, // 22: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DbCreateUserHistoryResponse
-	16, // 23: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DbGetUserHistoryResponse
-	19, // 24: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
-	14, // [14:25] is the sub-list for method output_type
-	3,  // [3:14] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	21, // 3: snitch.v1.CreateBackupFilesResponse.files:type_name -> snitch.v1.BackupFile
+	0,  // 4: snitch.v1.DatabaseService.CreateGroup:input_type -> snitch.v1.CreateGroupRequest
+	1,  // 5: snitch.v1.DatabaseService.FindGroupByServer:input_type -> snitch.v1.FindGroupByServerRequest
+	3,  // 6: snitch.v1.DatabaseService.AddServerToGroup:input_type -> snitch.v1.AddServerToGroupRequest
+	4,  // 7: snitch.v1.DatabaseService.CreateGroupDatabase:input_type -> snitch.v1.CreateGroupDatabaseRequest
+	5,  // 8: snitch.v1.DatabaseService.CreateReport:input_type -> snitch.v1.DbCreateReportRequest
+	7,  // 9: snitch.v1.DatabaseService.GetReport:input_type -> snitch.v1.DbGetReportRequest
+	9,  // 10: snitch.v1.DatabaseService.ListReports:input_type -> snitch.v1.DbListReportsRequest
+	11, // 11: snitch.v1.DatabaseService.DeleteReport:input_type -> snitch.v1.DbDeleteReportRequest
+	12, // 12: snitch.v1.DatabaseService.CreateUserHistory:input_type -> snitch.v1.DbCreateUserHistoryRequest
+	14, // 13: snitch.v1.DatabaseService.GetUserHistory:input_type -> snitch.v1.DbGetUserHistoryRequest
+	17, // 14: snitch.v1.DatabaseService.ListServers:input_type -> snitch.v1.ListServersRequest
+	20, // 15: snitch.v1.DatabaseService.CreateBackupFiles:input_type -> snitch.v1.CreateBackupFilesRequest
+	23, // 16: snitch.v1.DatabaseService.CleanupBackupFiles:input_type -> snitch.v1.CleanupBackupFilesRequest
+	24, // 17: snitch.v1.DatabaseService.CreateGroup:output_type -> google.protobuf.Empty
+	2,  // 18: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
+	24, // 19: snitch.v1.DatabaseService.AddServerToGroup:output_type -> google.protobuf.Empty
+	24, // 20: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> google.protobuf.Empty
+	6,  // 21: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DbCreateReportResponse
+	8,  // 22: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DbGetReportResponse
+	10, // 23: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DbListReportsResponse
+	24, // 24: snitch.v1.DatabaseService.DeleteReport:output_type -> google.protobuf.Empty
+	13, // 25: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DbCreateUserHistoryResponse
+	16, // 26: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DbGetUserHistoryResponse
+	19, // 27: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
+	22, // 28: snitch.v1.DatabaseService.CreateBackupFiles:output_type -> snitch.v1.CreateBackupFilesResponse
+	24, // 29: snitch.v1.DatabaseService.CleanupBackupFiles:output_type -> google.protobuf.Empty
+	17, // [17:30] is the sub-list for method output_type
+	4,  // [4:17] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_snitch_v1_database_proto_init() }
@@ -1363,7 +1588,7 @@ func file_snitch_v1_database_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_database_proto_rawDesc), len(file_snitch_v1_database_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
