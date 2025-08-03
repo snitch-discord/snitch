@@ -8,3 +8,6 @@ SELECT group_id FROM servers WHERE server_id = ?;
 
 -- name: AddServerToGroup :exec
 INSERT INTO servers (server_id, output_channel, group_id, permission_level) VALUES (?, ?, ?, ?);
+
+-- name: ListServers :many
+SELECT server_id, group_id FROM servers WHERE group_id = ?;

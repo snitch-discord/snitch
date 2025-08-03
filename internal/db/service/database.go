@@ -13,8 +13,11 @@ import (
 	"snitch/internal/db/migrations"
 	"snitch/internal/db/sqlcgen/groupdb"
 	"snitch/internal/db/sqlcgen/metadata"
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
+	"connectrpc.com/connect"
 	"github.com/pressly/goose/v3"
+	"google.golang.org/protobuf/types/known/emptypb"
 	_ "github.com/tursodatabase/go-libsql"
 )
 
@@ -33,6 +36,12 @@ type DatabaseService struct {
 	groupDBMutex   sync.RWMutex
 	dbDir          string
 	logger         *slog.Logger
+
+	// Repository pattern
+	GroupRepository  *GroupRepository
+	ReportRepository *ReportRepository
+	UserRepository   *UserRepository
+	ServerRepository *ServerRepository
 }
 
 func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) (*DatabaseService, error) {
@@ -72,6 +81,12 @@ func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) 
 		dbDir:           dbDir,
 		logger:          logger,
 	}
+
+	// Initialize repositories
+	service.GroupRepository = NewGroupRepository(service)
+	service.ReportRepository = NewReportRepository(service)
+	service.UserRepository = NewUserRepository(service)
+	service.ServerRepository = NewServerRepository(service)
 
 	return service, nil
 }
@@ -271,4 +286,54 @@ func (s *DatabaseService) RunMigrationsOnAllTenants(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// Delegation methods for gRPC endpoints - forward to appropriate repositories
+
+// Group operations
+func (s *DatabaseService) CreateGroupDatabase(ctx context.Context, req *connect.Request[snitchv1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error) {
+	return s.GroupRepository.CreateGroupDatabase(ctx, req)
+}
+
+// Report operations
+func (s *DatabaseService) CreateReport(ctx context.Context, req *connect.Request[snitchv1.DbCreateReportRequest]) (*connect.Response[snitchv1.DbCreateReportResponse], error) {
+	return s.ReportRepository.CreateReport(ctx, req)
+}
+
+func (s *DatabaseService) GetReport(ctx context.Context, req *connect.Request[snitchv1.DbGetReportRequest]) (*connect.Response[snitchv1.DbGetReportResponse], error) {
+	return s.ReportRepository.GetReport(ctx, req)
+}
+
+func (s *DatabaseService) ListReports(ctx context.Context, req *connect.Request[snitchv1.DbListReportsRequest]) (*connect.Response[snitchv1.DbListReportsResponse], error) {
+	return s.ReportRepository.ListReports(ctx, req)
+}
+
+func (s *DatabaseService) DeleteReport(ctx context.Context, req *connect.Request[snitchv1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error) {
+	return s.ReportRepository.DeleteReport(ctx, req)
+}
+
+// User operations
+func (s *DatabaseService) CreateUserHistory(ctx context.Context, req *connect.Request[snitchv1.DbCreateUserHistoryRequest]) (*connect.Response[snitchv1.DbCreateUserHistoryResponse], error) {
+	return s.UserRepository.CreateUserHistory(ctx, req)
+}
+
+func (s *DatabaseService) GetUserHistory(ctx context.Context, req *connect.Request[snitchv1.DbGetUserHistoryRequest]) (*connect.Response[snitchv1.DbGetUserHistoryResponse], error) {
+	return s.UserRepository.GetUserHistory(ctx, req)
+}
+
+// Server and metadata operations
+func (s *DatabaseService) CreateGroup(ctx context.Context, req *connect.Request[snitchv1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+	return s.ServerRepository.CreateGroup(ctx, req)
+}
+
+func (s *DatabaseService) FindGroupByServer(ctx context.Context, req *connect.Request[snitchv1.FindGroupByServerRequest]) (*connect.Response[snitchv1.FindGroupByServerResponse], error) {
+	return s.ServerRepository.FindGroupByServer(ctx, req)
+}
+
+func (s *DatabaseService) AddServerToGroup(ctx context.Context, req *connect.Request[snitchv1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+	return s.ServerRepository.AddServerToGroup(ctx, req)
+}
+
+func (s *DatabaseService) ListServers(ctx context.Context, req *connect.Request[snitchv1.ListServersRequest]) (*connect.Response[snitchv1.ListServersResponse], error) {
+	return s.ServerRepository.ListServers(ctx, req)
 }

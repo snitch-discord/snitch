@@ -13,6 +13,7 @@ type Querier interface {
 	// Metadata database queries (groups and servers)
 	CreateGroup(ctx context.Context, arg CreateGroupParams) error
 	FindGroupByServer(ctx context.Context, serverID string) (string, error)
+	ListServers(ctx context.Context, groupID string) ([]ListServersRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -56,3 +56,35 @@ func (q *Queries) FindGroupByServer(ctx context.Context, serverID string) (strin
 	err := row.Scan(&group_id)
 	return group_id, err
 }
+
+const listServers = `-- name: ListServers :many
+SELECT server_id, group_id FROM servers WHERE group_id = ?
+`
+
+type ListServersRow struct {
+	ServerID string `json:"server_id"`
+	GroupID  string `json:"group_id"`
+}
+
+func (q *Queries) ListServers(ctx context.Context, groupID string) ([]ListServersRow, error) {
+	rows, err := q.db.QueryContext(ctx, listServers, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListServersRow{}
+	for rows.Next() {
+		var i ListServersRow
+		if err := rows.Scan(&i.ServerID, &i.GroupID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
