@@ -10,10 +10,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install sqlc
-RUN curl -L https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz | \
-    tar -xz -C /usr/local/bin sqlc && \
-    chmod +x /usr/local/bin/sqlc
 
 # Set up build environment for performance
 ENV CGO_ENABLED=1
@@ -26,9 +22,6 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 # Copy source code
 COPY . .
-
-# Generate sqlc code
-RUN sqlc generate
 
 # Build with performance optimizations and caching
 RUN --mount=type=cache,target=/root/.cache/go-build \

@@ -26,7 +26,7 @@ go build ./cmd/bot
 # Generate protocol buffers
 buf generate
 
-# Generate type-safe database queries
+# Generate type-safe database queries (run locally before committing)
 sqlc generate
 ```
 
@@ -49,7 +49,7 @@ goose -dir internal/db/migrations/tenant create -s migration_name sql
 goose -dir internal/db/migrations/metadata sqlite3 ./data/metadata.db up
 goose -dir internal/db/migrations/tenant sqlite3 ./data/group_<GROUP_ID>.db up
 
-# Generate sqlc after schema changes
+# Generate sqlc after schema changes (required before committing)
 sqlc generate
 ```
 
@@ -165,8 +165,9 @@ Required environment variables:
 
 1. Use `./run.sh` for development (simplified setup with auto-rebuild)
 2. Protocol buffer changes require `buf generate`
-3. Database schema changes are handled in the database service
-4. All services communicate via gRPC and real-time Connect streaming events
+3. Database schema changes require `sqlc generate` after migration files are updated
+4. **IMPORTANT**: Run `sqlc generate` locally before committing - CI will verify generated code is up-to-date
+5. All services communicate via gRPC and real-time Connect streaming events
 
 ## Key Patterns
 
