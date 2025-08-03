@@ -1,7 +1,9 @@
 package events
 
 import (
+	"crypto/tls"
 	"log/slog"
+	"net/http"
 	"testing"
 
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
@@ -11,12 +13,24 @@ import (
 
 const TEST_GUILD_ID = "test-guild-id"
 
+// createTestHTTPClient creates an HTTP client suitable for testing with HTTPS
+func createTestHTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, // Skip certificate verification for tests
+			},
+		},
+	}
+}
+
 func TestClient_Creation(t *testing.T) {
 	// Test that client can be created without errors
 	session := &discordgo.Session{}
 	slogger := slog.Default()
+	httpClient := createTestHTTPClient()
 
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	if client.client == nil {
 		t.Error("Connect client should not be nil")
@@ -38,7 +52,8 @@ func TestClient_Creation(t *testing.T) {
 func TestClient_RegisterHandler(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Test handler registration
 	handlerCalled := false
@@ -69,7 +84,8 @@ func TestClient_RegisterHandler(t *testing.T) {
 func TestClient_HandlerNotFound(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Test handling an event type with no registered handler
 	testEvent := &snitchv1.Event{
@@ -85,7 +101,8 @@ func TestClient_HandlerNotFound(t *testing.T) {
 func TestClient_MultipleHandlers(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Register multiple handlers
 	handler1Called := false

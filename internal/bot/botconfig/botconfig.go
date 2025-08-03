@@ -39,5 +39,5 @@ func FromEnv() (BotConfig, error) {
 }
 
 func (botConfig BotConfig) BackendURL() (*url.URL, error) {
-	return url.Parse("http://" + net.JoinHostPort(botConfig.BackendHost, botConfig.BackendPort))
+	return url.Parse("https://" + net.JoinHostPort(botConfig.BackendHost, botConfig.BackendPort))
 }

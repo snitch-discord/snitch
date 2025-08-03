@@ -20,6 +20,7 @@ services:
       - 5200:5200
     volumes:
       - ./data:/app/data
+      - ./certs:/app/certs:ro
 
   snitch-backend:
     build:
@@ -45,6 +46,8 @@ services:
       - SNITCH_DB_PORT=5200
     ports:
       - 4200:4200
+    volumes:
+      - ./certs:/app/certs:ro
 
   snitch-bot:
     build:
@@ -69,4 +72,6 @@ services:
       - SNITCH_DISCORD_TOKEN=${SNITCH_DISCORD_TOKEN}
       - SNITCH_BACKEND_HOST=snitch-backend
       - SNITCH_BACKEND_PORT=4200
+    volumes:
+      - ./certs:/app/certs:ro
 

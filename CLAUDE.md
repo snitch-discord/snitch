@@ -6,16 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Snitch is a Discord bot system for cross-server user reporting and management. It consists of three main services:
 
-- **Database Service** (port 5200): Dedicated database service using embedded libSQL
-- **Backend API Server** (port 4200): Connect RPC service with real-time WebSocket events
-- **Discord Bot**: Slash command interface with real-time event handling
+- **Database Service** (port 5200): Dedicated database service using embedded libSQL with HTTPS/TLS
+- **Backend API Server** (port 4200): Connect RPC service with real-time WebSocket events over HTTPS/TLS  
+- **Discord Bot**: Slash command interface with real-time event handling over HTTPS/TLS
+
+All services communicate over **HTTPS with HTTP/2** using **Ed25519 TLS certificates** for security.
 
 ## Development Commands
 
 ### Setup and Running
 
 ```bash
-# Start complete development environment with auto-rebuild
+# Start complete development environment with auto-rebuild and TLS
 ./run.sh
 
 # Individual service builds
@@ -28,6 +30,22 @@ buf generate
 
 # Generate type-safe database queries (run locally before committing)
 sqlc generate
+```
+
+### TLS Certificate Management
+
+```bash
+# Generate TLS certificates (automatic on first run)
+./scripts/generate-certs.sh
+
+# Verify existing certificates
+./scripts/generate-certs.sh --verify
+
+# Force regenerate all certificates
+./scripts/generate-certs.sh --force
+
+# Show certificate help
+./scripts/generate-certs.sh --help
 ```
 
 ### Database Migrations
@@ -95,10 +113,12 @@ go test ./internal/backend/service
 - Type-safe protobuf event messages
 - Cross-service communication between backend and bot
 
-#### Authentication
+#### Authentication & Security
 
-- Server ID headers for request authorization
-- Group-based multi-tenancy via separate database files
+- **TLS encryption**: All service-to-service communication encrypted with Ed25519 certificates
+- **Certificate validation**: Services validate certificates against internal CA
+- **Server ID headers**: Request authorization
+- **Group-based multi-tenancy**: Separate database files per Discord server group
 
 ### Database Technology
 
@@ -116,6 +136,49 @@ go test ./internal/backend/service
 - **Automatic migration execution** on service startup
 - **Embedded migrations** compiled into binary using Go embed
 - **Tenant discovery** - automatically finds and migrates all existing tenant databases
+
+### TLS Security Architecture
+
+#### Certificate Infrastructure
+
+- **Certificate Authority**: Self-signed Ed25519 CA for internal services
+- **Certificate Types**:
+  - CA Certificate (`certs/ca/ca-cert.pem`): 10-year validity
+  - Database Service (`certs/db/cert.pem`): 1-year validity
+  - Backend Service (`certs/backend/cert.pem`): 1-year validity  
+  - Bot Service (`certs/bot/cert.pem`): 1-year validity (client auth)
+
+#### Subject Alternative Names (SANs)
+
+Each service certificate includes:
+- Docker service name (`snitch-db`, `snitch-backend`, `snitch-bot`)
+- `localhost` (local development)
+- `127.0.0.1` (loopback IP)
+
+#### TLS Configuration
+
+- **Algorithm**: Ed25519 (modern, fast, secure elliptic curve)
+- **Protocol**: HTTPS with HTTP/2 support (`h2`, fallback to `http/1.1`)
+- **Certificate Validation**: All services validate against internal CA
+- **Performance**: HTTP/2 multiplexing, header compression, binary protocol
+
+#### Service Communication Flow
+
+```
+Bot Service (HTTPS Client)
+    ↓ TLS + Certificate Validation
+Backend Service (Port 4200, HTTPS/HTTP2)  
+    ↓ TLS + Certificate Validation
+Database Service (Port 5200, HTTPS/HTTP2)
+```
+
+#### Automated Certificate Management
+
+- **Generation**: Automatic on first `./run.sh` execution
+- **Verification**: Automatic validation on each startup
+- **Regeneration**: `./scripts/generate-certs.sh --force`
+- **Git Exclusion**: Certificates not committed to repository
+- **Security**: Private keys have 600 permissions, certificates 644
 
 ### Container Images
 
@@ -156,23 +219,27 @@ Required environment variables:
 
 ### Development Tools
 
-- `compose.yml`: Complete Docker development environment (3 services)
+- `compose.yml`: Complete Docker development environment (3 services) with TLS certificate mounts
 - `buf.yaml`: Protocol buffer configuration
 - `db.Containerfile`: Database service container
 - `/bruno/`: API testing collection
+- `/scripts/generate-certs.sh`: Automated TLS certificate generation and management
 
 ## Development Workflow
 
-1. Use `./run.sh` for development (simplified setup with auto-rebuild)
+1. Use `./run.sh` for development (simplified setup with auto-rebuild and automatic TLS certificate management)
 2. Protocol buffer changes require `buf generate`
 3. Database schema changes require `sqlc generate` after migration files are updated
 4. **IMPORTANT**: Run `sqlc generate` locally before committing - CI will verify generated code is up-to-date
-5. All services communicate via gRPC and real-time Connect streaming events
+5. All services communicate via **HTTPS with HTTP/2** and real-time Connect streaming events
+6. **TLS certificates** are automatically generated and validated - no manual intervention required
 
 ## Key Patterns
 
+- **Security-first**: All service communication encrypted with Ed25519 TLS certificates
 - **Multi-tenancy**: Each Discord server group uses separate database files
 - **Event-driven**: Real-time updates via Connect RPC streaming between services
-- **Type Safety**: Generated code for gRPC services (Buf)
-- **Service-oriented**: Dedicated database service with gRPC API
+- **Type Safety**: Generated code for gRPC services (Buf) and TLS certificate validation
+- **Service-oriented**: Dedicated database service with HTTPS/HTTP2 gRPC API
 - **Container-first**: Docker Compose development with watch mode for hot reloading
+- **Automated operations**: Certificate generation, validation, and service startup

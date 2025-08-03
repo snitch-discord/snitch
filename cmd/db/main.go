@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 
 	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 func fatal(msg string, args ...any) {
@@ -26,6 +26,8 @@ func fatal(msg string, args ...any) {
 func main() {
 	port := flag.Int("port", 5200, "port to listen on")
 	dbDir := flag.String("db-dir", "./data", "directory to store database files")
+	certFile := flag.String("cert", "./certs/db/cert.pem", "TLS certificate file")
+	keyFile := flag.String("key", "./certs/db/key.pem", "TLS private key file")
 	flag.Parse()
 
 	slogger := slog.Default()
@@ -47,19 +49,37 @@ func main() {
 		slogger.Warn("Failed to migrate some tenant databases", "error", err)
 	}
 
+	// Load TLS certificate
+	cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+	if err != nil {
+		fatal("Failed to load TLS certificate", "error", err)
+	}
+
 	// Setup gRPC handlers
 	mux := http.NewServeMux()
 	mux.Handle(snitchv1connect.NewDatabaseServiceHandler(dbService, connect.WithInterceptors()))
 
+	// Configure TLS
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"h2", "http/1.1"},
+	}
+
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),
-		Handler:           h2c.NewHandler(mux, &http2.Server{}),
+		Handler:           mux,
+		TLSConfig:         tlsConfig,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	slogger.Info("Starting database service", "port", *port, "db_dir", *dbDir)
+	// Configure HTTP/2 explicitly
+	if err := http2.ConfigureServer(server, &http2.Server{}); err != nil {
+		fatal("Failed to configure HTTP/2", "error", err)
+	}
 
-	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+	slogger.Info("Starting database service with TLS", "port", *port, "db_dir", *dbDir, "cert", *certFile)
+
+	if err := server.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		slogger.Error(err.Error())
 	}
 }

@@ -23,12 +23,14 @@ type Client struct {
 
 type EventHandler func(session *discordgo.Session, event *snitchv1.Event) error
 
-func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, guildID string) *Client {
-	httpClient := &http.Client{
-		Timeout: 0, // No timeout for streaming connections
+func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, guildID string, httpClient *http.Client) *Client {
+	// Create a copy of the client for streaming with no timeout
+	streamingClient := &http.Client{
+		Timeout:   0, // No timeout for streaming connections
+		Transport: httpClient.Transport, // Use same TLS config
 	}
 
-	client := snitchv1connect.NewEventServiceClient(httpClient, backendURL)
+	client := snitchv1connect.NewEventServiceClient(streamingClient, backendURL)
 
 	return &Client{
 		client:   client,

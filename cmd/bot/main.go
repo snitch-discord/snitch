@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"flag"
 	"log"
 	"log/slog"
 	"net/http"
@@ -21,14 +24,31 @@ import (
 
 func main() {
 	testingGuildID := "1315524176936964117"
+	caCertFile := flag.String("ca-cert", "./certs/ca/ca-cert.pem", "CA certificate file for validating backend service")
+	flag.Parse()
 
 	config, err := botconfig.FromEnv()
 	if err != nil {
 		log.Fatalf("Failed to load bot configuration from environment: %v", err)
 	}
 
+	// Load CA certificate for backend service validation
+	caCert, err := os.ReadFile(*caCertFile)
+	if err != nil {
+		log.Fatalf("Failed to read CA certificate: %v", err)
+	}
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		log.Fatalf("Failed to parse CA certificate")
+	}
+
 	httpClient := http.Client{
 		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+		},
 	}
 
 	// initialize map of command name to command handler
@@ -85,7 +105,7 @@ func main() {
 		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, testingGuildID)
+	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, testingGuildID, &httpClient)
 
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))

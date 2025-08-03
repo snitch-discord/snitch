@@ -19,6 +19,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM gcr.io/distroless/static-debian12
 
+WORKDIR /app
 
-COPY --from=build /bin/bot /bin/bot
-CMD ["/bin/bot"]
+COPY --from=build /bin/bot .
+CMD ["./bot"]

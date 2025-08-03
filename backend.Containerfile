@@ -19,6 +19,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM gcr.io/distroless/static-debian12
 
-COPY --from=build /bin/backend /bin/backend
+WORKDIR /app
 
-CMD ["/bin/backend"]
+COPY --from=build /bin/backend .
+
+CMD ["./backend"]
