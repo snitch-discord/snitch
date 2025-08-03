@@ -15,7 +15,6 @@ import (
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
-	"golang.org/x/net/http2"
 )
 
 func fatal(msg string, args ...any) {
@@ -62,7 +61,7 @@ func main() {
 	// Configure TLS
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"h2", "http/1.1"},
+		NextProtos:   []string{"h2"},
 	}
 
 	server := &http.Server{
@@ -70,11 +69,6 @@ func main() {
 		Handler:           mux,
 		TLSConfig:         tlsConfig,
 		ReadHeaderTimeout: 10 * time.Second,
-	}
-
-	// Configure HTTP/2 explicitly
-	if err := http2.ConfigureServer(server, &http2.Server{}); err != nil {
-		fatal("Failed to configure HTTP/2", "error", err)
 	}
 
 	slogger.Info("Starting database service with TLS", "port", *port, "db_dir", *dbDir, "cert", *certFile)
