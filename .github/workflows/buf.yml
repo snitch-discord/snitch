@@ -11,4 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: bufbuild/buf-action@v1
         with:
-          setup_only: true
+          lint: true
+          format: true
+          breaking: ${{ !contains(github.event.head_commit.message, 'buf skip breaking') }}
+          breaking_against: .git#branch=main
