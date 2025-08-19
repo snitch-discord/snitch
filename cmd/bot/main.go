@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"log"
 	"log/slog"
 	"net/http"
@@ -24,8 +23,6 @@ import (
 
 func main() {
 	testingGuildID := "1315524176936964117"
-	caCertFile := flag.String("ca-cert", "./certs/ca/ca-cert.pem", "CA certificate file for validating backend service")
-	flag.Parse()
 
 	config, err := botconfig.FromEnv()
 	if err != nil {
@@ -33,10 +30,11 @@ func main() {
 	}
 
 	// Load CA certificate for backend service validation
-	caCert, err := os.ReadFile(*caCertFile)
+	caCert, err := os.ReadFile(config.CaCertPath)
 	if err != nil {
 		log.Fatalf("Failed to read CA certificate: %v", err)
 	}
+
 	caCertPool := x509.NewCertPool()
 	if !caCertPool.AppendCertsFromPEM(caCert) {
 		log.Fatalf("Failed to parse CA certificate")

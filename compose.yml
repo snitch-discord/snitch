@@ -16,6 +16,10 @@ services:
           path: internal/shared
     restart: unless-stopped
     image: snitch-db
+    environment:
+      - DB_DIR_PATH=./data
+      - CERT_FILE_PATH=./certs/db/cert.pem
+      - KEY_FILE_PATH=./certs/db/key.pem
     ports:
       - 5200:5200
     volumes:
@@ -42,6 +46,9 @@ services:
     depends_on:
       - snitch-db
     environment:
+      - CA_CERT_FILE_PATH=./certs/ca/ca-cert.pem
+      - CERT_FILE_PATH=./certs/backend/cert.pem
+      - KEY_FILE_PATH=./certs/backend/key.pem
       - SNITCH_DB_HOST=snitch-db
       - SNITCH_DB_PORT=5200
     ports:
@@ -69,9 +76,9 @@ services:
     depends_on:
       - snitch-backend
     environment:
+      - CA_CERT_FILE_PATH=./certs/ca/ca-cert.pem
       - SNITCH_DISCORD_TOKEN=${SNITCH_DISCORD_TOKEN}
       - SNITCH_BACKEND_HOST=snitch-backend
       - SNITCH_BACKEND_PORT=4200
     volumes:
       - ./certs:/app/certs:ro
-

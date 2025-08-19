@@ -6,11 +6,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"snitch/internal/db/dbconfig"
 	"snitch/internal/db/service"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
@@ -24,16 +26,18 @@ func fatal(msg string, args ...any) {
 
 func main() {
 	port := flag.Int("port", 5200, "port to listen on")
-	dbDir := flag.String("db-dir", "./data", "directory to store database files")
-	certFile := flag.String("cert", "./certs/db/cert.pem", "TLS certificate file")
-	keyFile := flag.String("key", "./certs/db/key.pem", "TLS private key file")
 	flag.Parse()
+
+	config, err := dbconfig.FromEnv()
+	if err != nil {
+		log.Fatalf("Failed to load db configuration from environment: %v", err)
+	}
 
 	slogger := slog.Default()
 	ctx := context.Background()
 
 	// Initialize database service
-	dbService, err := service.NewDatabaseService(ctx, *dbDir, slogger)
+	dbService, err := service.NewDatabaseService(ctx, config.DbDirPath, slogger)
 	if err != nil {
 		fatal("Failed to initialize database service", "error", err)
 	}
@@ -49,7 +53,7 @@ func main() {
 	}
 
 	// Load TLS certificate
-	cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+	cert, err := tls.LoadX509KeyPair(config.CertFilePath, config.KeyFilePath)
 	if err != nil {
 		fatal("Failed to load TLS certificate", "error", err)
 	}
@@ -71,7 +75,7 @@ func main() {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	slogger.Info("Starting database service with TLS", "port", *port, "db_dir", *dbDir, "cert", *certFile)
+	slogger.Info("Starting database service with TLS", "port", *port, "db_dir", config.DbDirPath, "cert", config.CertFilePath)
 
 	if err := server.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		slogger.Error(err.Error())

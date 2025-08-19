@@ -21,6 +21,6 @@ FROM gcr.io/distroless/static-debian12
 
 WORKDIR /app
 
-COPY --from=build /bin/backend .
+COPY --from=build /bin/backend /bin/backend
 
-CMD ["./backend"]
+CMD ["/bin/backend"]

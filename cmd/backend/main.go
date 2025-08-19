@@ -6,11 +6,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"snitch/internal/backend/backendconfig"
 	"snitch/internal/backend/service"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -20,35 +22,28 @@ import (
 
 func main() {
 	port := flag.Int("port", 4200, "port to listen on")
-	certFile := flag.String("cert", "./certs/backend/cert.pem", "TLS certificate file")
-	keyFile := flag.String("key", "./certs/backend/key.pem", "TLS private key file")
-	caCertFile := flag.String("ca-cert", "./certs/ca/ca-cert.pem", "CA certificate file for validating database service")
 	flag.Parse()
 
-	// Get database service connection details from environment
-	dbHost := os.Getenv("SNITCH_DB_HOST")
-	if dbHost == "" {
-		dbHost = "localhost"
-	}
-	dbPort := os.Getenv("SNITCH_DB_PORT")
-	if dbPort == "" {
-		dbPort = "5200"
+	config, err := backendconfig.FromEnv()
+	if err != nil {
+		log.Fatalf("Failed to load backend configuration from environment: %v", err)
 	}
 
 	// Load CA certificate for database service validation
-	caCert, err := os.ReadFile(*caCertFile)
+	caCert, err := os.ReadFile(config.CaCertFilePath)
 	if err != nil {
-		slog.Error("Failed to read CA certificate", "error", err)
-		os.Exit(1)
+		log.Fatal("Failed to read CA certificate", "error", err)
 	}
 	caCertPool := x509.NewCertPool()
 	if !caCertPool.AppendCertsFromPEM(caCert) {
-		slog.Error("Failed to parse CA certificate")
-		os.Exit(1)
+		log.Fatal("Failed to parse CA certificate")
 	}
 
 	// Create database service client (Connect RPC over HTTPS)
-	dbServiceURL := fmt.Sprintf("https://%s:%s", dbHost, dbPort)
+	dbServiceURL, err := config.DbURL()
+	if err != nil {
+		log.Fatalf("Failed to load db URL from environment: %v", err)
+	}
 	dbClient := snitchv1connect.NewDatabaseServiceClient(
 		&http.Client{
 			Timeout: 30 * time.Second,
@@ -57,8 +52,8 @@ func main() {
 					RootCAs: caCertPool,
 				},
 			},
-		}, 
-		dbServiceURL,
+		},
+		dbServiceURL.String(),
 	)
 
 	eventService := service.NewEventService(dbClient)
@@ -67,10 +62,9 @@ func main() {
 	userServer := service.NewUserServer(dbClient)
 
 	// Load TLS certificate for backend service
-	cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+	cert, err := tls.LoadX509KeyPair(config.CertFilePath, config.KeyFilePath)
 	if err != nil {
-		slog.Error("Failed to load TLS certificate", "error", err)
-		os.Exit(1)
+		log.Fatal("Failed to load TLS certificate", "error", err)
 	}
 
 	baseInterceptors := connect.WithInterceptors(
@@ -99,7 +93,7 @@ func main() {
 		// No ReadTimeout/WriteTimeout for streaming support
 	}
 
-	slog.Info("Starting backend service with TLS", "port", *port, "db_url", dbServiceURL, "cert", *certFile)
+	slog.Info("Starting backend service with TLS", "port", *port, "db_url", dbServiceURL, "cert", config.CertFilePath)
 
 	if err := server.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		slog.Error(err.Error())
