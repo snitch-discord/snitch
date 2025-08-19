@@ -9,7 +9,6 @@ import (
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ServerRepository handles server and metadata operations
@@ -28,7 +27,7 @@ func NewServerRepository(service *DatabaseService) *ServerRepository {
 func (r *ServerRepository) CreateGroup(
 	ctx context.Context,
 	req *connect.Request[snitchv1.CreateGroupRequest],
-) (*connect.Response[emptypb.Empty], error) {
+) (*connect.Response[snitchv1.CreateGroupResponse], error) {
 	queries := metadata.New(r.service.metadataDB)
 
 	err := queries.CreateGroup(ctx, metadata.CreateGroupParams{
@@ -41,7 +40,7 @@ func (r *ServerRepository) CreateGroup(
 	}
 
 	r.service.logger.Info("Created group", "group_id", req.Msg.GroupId, "group_name", req.Msg.GroupName)
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	return connect.NewResponse(&snitchv1.CreateGroupResponse{GroupId: req.Msg.GroupId}), nil
 }
 
 // FindGroupByServer finds the group ID for a given server ID using sqlc
@@ -71,7 +70,7 @@ func (r *ServerRepository) FindGroupByServer(
 func (r *ServerRepository) AddServerToGroup(
 	ctx context.Context,
 	req *connect.Request[snitchv1.AddServerToGroupRequest],
-) (*connect.Response[emptypb.Empty], error) {
+) (*connect.Response[snitchv1.AddServerToGroupResponse], error) {
 	queries := metadata.New(r.service.metadataDB)
 
 	// Use default values for output_channel and permission_level as in the original queries
@@ -93,7 +92,7 @@ func (r *ServerRepository) AddServerToGroup(
 		"server_id", req.Msg.ServerId,
 		"group_id", req.Msg.GroupId)
 
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	return connect.NewResponse(&snitchv1.AddServerToGroupResponse{ServerId: req.Msg.ServerId}), nil
 }
 
 // ListServers retrieves all servers for a given group from the metadata database using sqlc

@@ -26,8 +26,8 @@ func NewUserRepository(service *DatabaseService) *UserRepository {
 // CreateUserHistory creates a new user history entry in the group database using sqlc
 func (r *UserRepository) CreateUserHistory(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbCreateUserHistoryRequest],
-) (*connect.Response[snitchv1.DbCreateUserHistoryResponse], error) {
+	req *connect.Request[snitchv1.DatabaseServiceCreateUserHistoryRequest],
+) (*connect.Response[snitchv1.DatabaseServiceCreateUserHistoryResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -64,7 +64,7 @@ func (r *UserRepository) CreateUserHistory(
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to create user history: %w", err))
 	}
 
-	response := &snitchv1.DbCreateUserHistoryResponse{
+	response := &snitchv1.DatabaseServiceCreateUserHistoryResponse{
 		HistoryId: historyID,
 	}
 
@@ -80,8 +80,8 @@ func (r *UserRepository) CreateUserHistory(
 // GetUserHistory retrieves user history entries from the group database using sqlc
 func (r *UserRepository) GetUserHistory(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbGetUserHistoryRequest],
-) (*connect.Response[snitchv1.DbGetUserHistoryResponse], error) {
+	req *connect.Request[snitchv1.DatabaseServiceGetUserHistoryRequest],
+) (*connect.Response[snitchv1.DatabaseServiceGetUserHistoryResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -141,7 +141,7 @@ func (r *UserRepository) GetUserHistory(
 		entries = append(entries, entry)
 	}
 
-	response := &snitchv1.DbGetUserHistoryResponse{
+	response := &snitchv1.DatabaseServiceGetUserHistoryResponse{
 		Entries: entries,
 	}
 

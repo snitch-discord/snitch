@@ -7,7 +7,6 @@ import (
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // GroupRepository handles group database management operations
@@ -26,12 +25,12 @@ func NewGroupRepository(service *DatabaseService) *GroupRepository {
 func (r *GroupRepository) CreateGroupDatabase(
 	ctx context.Context,
 	req *connect.Request[snitchv1.CreateGroupDatabaseRequest],
-) (*connect.Response[emptypb.Empty], error) {
+) (*connect.Response[snitchv1.CreateGroupDatabaseResponse], error) {
 	_, err := r.service.createGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		r.service.logger.Error("Failed to create group database", "group_id", req.Msg.GroupId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to create group database: %w", err))
 	}
 
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	return connect.NewResponse(&snitchv1.CreateGroupDatabaseResponse{GroupId: req.Msg.GroupId}), nil
 }

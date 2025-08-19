@@ -16,7 +16,7 @@ import (
 )
 
 type subscriber struct {
-	eventChan chan *snitchv1.Event
+	eventChan chan *snitchv1.SubscribeResponse
 	groupID   string
 }
 
@@ -37,7 +37,7 @@ func NewEventService(dbClient snitchv1connect.DatabaseServiceClient) *EventServi
 func (s *EventService) Subscribe(
 	ctx context.Context,
 	req *connect.Request[snitchv1.SubscribeRequest],
-	stream *connect.ServerStream[snitchv1.Event],
+	stream *connect.ServerStream[snitchv1.SubscribeResponse],
 ) error {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
@@ -65,7 +65,7 @@ func (s *EventService) Subscribe(
 	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID)
 
 	// Create a channel for this subscriber
-	eventChan := make(chan *snitchv1.Event, 256)
+	eventChan := make(chan *snitchv1.SubscribeResponse, 256)
 
 	sub := &subscriber{
 		eventChan: eventChan,
@@ -102,12 +102,12 @@ func (s *EventService) Subscribe(
 }
 
 // PublishEvent broadcasts an event to all subscribers
-func (s *EventService) PublishEvent(ctx context.Context, event *snitchv1.Event) error {
+func (s *EventService) PublishEvent(ctx context.Context, event *snitchv1.SubscribeResponse) error {
 	return s.PublishEventWithRetry(ctx, event, 3, time.Millisecond*100)
 }
 
 // PublishEventWithRetry broadcasts an event with retry logic
-func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.Event, maxRetries int, retryDelay time.Duration) error {
+func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.SubscribeResponse, maxRetries int, retryDelay time.Duration) error {
 	var lastErr error
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
@@ -139,7 +139,7 @@ func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv
 }
 
 // publishEventOnce attempts to publish an event once
-func (s *EventService) publishEventOnce(ctx context.Context, event *snitchv1.Event) error {
+func (s *EventService) publishEventOnce(ctx context.Context, event *snitchv1.SubscribeResponse) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

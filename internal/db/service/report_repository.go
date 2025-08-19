@@ -9,7 +9,6 @@ import (
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ReportRepository handles report CRUD operations
@@ -27,8 +26,8 @@ func NewReportRepository(service *DatabaseService) *ReportRepository {
 // CreateReport creates a new report in the group database using sqlc
 func (r *ReportRepository) CreateReport(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbCreateReportRequest],
-) (*connect.Response[snitchv1.DbCreateReportResponse], error) {
+	req *connect.Request[snitchv1.DatabaseServiceCreateReportRequest],
+) (*connect.Response[snitchv1.DatabaseServiceCreateReportResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -59,7 +58,7 @@ func (r *ReportRepository) CreateReport(
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to create report: %w", err))
 	}
 
-	response := &snitchv1.DbCreateReportResponse{
+	response := &snitchv1.DatabaseServiceCreateReportResponse{
 		ReportId: reportID,
 	}
 
@@ -70,8 +69,8 @@ func (r *ReportRepository) CreateReport(
 // GetReport retrieves a specific report from the group database using sqlc
 func (r *ReportRepository) GetReport(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbGetReportRequest],
-) (*connect.Response[snitchv1.DbGetReportResponse], error) {
+	req *connect.Request[snitchv1.DatabaseServiceGetReportRequest],
+) (*connect.Response[snitchv1.DatabaseServiceGetReportResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -89,7 +88,7 @@ func (r *ReportRepository) GetReport(
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get report: %w", err))
 	}
 
-	response := &snitchv1.DbGetReportResponse{
+	response := &snitchv1.DatabaseServiceGetReportResponse{
 		Id:         report.ReportID,
 		Reason:     report.ReportText,
 		ReporterId: report.ReporterID,
@@ -108,8 +107,8 @@ func (r *ReportRepository) GetReport(
 // ListReports lists reports from the group database using sqlc
 func (r *ReportRepository) ListReports(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbListReportsRequest],
-) (*connect.Response[snitchv1.DbListReportsResponse], error) {
+	req *connect.Request[snitchv1.DatabaseServiceListReportsRequest],
+) (*connect.Response[snitchv1.DatabaseServiceListReportsResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -151,9 +150,9 @@ func (r *ReportRepository) ListReports(
 		reportRows = reportRows[start:end]
 	}
 
-	var reports []*snitchv1.DbGetReportResponse
+	var reports []*snitchv1.DatabaseServiceGetReportResponse
 	for _, reportRow := range reportRows {
-		report := &snitchv1.DbGetReportResponse{
+		report := &snitchv1.DatabaseServiceGetReportResponse{
 			Id:         reportRow.ReportID,
 			Reason:     reportRow.ReportText,
 			ReporterId: reportRow.ReporterID,
@@ -169,7 +168,7 @@ func (r *ReportRepository) ListReports(
 		reports = append(reports, report)
 	}
 
-	response := &snitchv1.DbListReportsResponse{
+	response := &snitchv1.DatabaseServiceListReportsResponse{
 		Reports: reports,
 	}
 
@@ -179,8 +178,8 @@ func (r *ReportRepository) ListReports(
 // DeleteReport deletes a report from the group database using sqlc
 func (r *ReportRepository) DeleteReport(
 	ctx context.Context,
-	req *connect.Request[snitchv1.DbDeleteReportRequest],
-) (*connect.Response[emptypb.Empty], error) {
+	req *connect.Request[snitchv1.DatabaseServiceDeleteReportRequest],
+) (*connect.Response[snitchv1.DatabaseServiceDeleteReportResponse], error) {
 	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get group database: %w", err))
@@ -200,5 +199,5 @@ func (r *ReportRepository) DeleteReport(
 	}
 
 	r.service.logger.Info("Deleted report", "group_id", req.Msg.GroupId, "report_id", req.Msg.ReportId)
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	return connect.NewResponse(&snitchv1.DatabaseServiceDeleteReportResponse{ReportId: req.Msg.ReportId}), nil
 }

@@ -17,7 +17,7 @@ func TestEventService_PublishEvent(t *testing.T) {
 	service := NewEventService(nil)
 
 	// Test event publishing to subscribers with group filtering
-	eventChan := make(chan *snitchv1.Event, 10)
+	eventChan := make(chan *snitchv1.SubscribeResponse, 10)
 
 	// Create subscriber for group "test-group"
 	sub := &subscriber{
@@ -30,7 +30,7 @@ func TestEventService_PublishEvent(t *testing.T) {
 	service.mu.Unlock()
 
 	// Test event for same group should be delivered
-	testEvent := &snitchv1.Event{
+	testEvent := &snitchv1.SubscribeResponse{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		ServerId:  TEST_SERVER_ID,
 		GroupId:   TEST_GROUP_ID,
@@ -63,8 +63,8 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	service := NewEventService(nil)
 
 	// Create subscribers for different groups
-	group1Chan := make(chan *snitchv1.Event, 10)
-	group2Chan := make(chan *snitchv1.Event, 10)
+	group1Chan := make(chan *snitchv1.SubscribeResponse, 10)
+	group2Chan := make(chan *snitchv1.SubscribeResponse, 10)
 
 	sub1 := &subscriber{
 		eventChan: group1Chan,
@@ -82,7 +82,7 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	service.mu.Unlock()
 
 	// Send event to group-1
-	testEvent := &snitchv1.Event{
+	testEvent := &snitchv1.SubscribeResponse{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		ServerId:  TEST_SERVER_ID,
 		GroupId:   group1ID,
@@ -118,14 +118,14 @@ func TestEventService_ChannelFullHandling(t *testing.T) {
 	service := NewEventService(nil)
 
 	// Test that full channels don't block publishing
-	testEvent := &snitchv1.Event{
+	testEvent := &snitchv1.SubscribeResponse{
 		Type:      snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		GroupId:   TEST_GROUP_ID,
 		Timestamp: timestamppb.Now(),
 	}
 
 	// Create a full channel
-	fullChan := make(chan *snitchv1.Event)
+	fullChan := make(chan *snitchv1.SubscribeResponse)
 	sub := &subscriber{
 		eventChan: fullChan,
 		groupID:   TEST_GROUP_ID,

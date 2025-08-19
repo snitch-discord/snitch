@@ -9,7 +9,6 @@ package snitchv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -75,6 +74,50 @@ func (x *CreateGroupRequest) GetGroupName() string {
 	return ""
 }
 
+type CreateGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateGroupResponse) Reset() {
+	*x = CreateGroupResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGroupResponse) ProtoMessage() {}
+
+func (x *CreateGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGroupResponse.ProtoReflect.Descriptor instead.
+func (*CreateGroupResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateGroupResponse) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
 type FindGroupByServerRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServerId      string                 `protobuf:"bytes,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
@@ -84,7 +127,7 @@ type FindGroupByServerRequest struct {
 
 func (x *FindGroupByServerRequest) Reset() {
 	*x = FindGroupByServerRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[1]
+	mi := &file_snitch_v1_database_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +139,7 @@ func (x *FindGroupByServerRequest) String() string {
 func (*FindGroupByServerRequest) ProtoMessage() {}
 
 func (x *FindGroupByServerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[1]
+	mi := &file_snitch_v1_database_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +152,7 @@ func (x *FindGroupByServerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindGroupByServerRequest.ProtoReflect.Descriptor instead.
 func (*FindGroupByServerRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{1}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *FindGroupByServerRequest) GetServerId() string {
@@ -128,7 +171,7 @@ type FindGroupByServerResponse struct {
 
 func (x *FindGroupByServerResponse) Reset() {
 	*x = FindGroupByServerResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[2]
+	mi := &file_snitch_v1_database_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -140,7 +183,7 @@ func (x *FindGroupByServerResponse) String() string {
 func (*FindGroupByServerResponse) ProtoMessage() {}
 
 func (x *FindGroupByServerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[2]
+	mi := &file_snitch_v1_database_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -153,7 +196,7 @@ func (x *FindGroupByServerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindGroupByServerResponse.ProtoReflect.Descriptor instead.
 func (*FindGroupByServerResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{2}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *FindGroupByServerResponse) GetGroupId() string {
@@ -173,7 +216,7 @@ type AddServerToGroupRequest struct {
 
 func (x *AddServerToGroupRequest) Reset() {
 	*x = AddServerToGroupRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[3]
+	mi := &file_snitch_v1_database_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -185,7 +228,7 @@ func (x *AddServerToGroupRequest) String() string {
 func (*AddServerToGroupRequest) ProtoMessage() {}
 
 func (x *AddServerToGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[3]
+	mi := &file_snitch_v1_database_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,7 +241,7 @@ func (x *AddServerToGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddServerToGroupRequest.ProtoReflect.Descriptor instead.
 func (*AddServerToGroupRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{3}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AddServerToGroupRequest) GetServerId() string {
@@ -215,6 +258,50 @@ func (x *AddServerToGroupRequest) GetGroupId() string {
 	return ""
 }
 
+type AddServerToGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServerId      string                 `protobuf:"bytes,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddServerToGroupResponse) Reset() {
+	*x = AddServerToGroupResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddServerToGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddServerToGroupResponse) ProtoMessage() {}
+
+func (x *AddServerToGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddServerToGroupResponse.ProtoReflect.Descriptor instead.
+func (*AddServerToGroupResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *AddServerToGroupResponse) GetServerId() string {
+	if x != nil {
+		return x.ServerId
+	}
+	return ""
+}
+
 // Group database operations
 type CreateGroupDatabaseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -225,7 +312,7 @@ type CreateGroupDatabaseRequest struct {
 
 func (x *CreateGroupDatabaseRequest) Reset() {
 	*x = CreateGroupDatabaseRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[4]
+	mi := &file_snitch_v1_database_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -237,7 +324,7 @@ func (x *CreateGroupDatabaseRequest) String() string {
 func (*CreateGroupDatabaseRequest) ProtoMessage() {}
 
 func (x *CreateGroupDatabaseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[4]
+	mi := &file_snitch_v1_database_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -250,7 +337,7 @@ func (x *CreateGroupDatabaseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGroupDatabaseRequest.ProtoReflect.Descriptor instead.
 func (*CreateGroupDatabaseRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{4}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CreateGroupDatabaseRequest) GetGroupId() string {
@@ -260,7 +347,51 @@ func (x *CreateGroupDatabaseRequest) GetGroupId() string {
 	return ""
 }
 
-type DbCreateReportRequest struct {
+type CreateGroupDatabaseResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateGroupDatabaseResponse) Reset() {
+	*x = CreateGroupDatabaseResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateGroupDatabaseResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGroupDatabaseResponse) ProtoMessage() {}
+
+func (x *CreateGroupDatabaseResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGroupDatabaseResponse.ProtoReflect.Descriptor instead.
+func (*CreateGroupDatabaseResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CreateGroupDatabaseResponse) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+type DatabaseServiceCreateReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -272,21 +403,21 @@ type DbCreateReportRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbCreateReportRequest) Reset() {
-	*x = DbCreateReportRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[5]
+func (x *DatabaseServiceCreateReportRequest) Reset() {
+	*x = DatabaseServiceCreateReportRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbCreateReportRequest) String() string {
+func (x *DatabaseServiceCreateReportRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbCreateReportRequest) ProtoMessage() {}
+func (*DatabaseServiceCreateReportRequest) ProtoMessage() {}
 
-func (x *DbCreateReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[5]
+func (x *DatabaseServiceCreateReportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -297,75 +428,75 @@ func (x *DbCreateReportRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbCreateReportRequest.ProtoReflect.Descriptor instead.
-func (*DbCreateReportRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use DatabaseServiceCreateReportRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceCreateReportRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DbCreateReportRequest) GetGroupId() string {
+func (x *DatabaseServiceCreateReportRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbCreateReportRequest) GetUserId() string {
+func (x *DatabaseServiceCreateReportRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *DbCreateReportRequest) GetReporterId() string {
+func (x *DatabaseServiceCreateReportRequest) GetReporterId() string {
 	if x != nil {
 		return x.ReporterId
 	}
 	return ""
 }
 
-func (x *DbCreateReportRequest) GetServerId() string {
+func (x *DatabaseServiceCreateReportRequest) GetServerId() string {
 	if x != nil {
 		return x.ServerId
 	}
 	return ""
 }
 
-func (x *DbCreateReportRequest) GetReason() string {
+func (x *DatabaseServiceCreateReportRequest) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-func (x *DbCreateReportRequest) GetEvidenceUrl() string {
+func (x *DatabaseServiceCreateReportRequest) GetEvidenceUrl() string {
 	if x != nil && x.EvidenceUrl != nil {
 		return *x.EvidenceUrl
 	}
 	return ""
 }
 
-type DbCreateReportResponse struct {
+type DatabaseServiceCreateReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbCreateReportResponse) Reset() {
-	*x = DbCreateReportResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[6]
+func (x *DatabaseServiceCreateReportResponse) Reset() {
+	*x = DatabaseServiceCreateReportResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbCreateReportResponse) String() string {
+func (x *DatabaseServiceCreateReportResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbCreateReportResponse) ProtoMessage() {}
+func (*DatabaseServiceCreateReportResponse) ProtoMessage() {}
 
-func (x *DbCreateReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[6]
+func (x *DatabaseServiceCreateReportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -376,19 +507,19 @@ func (x *DbCreateReportResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbCreateReportResponse.ProtoReflect.Descriptor instead.
-func (*DbCreateReportResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{6}
+// Deprecated: Use DatabaseServiceCreateReportResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceCreateReportResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *DbCreateReportResponse) GetReportId() int64 {
+func (x *DatabaseServiceCreateReportResponse) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
 	return 0
 }
 
-type DbGetReportRequest struct {
+type DatabaseServiceGetReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	ReportId      int64                  `protobuf:"varint,2,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
@@ -396,21 +527,21 @@ type DbGetReportRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbGetReportRequest) Reset() {
-	*x = DbGetReportRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[7]
+func (x *DatabaseServiceGetReportRequest) Reset() {
+	*x = DatabaseServiceGetReportRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbGetReportRequest) String() string {
+func (x *DatabaseServiceGetReportRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbGetReportRequest) ProtoMessage() {}
+func (*DatabaseServiceGetReportRequest) ProtoMessage() {}
 
-func (x *DbGetReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[7]
+func (x *DatabaseServiceGetReportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,26 +552,26 @@ func (x *DbGetReportRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbGetReportRequest.ProtoReflect.Descriptor instead.
-func (*DbGetReportRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{7}
+// Deprecated: Use DatabaseServiceGetReportRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceGetReportRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *DbGetReportRequest) GetGroupId() string {
+func (x *DatabaseServiceGetReportRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbGetReportRequest) GetReportId() int64 {
+func (x *DatabaseServiceGetReportRequest) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
 	return 0
 }
 
-type DbGetReportResponse struct {
+type DatabaseServiceGetReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -453,21 +584,21 @@ type DbGetReportResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbGetReportResponse) Reset() {
-	*x = DbGetReportResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[8]
+func (x *DatabaseServiceGetReportResponse) Reset() {
+	*x = DatabaseServiceGetReportResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbGetReportResponse) String() string {
+func (x *DatabaseServiceGetReportResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbGetReportResponse) ProtoMessage() {}
+func (*DatabaseServiceGetReportResponse) ProtoMessage() {}
 
-func (x *DbGetReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[8]
+func (x *DatabaseServiceGetReportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -478,61 +609,61 @@ func (x *DbGetReportResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbGetReportResponse.ProtoReflect.Descriptor instead.
-func (*DbGetReportResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{8}
+// Deprecated: Use DatabaseServiceGetReportResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceGetReportResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *DbGetReportResponse) GetId() int64 {
+func (x *DatabaseServiceGetReportResponse) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *DbGetReportResponse) GetUserId() string {
+func (x *DatabaseServiceGetReportResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *DbGetReportResponse) GetReporterId() string {
+func (x *DatabaseServiceGetReportResponse) GetReporterId() string {
 	if x != nil {
 		return x.ReporterId
 	}
 	return ""
 }
 
-func (x *DbGetReportResponse) GetServerId() string {
+func (x *DatabaseServiceGetReportResponse) GetServerId() string {
 	if x != nil {
 		return x.ServerId
 	}
 	return ""
 }
 
-func (x *DbGetReportResponse) GetReason() string {
+func (x *DatabaseServiceGetReportResponse) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-func (x *DbGetReportResponse) GetEvidenceUrl() string {
+func (x *DatabaseServiceGetReportResponse) GetEvidenceUrl() string {
 	if x != nil && x.EvidenceUrl != nil {
 		return *x.EvidenceUrl
 	}
 	return ""
 }
 
-func (x *DbGetReportResponse) GetCreatedAt() string {
+func (x *DatabaseServiceGetReportResponse) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-type DbListReportsRequest struct {
+type DatabaseServiceListReportsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	UserId        *string                `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3,oneof" json:"user_id,omitempty"`
@@ -542,21 +673,21 @@ type DbListReportsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbListReportsRequest) Reset() {
-	*x = DbListReportsRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[9]
+func (x *DatabaseServiceListReportsRequest) Reset() {
+	*x = DatabaseServiceListReportsRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbListReportsRequest) String() string {
+func (x *DatabaseServiceListReportsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbListReportsRequest) ProtoMessage() {}
+func (*DatabaseServiceListReportsRequest) ProtoMessage() {}
 
-func (x *DbListReportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[9]
+func (x *DatabaseServiceListReportsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -567,61 +698,61 @@ func (x *DbListReportsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbListReportsRequest.ProtoReflect.Descriptor instead.
-func (*DbListReportsRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{9}
+// Deprecated: Use DatabaseServiceListReportsRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceListReportsRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *DbListReportsRequest) GetGroupId() string {
+func (x *DatabaseServiceListReportsRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbListReportsRequest) GetUserId() string {
+func (x *DatabaseServiceListReportsRequest) GetUserId() string {
 	if x != nil && x.UserId != nil {
 		return *x.UserId
 	}
 	return ""
 }
 
-func (x *DbListReportsRequest) GetLimit() int32 {
+func (x *DatabaseServiceListReportsRequest) GetLimit() int32 {
 	if x != nil && x.Limit != nil {
 		return *x.Limit
 	}
 	return 0
 }
 
-func (x *DbListReportsRequest) GetOffset() int32 {
+func (x *DatabaseServiceListReportsRequest) GetOffset() int32 {
 	if x != nil && x.Offset != nil {
 		return *x.Offset
 	}
 	return 0
 }
 
-type DbListReportsResponse struct {
+type DatabaseServiceDeleteReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Reports       []*DbGetReportResponse `protobuf:"bytes,1,rep,name=reports,proto3" json:"reports,omitempty"`
+	ReportId      int64                  `protobuf:"varint,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbListReportsResponse) Reset() {
-	*x = DbListReportsResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[10]
+func (x *DatabaseServiceDeleteReportResponse) Reset() {
+	*x = DatabaseServiceDeleteReportResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbListReportsResponse) String() string {
+func (x *DatabaseServiceDeleteReportResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbListReportsResponse) ProtoMessage() {}
+func (*DatabaseServiceDeleteReportResponse) ProtoMessage() {}
 
-func (x *DbListReportsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[10]
+func (x *DatabaseServiceDeleteReportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,19 +763,63 @@ func (x *DbListReportsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbListReportsResponse.ProtoReflect.Descriptor instead.
-func (*DbListReportsResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{10}
+// Deprecated: Use DatabaseServiceDeleteReportResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceDeleteReportResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *DbListReportsResponse) GetReports() []*DbGetReportResponse {
+func (x *DatabaseServiceDeleteReportResponse) GetReportId() int64 {
+	if x != nil {
+		return x.ReportId
+	}
+	return 0
+}
+
+type DatabaseServiceListReportsResponse struct {
+	state         protoimpl.MessageState              `protogen:"open.v1"`
+	Reports       []*DatabaseServiceGetReportResponse `protobuf:"bytes,1,rep,name=reports,proto3" json:"reports,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DatabaseServiceListReportsResponse) Reset() {
+	*x = DatabaseServiceListReportsResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatabaseServiceListReportsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatabaseServiceListReportsResponse) ProtoMessage() {}
+
+func (x *DatabaseServiceListReportsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatabaseServiceListReportsResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceListReportsResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DatabaseServiceListReportsResponse) GetReports() []*DatabaseServiceGetReportResponse {
 	if x != nil {
 		return x.Reports
 	}
 	return nil
 }
 
-type DbDeleteReportRequest struct {
+type DatabaseServiceDeleteReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	ReportId      int64                  `protobuf:"varint,2,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
@@ -652,21 +827,21 @@ type DbDeleteReportRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbDeleteReportRequest) Reset() {
-	*x = DbDeleteReportRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[11]
+func (x *DatabaseServiceDeleteReportRequest) Reset() {
+	*x = DatabaseServiceDeleteReportRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbDeleteReportRequest) String() string {
+func (x *DatabaseServiceDeleteReportRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbDeleteReportRequest) ProtoMessage() {}
+func (*DatabaseServiceDeleteReportRequest) ProtoMessage() {}
 
-func (x *DbDeleteReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[11]
+func (x *DatabaseServiceDeleteReportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -677,26 +852,26 @@ func (x *DbDeleteReportRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbDeleteReportRequest.ProtoReflect.Descriptor instead.
-func (*DbDeleteReportRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{11}
+// Deprecated: Use DatabaseServiceDeleteReportRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceDeleteReportRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *DbDeleteReportRequest) GetGroupId() string {
+func (x *DatabaseServiceDeleteReportRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbDeleteReportRequest) GetReportId() int64 {
+func (x *DatabaseServiceDeleteReportRequest) GetReportId() int64 {
 	if x != nil {
 		return x.ReportId
 	}
 	return 0
 }
 
-type DbCreateUserHistoryRequest struct {
+type DatabaseServiceCreateUserHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -708,21 +883,21 @@ type DbCreateUserHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbCreateUserHistoryRequest) Reset() {
-	*x = DbCreateUserHistoryRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[12]
+func (x *DatabaseServiceCreateUserHistoryRequest) Reset() {
+	*x = DatabaseServiceCreateUserHistoryRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbCreateUserHistoryRequest) String() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbCreateUserHistoryRequest) ProtoMessage() {}
+func (*DatabaseServiceCreateUserHistoryRequest) ProtoMessage() {}
 
-func (x *DbCreateUserHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[12]
+func (x *DatabaseServiceCreateUserHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,75 +908,75 @@ func (x *DbCreateUserHistoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbCreateUserHistoryRequest.ProtoReflect.Descriptor instead.
-func (*DbCreateUserHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{12}
+// Deprecated: Use DatabaseServiceCreateUserHistoryRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceCreateUserHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *DbCreateUserHistoryRequest) GetGroupId() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbCreateUserHistoryRequest) GetUserId() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *DbCreateUserHistoryRequest) GetServerId() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetServerId() string {
 	if x != nil {
 		return x.ServerId
 	}
 	return ""
 }
 
-func (x *DbCreateUserHistoryRequest) GetAction() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetAction() string {
 	if x != nil {
 		return x.Action
 	}
 	return ""
 }
 
-func (x *DbCreateUserHistoryRequest) GetReason() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetReason() string {
 	if x != nil && x.Reason != nil {
 		return *x.Reason
 	}
 	return ""
 }
 
-func (x *DbCreateUserHistoryRequest) GetEvidenceUrl() string {
+func (x *DatabaseServiceCreateUserHistoryRequest) GetEvidenceUrl() string {
 	if x != nil && x.EvidenceUrl != nil {
 		return *x.EvidenceUrl
 	}
 	return ""
 }
 
-type DbCreateUserHistoryResponse struct {
+type DatabaseServiceCreateUserHistoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	HistoryId     int64                  `protobuf:"varint,1,opt,name=history_id,json=historyId,proto3" json:"history_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbCreateUserHistoryResponse) Reset() {
-	*x = DbCreateUserHistoryResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[13]
+func (x *DatabaseServiceCreateUserHistoryResponse) Reset() {
+	*x = DatabaseServiceCreateUserHistoryResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbCreateUserHistoryResponse) String() string {
+func (x *DatabaseServiceCreateUserHistoryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbCreateUserHistoryResponse) ProtoMessage() {}
+func (*DatabaseServiceCreateUserHistoryResponse) ProtoMessage() {}
 
-func (x *DbCreateUserHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[13]
+func (x *DatabaseServiceCreateUserHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -812,19 +987,19 @@ func (x *DbCreateUserHistoryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbCreateUserHistoryResponse.ProtoReflect.Descriptor instead.
-func (*DbCreateUserHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{13}
+// Deprecated: Use DatabaseServiceCreateUserHistoryResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceCreateUserHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *DbCreateUserHistoryResponse) GetHistoryId() int64 {
+func (x *DatabaseServiceCreateUserHistoryResponse) GetHistoryId() int64 {
 	if x != nil {
 		return x.HistoryId
 	}
 	return 0
 }
 
-type DbGetUserHistoryRequest struct {
+type DatabaseServiceGetUserHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -834,21 +1009,21 @@ type DbGetUserHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbGetUserHistoryRequest) Reset() {
-	*x = DbGetUserHistoryRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[14]
+func (x *DatabaseServiceGetUserHistoryRequest) Reset() {
+	*x = DatabaseServiceGetUserHistoryRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbGetUserHistoryRequest) String() string {
+func (x *DatabaseServiceGetUserHistoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbGetUserHistoryRequest) ProtoMessage() {}
+func (*DatabaseServiceGetUserHistoryRequest) ProtoMessage() {}
 
-func (x *DbGetUserHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[14]
+func (x *DatabaseServiceGetUserHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -859,33 +1034,33 @@ func (x *DbGetUserHistoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbGetUserHistoryRequest.ProtoReflect.Descriptor instead.
-func (*DbGetUserHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{14}
+// Deprecated: Use DatabaseServiceGetUserHistoryRequest.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceGetUserHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *DbGetUserHistoryRequest) GetGroupId() string {
+func (x *DatabaseServiceGetUserHistoryRequest) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *DbGetUserHistoryRequest) GetUserId() string {
+func (x *DatabaseServiceGetUserHistoryRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *DbGetUserHistoryRequest) GetLimit() int32 {
+func (x *DatabaseServiceGetUserHistoryRequest) GetLimit() int32 {
 	if x != nil && x.Limit != nil {
 		return *x.Limit
 	}
 	return 0
 }
 
-func (x *DbGetUserHistoryRequest) GetOffset() int32 {
+func (x *DatabaseServiceGetUserHistoryRequest) GetOffset() int32 {
 	if x != nil && x.Offset != nil {
 		return *x.Offset
 	}
@@ -907,7 +1082,7 @@ type DbUserHistoryEntry struct {
 
 func (x *DbUserHistoryEntry) Reset() {
 	*x = DbUserHistoryEntry{}
-	mi := &file_snitch_v1_database_proto_msgTypes[15]
+	mi := &file_snitch_v1_database_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -919,7 +1094,7 @@ func (x *DbUserHistoryEntry) String() string {
 func (*DbUserHistoryEntry) ProtoMessage() {}
 
 func (x *DbUserHistoryEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[15]
+	mi := &file_snitch_v1_database_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +1107,7 @@ func (x *DbUserHistoryEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DbUserHistoryEntry.ProtoReflect.Descriptor instead.
 func (*DbUserHistoryEntry) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{15}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *DbUserHistoryEntry) GetId() int64 {
@@ -984,28 +1159,28 @@ func (x *DbUserHistoryEntry) GetCreatedAt() string {
 	return ""
 }
 
-type DbGetUserHistoryResponse struct {
+type DatabaseServiceGetUserHistoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Entries       []*DbUserHistoryEntry  `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DbGetUserHistoryResponse) Reset() {
-	*x = DbGetUserHistoryResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[16]
+func (x *DatabaseServiceGetUserHistoryResponse) Reset() {
+	*x = DatabaseServiceGetUserHistoryResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DbGetUserHistoryResponse) String() string {
+func (x *DatabaseServiceGetUserHistoryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DbGetUserHistoryResponse) ProtoMessage() {}
+func (*DatabaseServiceGetUserHistoryResponse) ProtoMessage() {}
 
-func (x *DbGetUserHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[16]
+func (x *DatabaseServiceGetUserHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1016,12 +1191,12 @@ func (x *DbGetUserHistoryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DbGetUserHistoryResponse.ProtoReflect.Descriptor instead.
-func (*DbGetUserHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{16}
+// Deprecated: Use DatabaseServiceGetUserHistoryResponse.ProtoReflect.Descriptor instead.
+func (*DatabaseServiceGetUserHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{20}
 }
 
-func (x *DbGetUserHistoryResponse) GetEntries() []*DbUserHistoryEntry {
+func (x *DatabaseServiceGetUserHistoryResponse) GetEntries() []*DbUserHistoryEntry {
 	if x != nil {
 		return x.Entries
 	}
@@ -1037,7 +1212,7 @@ type ListServersRequest struct {
 
 func (x *ListServersRequest) Reset() {
 	*x = ListServersRequest{}
-	mi := &file_snitch_v1_database_proto_msgTypes[17]
+	mi := &file_snitch_v1_database_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1049,7 +1224,7 @@ func (x *ListServersRequest) String() string {
 func (*ListServersRequest) ProtoMessage() {}
 
 func (x *ListServersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[17]
+	mi := &file_snitch_v1_database_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1062,7 +1237,7 @@ func (x *ListServersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListServersRequest.ProtoReflect.Descriptor instead.
 func (*ListServersRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{17}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListServersRequest) GetGroupId() string {
@@ -1082,7 +1257,7 @@ type ServerEntry struct {
 
 func (x *ServerEntry) Reset() {
 	*x = ServerEntry{}
-	mi := &file_snitch_v1_database_proto_msgTypes[18]
+	mi := &file_snitch_v1_database_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1094,7 +1269,7 @@ func (x *ServerEntry) String() string {
 func (*ServerEntry) ProtoMessage() {}
 
 func (x *ServerEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[18]
+	mi := &file_snitch_v1_database_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1107,7 +1282,7 @@ func (x *ServerEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerEntry.ProtoReflect.Descriptor instead.
 func (*ServerEntry) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{18}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ServerEntry) GetServerId() string {
@@ -1133,7 +1308,7 @@ type ListServersResponse struct {
 
 func (x *ListServersResponse) Reset() {
 	*x = ListServersResponse{}
-	mi := &file_snitch_v1_database_proto_msgTypes[19]
+	mi := &file_snitch_v1_database_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1145,7 +1320,7 @@ func (x *ListServersResponse) String() string {
 func (*ListServersResponse) ProtoMessage() {}
 
 func (x *ListServersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_database_proto_msgTypes[19]
+	mi := &file_snitch_v1_database_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1158,7 +1333,7 @@ func (x *ListServersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListServersResponse.ProtoReflect.Descriptor instead.
 func (*ListServersResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_database_proto_rawDescGZIP(), []int{19}
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListServersResponse) GetServers() []*ServerEntry {
@@ -1172,11 +1347,13 @@ var File_snitch_v1_database_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_database_proto_rawDesc = "" +
 	"\n" +
-	"\x18snitch/v1/database.proto\x12\tsnitch.v1\x1a\x1bgoogle/protobuf/empty.proto\"N\n" +
+	"\x18snitch/v1/database.proto\x12\tsnitch.v1\"N\n" +
 	"\x12CreateGroupRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1d\n" +
 	"\n" +
-	"group_name\x18\x02 \x01(\tR\tgroupName\"7\n" +
+	"group_name\x18\x02 \x01(\tR\tgroupName\"0\n" +
+	"\x13CreateGroupResponse\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"7\n" +
 	"\x18FindGroupByServerRequest\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\"6\n" +
 	"\x19FindGroupByServerResponse\x12\x19\n" +
@@ -1184,9 +1361,13 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\x17AddServerToGroupRequest\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"7\n" +
+	"\x18AddServerToGroupResponse\x12\x1b\n" +
+	"\tserver_id\x18\x01 \x01(\tR\bserverId\"7\n" +
 	"\x1aCreateGroupDatabaseRequest\x12\x19\n" +
-	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"\xda\x01\n" +
-	"\x15DbCreateReportRequest\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"8\n" +
+	"\x1bCreateGroupDatabaseResponse\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"\xe7\x01\n" +
+	"\"DatabaseServiceCreateReportRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
 	"\vreporter_id\x18\x03 \x01(\tR\n" +
@@ -1194,13 +1375,13 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\tserver_id\x18\x04 \x01(\tR\bserverId\x12\x16\n" +
 	"\x06reason\x18\x05 \x01(\tR\x06reason\x12&\n" +
 	"\fevidence_url\x18\x06 \x01(\tH\x00R\vevidenceUrl\x88\x01\x01B\x0f\n" +
-	"\r_evidence_url\"5\n" +
-	"\x16DbCreateReportResponse\x12\x1b\n" +
-	"\treport_id\x18\x01 \x01(\x03R\breportId\"L\n" +
-	"\x12DbGetReportRequest\x12\x19\n" +
+	"\r_evidence_url\"B\n" +
+	"#DatabaseServiceCreateReportResponse\x12\x1b\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\"Y\n" +
+	"\x1fDatabaseServiceGetReportRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1b\n" +
-	"\treport_id\x18\x02 \x01(\x03R\breportId\"\xec\x01\n" +
-	"\x13DbGetReportResponse\x12\x0e\n" +
+	"\treport_id\x18\x02 \x01(\x03R\breportId\"\xf9\x01\n" +
+	" DatabaseServiceGetReportResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
 	"\vreporter_id\x18\x03 \x01(\tR\n" +
@@ -1210,8 +1391,8 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\fevidence_url\x18\x06 \x01(\tH\x00R\vevidenceUrl\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAtB\x0f\n" +
-	"\r_evidence_url\"\xa8\x01\n" +
-	"\x14DbListReportsRequest\x12\x19\n" +
+	"\r_evidence_url\"\xb5\x01\n" +
+	"!DatabaseServiceListReportsRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1c\n" +
 	"\auser_id\x18\x02 \x01(\tH\x00R\x06userId\x88\x01\x01\x12\x19\n" +
 	"\x05limit\x18\x03 \x01(\x05H\x01R\x05limit\x88\x01\x01\x12\x1b\n" +
@@ -1219,13 +1400,15 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\n" +
 	"\b_user_idB\b\n" +
 	"\x06_limitB\t\n" +
-	"\a_offset\"Q\n" +
-	"\x15DbListReportsResponse\x128\n" +
-	"\areports\x18\x01 \x03(\v2\x1e.snitch.v1.DbGetReportResponseR\areports\"O\n" +
-	"\x15DbDeleteReportRequest\x12\x19\n" +
+	"\a_offset\"B\n" +
+	"#DatabaseServiceDeleteReportResponse\x12\x1b\n" +
+	"\treport_id\x18\x01 \x01(\x03R\breportId\"k\n" +
+	"\"DatabaseServiceListReportsResponse\x12E\n" +
+	"\areports\x18\x01 \x03(\v2+.snitch.v1.DatabaseServiceGetReportResponseR\areports\"\\\n" +
+	"\"DatabaseServiceDeleteReportRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x1b\n" +
-	"\treport_id\x18\x02 \x01(\x03R\breportId\"\xe6\x01\n" +
-	"\x1aDbCreateUserHistoryRequest\x12\x19\n" +
+	"\treport_id\x18\x02 \x01(\x03R\breportId\"\xf3\x01\n" +
+	"'DatabaseServiceCreateUserHistoryRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tserver_id\x18\x03 \x01(\tR\bserverId\x12\x16\n" +
@@ -1233,11 +1416,11 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\x06reason\x18\x05 \x01(\tH\x00R\x06reason\x88\x01\x01\x12&\n" +
 	"\fevidence_url\x18\x06 \x01(\tH\x01R\vevidenceUrl\x88\x01\x01B\t\n" +
 	"\a_reasonB\x0f\n" +
-	"\r_evidence_url\"<\n" +
-	"\x1bDbCreateUserHistoryResponse\x12\x1d\n" +
+	"\r_evidence_url\"I\n" +
+	"(DatabaseServiceCreateUserHistoryResponse\x12\x1d\n" +
 	"\n" +
-	"history_id\x18\x01 \x01(\x03R\thistoryId\"\x9a\x01\n" +
-	"\x17DbGetUserHistoryRequest\x12\x19\n" +
+	"history_id\x18\x01 \x01(\x03R\thistoryId\"\xa7\x01\n" +
+	"$DatabaseServiceGetUserHistoryRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
 	"\x05limit\x18\x03 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
@@ -1254,8 +1437,8 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAtB\t\n" +
 	"\a_reasonB\x0f\n" +
-	"\r_evidence_url\"S\n" +
-	"\x18DbGetUserHistoryResponse\x127\n" +
+	"\r_evidence_url\"`\n" +
+	"%DatabaseServiceGetUserHistoryResponse\x127\n" +
 	"\aentries\x18\x01 \x03(\v2\x1d.snitch.v1.DbUserHistoryEntryR\aentries\"/\n" +
 	"\x12ListServersRequest\x12\x19\n" +
 	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"E\n" +
@@ -1263,18 +1446,18 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"G\n" +
 	"\x13ListServersResponse\x120\n" +
-	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers2\xbd\a\n" +
-	"\x0fDatabaseService\x12F\n" +
-	"\vCreateGroup\x12\x1d.snitch.v1.CreateGroupRequest\x1a\x16.google.protobuf.Empty\"\x00\x12`\n" +
-	"\x11FindGroupByServer\x12#.snitch.v1.FindGroupByServerRequest\x1a$.snitch.v1.FindGroupByServerResponse\"\x00\x12P\n" +
-	"\x10AddServerToGroup\x12\".snitch.v1.AddServerToGroupRequest\x1a\x16.google.protobuf.Empty\"\x00\x12V\n" +
-	"\x13CreateGroupDatabase\x12%.snitch.v1.CreateGroupDatabaseRequest\x1a\x16.google.protobuf.Empty\"\x00\x12U\n" +
-	"\fCreateReport\x12 .snitch.v1.DbCreateReportRequest\x1a!.snitch.v1.DbCreateReportResponse\"\x00\x12L\n" +
-	"\tGetReport\x12\x1d.snitch.v1.DbGetReportRequest\x1a\x1e.snitch.v1.DbGetReportResponse\"\x00\x12R\n" +
-	"\vListReports\x12\x1f.snitch.v1.DbListReportsRequest\x1a .snitch.v1.DbListReportsResponse\"\x00\x12J\n" +
-	"\fDeleteReport\x12 .snitch.v1.DbDeleteReportRequest\x1a\x16.google.protobuf.Empty\"\x00\x12d\n" +
-	"\x11CreateUserHistory\x12%.snitch.v1.DbCreateUserHistoryRequest\x1a&.snitch.v1.DbCreateUserHistoryResponse\"\x00\x12[\n" +
-	"\x0eGetUserHistory\x12\".snitch.v1.DbGetUserHistoryRequest\x1a#.snitch.v1.DbGetUserHistoryResponse\"\x00\x12N\n" +
+	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers2\x89\t\n" +
+	"\x0fDatabaseService\x12N\n" +
+	"\vCreateGroup\x12\x1d.snitch.v1.CreateGroupRequest\x1a\x1e.snitch.v1.CreateGroupResponse\"\x00\x12`\n" +
+	"\x11FindGroupByServer\x12#.snitch.v1.FindGroupByServerRequest\x1a$.snitch.v1.FindGroupByServerResponse\"\x00\x12]\n" +
+	"\x10AddServerToGroup\x12\".snitch.v1.AddServerToGroupRequest\x1a#.snitch.v1.AddServerToGroupResponse\"\x00\x12f\n" +
+	"\x13CreateGroupDatabase\x12%.snitch.v1.CreateGroupDatabaseRequest\x1a&.snitch.v1.CreateGroupDatabaseResponse\"\x00\x12o\n" +
+	"\fCreateReport\x12-.snitch.v1.DatabaseServiceCreateReportRequest\x1a..snitch.v1.DatabaseServiceCreateReportResponse\"\x00\x12f\n" +
+	"\tGetReport\x12*.snitch.v1.DatabaseServiceGetReportRequest\x1a+.snitch.v1.DatabaseServiceGetReportResponse\"\x00\x12l\n" +
+	"\vListReports\x12,.snitch.v1.DatabaseServiceListReportsRequest\x1a-.snitch.v1.DatabaseServiceListReportsResponse\"\x00\x12o\n" +
+	"\fDeleteReport\x12-.snitch.v1.DatabaseServiceDeleteReportRequest\x1a..snitch.v1.DatabaseServiceDeleteReportResponse\"\x00\x12~\n" +
+	"\x11CreateUserHistory\x122.snitch.v1.DatabaseServiceCreateUserHistoryRequest\x1a3.snitch.v1.DatabaseServiceCreateUserHistoryResponse\"\x00\x12u\n" +
+	"\x0eGetUserHistory\x12/.snitch.v1.DatabaseServiceGetUserHistoryRequest\x1a0.snitch.v1.DatabaseServiceGetUserHistoryResponse\"\x00\x12N\n" +
 	"\vListServers\x12\x1d.snitch.v1.ListServersRequest\x1a\x1e.snitch.v1.ListServersResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
@@ -1289,56 +1472,59 @@ func file_snitch_v1_database_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_database_proto_rawDescData
 }
 
-var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_snitch_v1_database_proto_goTypes = []any{
-	(*CreateGroupRequest)(nil),          // 0: snitch.v1.CreateGroupRequest
-	(*FindGroupByServerRequest)(nil),    // 1: snitch.v1.FindGroupByServerRequest
-	(*FindGroupByServerResponse)(nil),   // 2: snitch.v1.FindGroupByServerResponse
-	(*AddServerToGroupRequest)(nil),     // 3: snitch.v1.AddServerToGroupRequest
-	(*CreateGroupDatabaseRequest)(nil),  // 4: snitch.v1.CreateGroupDatabaseRequest
-	(*DbCreateReportRequest)(nil),       // 5: snitch.v1.DbCreateReportRequest
-	(*DbCreateReportResponse)(nil),      // 6: snitch.v1.DbCreateReportResponse
-	(*DbGetReportRequest)(nil),          // 7: snitch.v1.DbGetReportRequest
-	(*DbGetReportResponse)(nil),         // 8: snitch.v1.DbGetReportResponse
-	(*DbListReportsRequest)(nil),        // 9: snitch.v1.DbListReportsRequest
-	(*DbListReportsResponse)(nil),       // 10: snitch.v1.DbListReportsResponse
-	(*DbDeleteReportRequest)(nil),       // 11: snitch.v1.DbDeleteReportRequest
-	(*DbCreateUserHistoryRequest)(nil),  // 12: snitch.v1.DbCreateUserHistoryRequest
-	(*DbCreateUserHistoryResponse)(nil), // 13: snitch.v1.DbCreateUserHistoryResponse
-	(*DbGetUserHistoryRequest)(nil),     // 14: snitch.v1.DbGetUserHistoryRequest
-	(*DbUserHistoryEntry)(nil),          // 15: snitch.v1.DbUserHistoryEntry
-	(*DbGetUserHistoryResponse)(nil),    // 16: snitch.v1.DbGetUserHistoryResponse
-	(*ListServersRequest)(nil),          // 17: snitch.v1.ListServersRequest
-	(*ServerEntry)(nil),                 // 18: snitch.v1.ServerEntry
-	(*ListServersResponse)(nil),         // 19: snitch.v1.ListServersResponse
-	(*emptypb.Empty)(nil),               // 20: google.protobuf.Empty
+	(*CreateGroupRequest)(nil),                       // 0: snitch.v1.CreateGroupRequest
+	(*CreateGroupResponse)(nil),                      // 1: snitch.v1.CreateGroupResponse
+	(*FindGroupByServerRequest)(nil),                 // 2: snitch.v1.FindGroupByServerRequest
+	(*FindGroupByServerResponse)(nil),                // 3: snitch.v1.FindGroupByServerResponse
+	(*AddServerToGroupRequest)(nil),                  // 4: snitch.v1.AddServerToGroupRequest
+	(*AddServerToGroupResponse)(nil),                 // 5: snitch.v1.AddServerToGroupResponse
+	(*CreateGroupDatabaseRequest)(nil),               // 6: snitch.v1.CreateGroupDatabaseRequest
+	(*CreateGroupDatabaseResponse)(nil),              // 7: snitch.v1.CreateGroupDatabaseResponse
+	(*DatabaseServiceCreateReportRequest)(nil),       // 8: snitch.v1.DatabaseServiceCreateReportRequest
+	(*DatabaseServiceCreateReportResponse)(nil),      // 9: snitch.v1.DatabaseServiceCreateReportResponse
+	(*DatabaseServiceGetReportRequest)(nil),          // 10: snitch.v1.DatabaseServiceGetReportRequest
+	(*DatabaseServiceGetReportResponse)(nil),         // 11: snitch.v1.DatabaseServiceGetReportResponse
+	(*DatabaseServiceListReportsRequest)(nil),        // 12: snitch.v1.DatabaseServiceListReportsRequest
+	(*DatabaseServiceDeleteReportResponse)(nil),      // 13: snitch.v1.DatabaseServiceDeleteReportResponse
+	(*DatabaseServiceListReportsResponse)(nil),       // 14: snitch.v1.DatabaseServiceListReportsResponse
+	(*DatabaseServiceDeleteReportRequest)(nil),       // 15: snitch.v1.DatabaseServiceDeleteReportRequest
+	(*DatabaseServiceCreateUserHistoryRequest)(nil),  // 16: snitch.v1.DatabaseServiceCreateUserHistoryRequest
+	(*DatabaseServiceCreateUserHistoryResponse)(nil), // 17: snitch.v1.DatabaseServiceCreateUserHistoryResponse
+	(*DatabaseServiceGetUserHistoryRequest)(nil),     // 18: snitch.v1.DatabaseServiceGetUserHistoryRequest
+	(*DbUserHistoryEntry)(nil),                       // 19: snitch.v1.DbUserHistoryEntry
+	(*DatabaseServiceGetUserHistoryResponse)(nil),    // 20: snitch.v1.DatabaseServiceGetUserHistoryResponse
+	(*ListServersRequest)(nil),                       // 21: snitch.v1.ListServersRequest
+	(*ServerEntry)(nil),                              // 22: snitch.v1.ServerEntry
+	(*ListServersResponse)(nil),                      // 23: snitch.v1.ListServersResponse
 }
 var file_snitch_v1_database_proto_depIdxs = []int32{
-	8,  // 0: snitch.v1.DbListReportsResponse.reports:type_name -> snitch.v1.DbGetReportResponse
-	15, // 1: snitch.v1.DbGetUserHistoryResponse.entries:type_name -> snitch.v1.DbUserHistoryEntry
-	18, // 2: snitch.v1.ListServersResponse.servers:type_name -> snitch.v1.ServerEntry
+	11, // 0: snitch.v1.DatabaseServiceListReportsResponse.reports:type_name -> snitch.v1.DatabaseServiceGetReportResponse
+	19, // 1: snitch.v1.DatabaseServiceGetUserHistoryResponse.entries:type_name -> snitch.v1.DbUserHistoryEntry
+	22, // 2: snitch.v1.ListServersResponse.servers:type_name -> snitch.v1.ServerEntry
 	0,  // 3: snitch.v1.DatabaseService.CreateGroup:input_type -> snitch.v1.CreateGroupRequest
-	1,  // 4: snitch.v1.DatabaseService.FindGroupByServer:input_type -> snitch.v1.FindGroupByServerRequest
-	3,  // 5: snitch.v1.DatabaseService.AddServerToGroup:input_type -> snitch.v1.AddServerToGroupRequest
-	4,  // 6: snitch.v1.DatabaseService.CreateGroupDatabase:input_type -> snitch.v1.CreateGroupDatabaseRequest
-	5,  // 7: snitch.v1.DatabaseService.CreateReport:input_type -> snitch.v1.DbCreateReportRequest
-	7,  // 8: snitch.v1.DatabaseService.GetReport:input_type -> snitch.v1.DbGetReportRequest
-	9,  // 9: snitch.v1.DatabaseService.ListReports:input_type -> snitch.v1.DbListReportsRequest
-	11, // 10: snitch.v1.DatabaseService.DeleteReport:input_type -> snitch.v1.DbDeleteReportRequest
-	12, // 11: snitch.v1.DatabaseService.CreateUserHistory:input_type -> snitch.v1.DbCreateUserHistoryRequest
-	14, // 12: snitch.v1.DatabaseService.GetUserHistory:input_type -> snitch.v1.DbGetUserHistoryRequest
-	17, // 13: snitch.v1.DatabaseService.ListServers:input_type -> snitch.v1.ListServersRequest
-	20, // 14: snitch.v1.DatabaseService.CreateGroup:output_type -> google.protobuf.Empty
-	2,  // 15: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
-	20, // 16: snitch.v1.DatabaseService.AddServerToGroup:output_type -> google.protobuf.Empty
-	20, // 17: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> google.protobuf.Empty
-	6,  // 18: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DbCreateReportResponse
-	8,  // 19: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DbGetReportResponse
-	10, // 20: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DbListReportsResponse
-	20, // 21: snitch.v1.DatabaseService.DeleteReport:output_type -> google.protobuf.Empty
-	13, // 22: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DbCreateUserHistoryResponse
-	16, // 23: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DbGetUserHistoryResponse
-	19, // 24: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
+	2,  // 4: snitch.v1.DatabaseService.FindGroupByServer:input_type -> snitch.v1.FindGroupByServerRequest
+	4,  // 5: snitch.v1.DatabaseService.AddServerToGroup:input_type -> snitch.v1.AddServerToGroupRequest
+	6,  // 6: snitch.v1.DatabaseService.CreateGroupDatabase:input_type -> snitch.v1.CreateGroupDatabaseRequest
+	8,  // 7: snitch.v1.DatabaseService.CreateReport:input_type -> snitch.v1.DatabaseServiceCreateReportRequest
+	10, // 8: snitch.v1.DatabaseService.GetReport:input_type -> snitch.v1.DatabaseServiceGetReportRequest
+	12, // 9: snitch.v1.DatabaseService.ListReports:input_type -> snitch.v1.DatabaseServiceListReportsRequest
+	15, // 10: snitch.v1.DatabaseService.DeleteReport:input_type -> snitch.v1.DatabaseServiceDeleteReportRequest
+	16, // 11: snitch.v1.DatabaseService.CreateUserHistory:input_type -> snitch.v1.DatabaseServiceCreateUserHistoryRequest
+	18, // 12: snitch.v1.DatabaseService.GetUserHistory:input_type -> snitch.v1.DatabaseServiceGetUserHistoryRequest
+	21, // 13: snitch.v1.DatabaseService.ListServers:input_type -> snitch.v1.ListServersRequest
+	1,  // 14: snitch.v1.DatabaseService.CreateGroup:output_type -> snitch.v1.CreateGroupResponse
+	3,  // 15: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
+	5,  // 16: snitch.v1.DatabaseService.AddServerToGroup:output_type -> snitch.v1.AddServerToGroupResponse
+	7,  // 17: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> snitch.v1.CreateGroupDatabaseResponse
+	9,  // 18: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DatabaseServiceCreateReportResponse
+	11, // 19: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DatabaseServiceGetReportResponse
+	14, // 20: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DatabaseServiceListReportsResponse
+	13, // 21: snitch.v1.DatabaseService.DeleteReport:output_type -> snitch.v1.DatabaseServiceDeleteReportResponse
+	17, // 22: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DatabaseServiceCreateUserHistoryResponse
+	20, // 23: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DatabaseServiceGetUserHistoryResponse
+	23, // 24: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
 	14, // [14:25] is the sub-list for method output_type
 	3,  // [3:14] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
@@ -1351,19 +1537,19 @@ func file_snitch_v1_database_proto_init() {
 	if File_snitch_v1_database_proto != nil {
 		return
 	}
-	file_snitch_v1_database_proto_msgTypes[5].OneofWrappers = []any{}
 	file_snitch_v1_database_proto_msgTypes[8].OneofWrappers = []any{}
-	file_snitch_v1_database_proto_msgTypes[9].OneofWrappers = []any{}
+	file_snitch_v1_database_proto_msgTypes[11].OneofWrappers = []any{}
 	file_snitch_v1_database_proto_msgTypes[12].OneofWrappers = []any{}
-	file_snitch_v1_database_proto_msgTypes[14].OneofWrappers = []any{}
-	file_snitch_v1_database_proto_msgTypes[15].OneofWrappers = []any{}
+	file_snitch_v1_database_proto_msgTypes[16].OneofWrappers = []any{}
+	file_snitch_v1_database_proto_msgTypes[18].OneofWrappers = []any{}
+	file_snitch_v1_database_proto_msgTypes[19].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_database_proto_rawDesc), len(file_snitch_v1_database_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

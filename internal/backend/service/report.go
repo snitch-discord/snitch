@@ -52,7 +52,7 @@ func (s *ReportServer) CreateReport(
 	groupID := findGroupResp.Msg.GroupId
 
 	// Create the report
-	createReportReq := &snitchv1.DbCreateReportRequest{
+	createReportReq := &snitchv1.DatabaseServiceCreateReportRequest{
 		GroupId:    groupID,
 		UserId:     req.Msg.ReportedId,
 		ReporterId: req.Msg.ReporterId,
@@ -68,11 +68,11 @@ func (s *ReportServer) CreateReport(
 	reportID := createReportResp.Msg.ReportId
 
 	// Emit event
-	event := &snitchv1.Event{
+	event := &snitchv1.SubscribeResponse{
 		Type:     snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 		GroupId:  groupID,
 		ServerId: serverID,
-		Data: &snitchv1.Event_ReportCreated{
+		Data: &snitchv1.SubscribeResponse_ReportCreated{
 			ReportCreated: &snitchv1.ReportCreatedEvent{
 				ReportId:   reportID,
 				ReportedId: req.Msg.ReportedId,
@@ -120,7 +120,7 @@ func (s *ReportServer) ListReports(
 	groupID := findGroupResp.Msg.GroupId
 
 	// List reports - convert from old protobuf format to new format for now
-	listReportsReq := &snitchv1.DbListReportsRequest{
+	listReportsReq := &snitchv1.DatabaseServiceListReportsRequest{
 		GroupId: groupID,
 		UserId:  req.Msg.ReportedId,
 		Limit:   nil,
@@ -175,7 +175,7 @@ func (s *ReportServer) DeleteReport(
 	groupID := findGroupResp.Msg.GroupId
 
 	// Delete the report
-	deleteReportReq := &snitchv1.DbDeleteReportRequest{
+	deleteReportReq := &snitchv1.DatabaseServiceDeleteReportRequest{
 		GroupId:  groupID,
 		ReportId: req.Msg.ReportId,
 	}
@@ -186,11 +186,11 @@ func (s *ReportServer) DeleteReport(
 	}
 
 	// Emit event
-	event := &snitchv1.Event{
+	event := &snitchv1.SubscribeResponse{
 		Type:     snitchv1.EventType_EVENT_TYPE_REPORT_DELETED,
 		GroupId:  groupID,
 		ServerId: serverID,
-		Data: &snitchv1.Event_ReportDeleted{
+		Data: &snitchv1.SubscribeResponse_ReportDeleted{
 			ReportDeleted: &snitchv1.ReportDeletedEvent{
 				ReportId: req.Msg.ReportId,
 			},

@@ -8,7 +8,6 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	v1 "snitch/pkg/proto/gen/snitch/v1"
 	strings "strings"
@@ -72,19 +71,19 @@ const (
 // DatabaseServiceClient is a client for the snitch.v1.DatabaseService service.
 type DatabaseServiceClient interface {
 	// Metadata operations
-	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
 	FindGroupByServer(context.Context, *connect.Request[v1.FindGroupByServerRequest]) (*connect.Response[v1.FindGroupByServerResponse], error)
-	AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error)
+	AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[v1.AddServerToGroupResponse], error)
 	// Group database operations
-	CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[v1.CreateGroupDatabaseResponse], error)
 	// Report operations
-	CreateReport(context.Context, *connect.Request[v1.DbCreateReportRequest]) (*connect.Response[v1.DbCreateReportResponse], error)
-	GetReport(context.Context, *connect.Request[v1.DbGetReportRequest]) (*connect.Response[v1.DbGetReportResponse], error)
-	ListReports(context.Context, *connect.Request[v1.DbListReportsRequest]) (*connect.Response[v1.DbListReportsResponse], error)
-	DeleteReport(context.Context, *connect.Request[v1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateReport(context.Context, *connect.Request[v1.DatabaseServiceCreateReportRequest]) (*connect.Response[v1.DatabaseServiceCreateReportResponse], error)
+	GetReport(context.Context, *connect.Request[v1.DatabaseServiceGetReportRequest]) (*connect.Response[v1.DatabaseServiceGetReportResponse], error)
+	ListReports(context.Context, *connect.Request[v1.DatabaseServiceListReportsRequest]) (*connect.Response[v1.DatabaseServiceListReportsResponse], error)
+	DeleteReport(context.Context, *connect.Request[v1.DatabaseServiceDeleteReportRequest]) (*connect.Response[v1.DatabaseServiceDeleteReportResponse], error)
 	// User history operations
-	CreateUserHistory(context.Context, *connect.Request[v1.DbCreateUserHistoryRequest]) (*connect.Response[v1.DbCreateUserHistoryResponse], error)
-	GetUserHistory(context.Context, *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error)
+	CreateUserHistory(context.Context, *connect.Request[v1.DatabaseServiceCreateUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceCreateUserHistoryResponse], error)
+	GetUserHistory(context.Context, *connect.Request[v1.DatabaseServiceGetUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceGetUserHistoryResponse], error)
 	// Server operations
 	ListServers(context.Context, *connect.Request[v1.ListServersRequest]) (*connect.Response[v1.ListServersResponse], error)
 }
@@ -100,7 +99,7 @@ func NewDatabaseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 	baseURL = strings.TrimRight(baseURL, "/")
 	databaseServiceMethods := v1.File_snitch_v1_database_proto.Services().ByName("DatabaseService").Methods()
 	return &databaseServiceClient{
-		createGroup: connect.NewClient[v1.CreateGroupRequest, emptypb.Empty](
+		createGroup: connect.NewClient[v1.CreateGroupRequest, v1.CreateGroupResponse](
 			httpClient,
 			baseURL+DatabaseServiceCreateGroupProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("CreateGroup")),
@@ -112,49 +111,49 @@ func NewDatabaseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(databaseServiceMethods.ByName("FindGroupByServer")),
 			connect.WithClientOptions(opts...),
 		),
-		addServerToGroup: connect.NewClient[v1.AddServerToGroupRequest, emptypb.Empty](
+		addServerToGroup: connect.NewClient[v1.AddServerToGroupRequest, v1.AddServerToGroupResponse](
 			httpClient,
 			baseURL+DatabaseServiceAddServerToGroupProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("AddServerToGroup")),
 			connect.WithClientOptions(opts...),
 		),
-		createGroupDatabase: connect.NewClient[v1.CreateGroupDatabaseRequest, emptypb.Empty](
+		createGroupDatabase: connect.NewClient[v1.CreateGroupDatabaseRequest, v1.CreateGroupDatabaseResponse](
 			httpClient,
 			baseURL+DatabaseServiceCreateGroupDatabaseProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("CreateGroupDatabase")),
 			connect.WithClientOptions(opts...),
 		),
-		createReport: connect.NewClient[v1.DbCreateReportRequest, v1.DbCreateReportResponse](
+		createReport: connect.NewClient[v1.DatabaseServiceCreateReportRequest, v1.DatabaseServiceCreateReportResponse](
 			httpClient,
 			baseURL+DatabaseServiceCreateReportProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("CreateReport")),
 			connect.WithClientOptions(opts...),
 		),
-		getReport: connect.NewClient[v1.DbGetReportRequest, v1.DbGetReportResponse](
+		getReport: connect.NewClient[v1.DatabaseServiceGetReportRequest, v1.DatabaseServiceGetReportResponse](
 			httpClient,
 			baseURL+DatabaseServiceGetReportProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("GetReport")),
 			connect.WithClientOptions(opts...),
 		),
-		listReports: connect.NewClient[v1.DbListReportsRequest, v1.DbListReportsResponse](
+		listReports: connect.NewClient[v1.DatabaseServiceListReportsRequest, v1.DatabaseServiceListReportsResponse](
 			httpClient,
 			baseURL+DatabaseServiceListReportsProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("ListReports")),
 			connect.WithClientOptions(opts...),
 		),
-		deleteReport: connect.NewClient[v1.DbDeleteReportRequest, emptypb.Empty](
+		deleteReport: connect.NewClient[v1.DatabaseServiceDeleteReportRequest, v1.DatabaseServiceDeleteReportResponse](
 			httpClient,
 			baseURL+DatabaseServiceDeleteReportProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("DeleteReport")),
 			connect.WithClientOptions(opts...),
 		),
-		createUserHistory: connect.NewClient[v1.DbCreateUserHistoryRequest, v1.DbCreateUserHistoryResponse](
+		createUserHistory: connect.NewClient[v1.DatabaseServiceCreateUserHistoryRequest, v1.DatabaseServiceCreateUserHistoryResponse](
 			httpClient,
 			baseURL+DatabaseServiceCreateUserHistoryProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("CreateUserHistory")),
 			connect.WithClientOptions(opts...),
 		),
-		getUserHistory: connect.NewClient[v1.DbGetUserHistoryRequest, v1.DbGetUserHistoryResponse](
+		getUserHistory: connect.NewClient[v1.DatabaseServiceGetUserHistoryRequest, v1.DatabaseServiceGetUserHistoryResponse](
 			httpClient,
 			baseURL+DatabaseServiceGetUserHistoryProcedure,
 			connect.WithSchema(databaseServiceMethods.ByName("GetUserHistory")),
@@ -171,21 +170,21 @@ func NewDatabaseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // databaseServiceClient implements DatabaseServiceClient.
 type databaseServiceClient struct {
-	createGroup         *connect.Client[v1.CreateGroupRequest, emptypb.Empty]
+	createGroup         *connect.Client[v1.CreateGroupRequest, v1.CreateGroupResponse]
 	findGroupByServer   *connect.Client[v1.FindGroupByServerRequest, v1.FindGroupByServerResponse]
-	addServerToGroup    *connect.Client[v1.AddServerToGroupRequest, emptypb.Empty]
-	createGroupDatabase *connect.Client[v1.CreateGroupDatabaseRequest, emptypb.Empty]
-	createReport        *connect.Client[v1.DbCreateReportRequest, v1.DbCreateReportResponse]
-	getReport           *connect.Client[v1.DbGetReportRequest, v1.DbGetReportResponse]
-	listReports         *connect.Client[v1.DbListReportsRequest, v1.DbListReportsResponse]
-	deleteReport        *connect.Client[v1.DbDeleteReportRequest, emptypb.Empty]
-	createUserHistory   *connect.Client[v1.DbCreateUserHistoryRequest, v1.DbCreateUserHistoryResponse]
-	getUserHistory      *connect.Client[v1.DbGetUserHistoryRequest, v1.DbGetUserHistoryResponse]
+	addServerToGroup    *connect.Client[v1.AddServerToGroupRequest, v1.AddServerToGroupResponse]
+	createGroupDatabase *connect.Client[v1.CreateGroupDatabaseRequest, v1.CreateGroupDatabaseResponse]
+	createReport        *connect.Client[v1.DatabaseServiceCreateReportRequest, v1.DatabaseServiceCreateReportResponse]
+	getReport           *connect.Client[v1.DatabaseServiceGetReportRequest, v1.DatabaseServiceGetReportResponse]
+	listReports         *connect.Client[v1.DatabaseServiceListReportsRequest, v1.DatabaseServiceListReportsResponse]
+	deleteReport        *connect.Client[v1.DatabaseServiceDeleteReportRequest, v1.DatabaseServiceDeleteReportResponse]
+	createUserHistory   *connect.Client[v1.DatabaseServiceCreateUserHistoryRequest, v1.DatabaseServiceCreateUserHistoryResponse]
+	getUserHistory      *connect.Client[v1.DatabaseServiceGetUserHistoryRequest, v1.DatabaseServiceGetUserHistoryResponse]
 	listServers         *connect.Client[v1.ListServersRequest, v1.ListServersResponse]
 }
 
 // CreateGroup calls snitch.v1.DatabaseService.CreateGroup.
-func (c *databaseServiceClient) CreateGroup(ctx context.Context, req *connect.Request[v1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *databaseServiceClient) CreateGroup(ctx context.Context, req *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error) {
 	return c.createGroup.CallUnary(ctx, req)
 }
 
@@ -195,42 +194,42 @@ func (c *databaseServiceClient) FindGroupByServer(ctx context.Context, req *conn
 }
 
 // AddServerToGroup calls snitch.v1.DatabaseService.AddServerToGroup.
-func (c *databaseServiceClient) AddServerToGroup(ctx context.Context, req *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *databaseServiceClient) AddServerToGroup(ctx context.Context, req *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[v1.AddServerToGroupResponse], error) {
 	return c.addServerToGroup.CallUnary(ctx, req)
 }
 
 // CreateGroupDatabase calls snitch.v1.DatabaseService.CreateGroupDatabase.
-func (c *databaseServiceClient) CreateGroupDatabase(ctx context.Context, req *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *databaseServiceClient) CreateGroupDatabase(ctx context.Context, req *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[v1.CreateGroupDatabaseResponse], error) {
 	return c.createGroupDatabase.CallUnary(ctx, req)
 }
 
 // CreateReport calls snitch.v1.DatabaseService.CreateReport.
-func (c *databaseServiceClient) CreateReport(ctx context.Context, req *connect.Request[v1.DbCreateReportRequest]) (*connect.Response[v1.DbCreateReportResponse], error) {
+func (c *databaseServiceClient) CreateReport(ctx context.Context, req *connect.Request[v1.DatabaseServiceCreateReportRequest]) (*connect.Response[v1.DatabaseServiceCreateReportResponse], error) {
 	return c.createReport.CallUnary(ctx, req)
 }
 
 // GetReport calls snitch.v1.DatabaseService.GetReport.
-func (c *databaseServiceClient) GetReport(ctx context.Context, req *connect.Request[v1.DbGetReportRequest]) (*connect.Response[v1.DbGetReportResponse], error) {
+func (c *databaseServiceClient) GetReport(ctx context.Context, req *connect.Request[v1.DatabaseServiceGetReportRequest]) (*connect.Response[v1.DatabaseServiceGetReportResponse], error) {
 	return c.getReport.CallUnary(ctx, req)
 }
 
 // ListReports calls snitch.v1.DatabaseService.ListReports.
-func (c *databaseServiceClient) ListReports(ctx context.Context, req *connect.Request[v1.DbListReportsRequest]) (*connect.Response[v1.DbListReportsResponse], error) {
+func (c *databaseServiceClient) ListReports(ctx context.Context, req *connect.Request[v1.DatabaseServiceListReportsRequest]) (*connect.Response[v1.DatabaseServiceListReportsResponse], error) {
 	return c.listReports.CallUnary(ctx, req)
 }
 
 // DeleteReport calls snitch.v1.DatabaseService.DeleteReport.
-func (c *databaseServiceClient) DeleteReport(ctx context.Context, req *connect.Request[v1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *databaseServiceClient) DeleteReport(ctx context.Context, req *connect.Request[v1.DatabaseServiceDeleteReportRequest]) (*connect.Response[v1.DatabaseServiceDeleteReportResponse], error) {
 	return c.deleteReport.CallUnary(ctx, req)
 }
 
 // CreateUserHistory calls snitch.v1.DatabaseService.CreateUserHistory.
-func (c *databaseServiceClient) CreateUserHistory(ctx context.Context, req *connect.Request[v1.DbCreateUserHistoryRequest]) (*connect.Response[v1.DbCreateUserHistoryResponse], error) {
+func (c *databaseServiceClient) CreateUserHistory(ctx context.Context, req *connect.Request[v1.DatabaseServiceCreateUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceCreateUserHistoryResponse], error) {
 	return c.createUserHistory.CallUnary(ctx, req)
 }
 
 // GetUserHistory calls snitch.v1.DatabaseService.GetUserHistory.
-func (c *databaseServiceClient) GetUserHistory(ctx context.Context, req *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error) {
+func (c *databaseServiceClient) GetUserHistory(ctx context.Context, req *connect.Request[v1.DatabaseServiceGetUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceGetUserHistoryResponse], error) {
 	return c.getUserHistory.CallUnary(ctx, req)
 }
 
@@ -242,19 +241,19 @@ func (c *databaseServiceClient) ListServers(ctx context.Context, req *connect.Re
 // DatabaseServiceHandler is an implementation of the snitch.v1.DatabaseService service.
 type DatabaseServiceHandler interface {
 	// Metadata operations
-	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
 	FindGroupByServer(context.Context, *connect.Request[v1.FindGroupByServerRequest]) (*connect.Response[v1.FindGroupByServerResponse], error)
-	AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error)
+	AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[v1.AddServerToGroupResponse], error)
 	// Group database operations
-	CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[v1.CreateGroupDatabaseResponse], error)
 	// Report operations
-	CreateReport(context.Context, *connect.Request[v1.DbCreateReportRequest]) (*connect.Response[v1.DbCreateReportResponse], error)
-	GetReport(context.Context, *connect.Request[v1.DbGetReportRequest]) (*connect.Response[v1.DbGetReportResponse], error)
-	ListReports(context.Context, *connect.Request[v1.DbListReportsRequest]) (*connect.Response[v1.DbListReportsResponse], error)
-	DeleteReport(context.Context, *connect.Request[v1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateReport(context.Context, *connect.Request[v1.DatabaseServiceCreateReportRequest]) (*connect.Response[v1.DatabaseServiceCreateReportResponse], error)
+	GetReport(context.Context, *connect.Request[v1.DatabaseServiceGetReportRequest]) (*connect.Response[v1.DatabaseServiceGetReportResponse], error)
+	ListReports(context.Context, *connect.Request[v1.DatabaseServiceListReportsRequest]) (*connect.Response[v1.DatabaseServiceListReportsResponse], error)
+	DeleteReport(context.Context, *connect.Request[v1.DatabaseServiceDeleteReportRequest]) (*connect.Response[v1.DatabaseServiceDeleteReportResponse], error)
 	// User history operations
-	CreateUserHistory(context.Context, *connect.Request[v1.DbCreateUserHistoryRequest]) (*connect.Response[v1.DbCreateUserHistoryResponse], error)
-	GetUserHistory(context.Context, *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error)
+	CreateUserHistory(context.Context, *connect.Request[v1.DatabaseServiceCreateUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceCreateUserHistoryResponse], error)
+	GetUserHistory(context.Context, *connect.Request[v1.DatabaseServiceGetUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceGetUserHistoryResponse], error)
 	// Server operations
 	ListServers(context.Context, *connect.Request[v1.ListServersRequest]) (*connect.Response[v1.ListServersResponse], error)
 }
@@ -365,7 +364,7 @@ func NewDatabaseServiceHandler(svc DatabaseServiceHandler, opts ...connect.Handl
 // UnimplementedDatabaseServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDatabaseServiceHandler struct{}
 
-func (UnimplementedDatabaseServiceHandler) CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedDatabaseServiceHandler) CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CreateGroup is not implemented"))
 }
 
@@ -373,35 +372,35 @@ func (UnimplementedDatabaseServiceHandler) FindGroupByServer(context.Context, *c
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.FindGroupByServer is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedDatabaseServiceHandler) AddServerToGroup(context.Context, *connect.Request[v1.AddServerToGroupRequest]) (*connect.Response[v1.AddServerToGroupResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.AddServerToGroup is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedDatabaseServiceHandler) CreateGroupDatabase(context.Context, *connect.Request[v1.CreateGroupDatabaseRequest]) (*connect.Response[v1.CreateGroupDatabaseResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CreateGroupDatabase is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) CreateReport(context.Context, *connect.Request[v1.DbCreateReportRequest]) (*connect.Response[v1.DbCreateReportResponse], error) {
+func (UnimplementedDatabaseServiceHandler) CreateReport(context.Context, *connect.Request[v1.DatabaseServiceCreateReportRequest]) (*connect.Response[v1.DatabaseServiceCreateReportResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CreateReport is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) GetReport(context.Context, *connect.Request[v1.DbGetReportRequest]) (*connect.Response[v1.DbGetReportResponse], error) {
+func (UnimplementedDatabaseServiceHandler) GetReport(context.Context, *connect.Request[v1.DatabaseServiceGetReportRequest]) (*connect.Response[v1.DatabaseServiceGetReportResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.GetReport is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) ListReports(context.Context, *connect.Request[v1.DbListReportsRequest]) (*connect.Response[v1.DbListReportsResponse], error) {
+func (UnimplementedDatabaseServiceHandler) ListReports(context.Context, *connect.Request[v1.DatabaseServiceListReportsRequest]) (*connect.Response[v1.DatabaseServiceListReportsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.ListReports is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) DeleteReport(context.Context, *connect.Request[v1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedDatabaseServiceHandler) DeleteReport(context.Context, *connect.Request[v1.DatabaseServiceDeleteReportRequest]) (*connect.Response[v1.DatabaseServiceDeleteReportResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.DeleteReport is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) CreateUserHistory(context.Context, *connect.Request[v1.DbCreateUserHistoryRequest]) (*connect.Response[v1.DbCreateUserHistoryResponse], error) {
+func (UnimplementedDatabaseServiceHandler) CreateUserHistory(context.Context, *connect.Request[v1.DatabaseServiceCreateUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceCreateUserHistoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.CreateUserHistory is not implemented"))
 }
 
-func (UnimplementedDatabaseServiceHandler) GetUserHistory(context.Context, *connect.Request[v1.DbGetUserHistoryRequest]) (*connect.Response[v1.DbGetUserHistoryResponse], error) {
+func (UnimplementedDatabaseServiceHandler) GetUserHistory(context.Context, *connect.Request[v1.DatabaseServiceGetUserHistoryRequest]) (*connect.Response[v1.DatabaseServiceGetUserHistoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.DatabaseService.GetUserHistory is not implemented"))
 }
 

@@ -50,7 +50,7 @@ func (s *UserServer) CreateUserHistory(
 	groupID := findGroupResp.Msg.GroupId
 
 	// Create user history entry
-	createHistoryReq := &snitchv1.DbCreateUserHistoryRequest{
+	createHistoryReq := &snitchv1.DatabaseServiceCreateUserHistoryRequest{
 		GroupId:     groupID,
 		UserId:      req.Msg.UserId,
 		ServerId:    serverID,
@@ -100,7 +100,7 @@ func (s *UserServer) ListUserHistory(
 	groupID := findGroupResp.Msg.GroupId
 
 	// Get user history
-	getUserHistoryReq := &snitchv1.DbGetUserHistoryRequest{
+	getUserHistoryReq := &snitchv1.DatabaseServiceGetUserHistoryRequest{
 		GroupId: groupID,
 		UserId:  req.Msg.UserId,
 		Limit:   nil,

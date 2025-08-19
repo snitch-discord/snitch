@@ -3,12 +3,14 @@ option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
 
 package snitch.v1;
 
-import "google/protobuf/empty.proto";
-
 // Metadata database operations
 message CreateGroupRequest {
   string group_id = 1;
   string group_name = 2;
+}
+
+message CreateGroupResponse {
+  string group_id = 1;
 }
 
 message FindGroupByServerRequest {
@@ -24,12 +26,20 @@ message AddServerToGroupRequest {
   string group_id = 2;
 }
 
+message AddServerToGroupResponse {
+  string server_id = 1;
+}
+
 // Group database operations
 message CreateGroupDatabaseRequest {
   string group_id = 1;
 }
 
-message DbCreateReportRequest {
+message CreateGroupDatabaseResponse {
+  string group_id = 1;
+}
+
+message DatabaseServiceCreateReportRequest {
   string group_id = 1;
   string user_id = 2;
   string reporter_id = 3;
@@ -38,16 +48,16 @@ message DbCreateReportRequest {
   optional string evidence_url = 6;
 }
 
-message DbCreateReportResponse {
+message DatabaseServiceCreateReportResponse {
   int64 report_id = 1;
 }
 
-message DbGetReportRequest {
+message DatabaseServiceGetReportRequest {
   string group_id = 1;
   int64 report_id = 2;
 }
 
-message DbGetReportResponse {
+message DatabaseServiceGetReportResponse {
   int64 id = 1;
   string user_id = 2;
   string reporter_id = 3;
@@ -57,23 +67,27 @@ message DbGetReportResponse {
   string created_at = 7;
 }
 
-message DbListReportsRequest {
+message DatabaseServiceListReportsRequest {
   string group_id = 1;
   optional string user_id = 2;
   optional int32 limit = 3;
   optional int32 offset = 4;
 }
 
-message DbListReportsResponse {
-  repeated DbGetReportResponse reports = 1;
+message DatabaseServiceDeleteReportResponse {
+  int64 report_id = 1;
 }
 
-message DbDeleteReportRequest {
+message DatabaseServiceListReportsResponse {
+  repeated DatabaseServiceGetReportResponse reports = 1;
+}
+
+message DatabaseServiceDeleteReportRequest {
   string group_id = 1;
   int64 report_id = 2;
 }
 
-message DbCreateUserHistoryRequest {
+message DatabaseServiceCreateUserHistoryRequest {
   string group_id = 1;
   string user_id = 2;
   string server_id = 3;
@@ -82,11 +96,11 @@ message DbCreateUserHistoryRequest {
   optional string evidence_url = 6;
 }
 
-message DbCreateUserHistoryResponse {
+message DatabaseServiceCreateUserHistoryResponse {
   int64 history_id = 1;
 }
 
-message DbGetUserHistoryRequest {
+message DatabaseServiceGetUserHistoryRequest {
   string group_id = 1;
   string user_id = 2;
   optional int32 limit = 3;
@@ -103,7 +117,7 @@ message DbUserHistoryEntry {
   string created_at = 7;
 }
 
-message DbGetUserHistoryResponse {
+message DatabaseServiceGetUserHistoryResponse {
   repeated DbUserHistoryEntry entries = 1;
 }
 
@@ -122,22 +136,22 @@ message ListServersResponse {
 
 service DatabaseService {
   // Metadata operations
-  rpc CreateGroup(CreateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
   rpc FindGroupByServer(FindGroupByServerRequest) returns (FindGroupByServerResponse) {}
-  rpc AddServerToGroup(AddServerToGroupRequest) returns (google.protobuf.Empty) {}
+  rpc AddServerToGroup(AddServerToGroupRequest) returns (AddServerToGroupResponse) {}
   
   // Group database operations
-  rpc CreateGroupDatabase(CreateGroupDatabaseRequest) returns (google.protobuf.Empty) {}
+  rpc CreateGroupDatabase(CreateGroupDatabaseRequest) returns (CreateGroupDatabaseResponse) {}
   
   // Report operations
-  rpc CreateReport(DbCreateReportRequest) returns (DbCreateReportResponse) {}
-  rpc GetReport(DbGetReportRequest) returns (DbGetReportResponse) {}
-  rpc ListReports(DbListReportsRequest) returns (DbListReportsResponse) {}
-  rpc DeleteReport(DbDeleteReportRequest) returns (google.protobuf.Empty) {}
+  rpc CreateReport(DatabaseServiceCreateReportRequest) returns (DatabaseServiceCreateReportResponse) {}
+  rpc GetReport(DatabaseServiceGetReportRequest) returns (DatabaseServiceGetReportResponse) {}
+  rpc ListReports(DatabaseServiceListReportsRequest) returns (DatabaseServiceListReportsResponse) {}
+  rpc DeleteReport(DatabaseServiceDeleteReportRequest) returns (DatabaseServiceDeleteReportResponse) {}
   
   // User history operations
-  rpc CreateUserHistory(DbCreateUserHistoryRequest) returns (DbCreateUserHistoryResponse) {}
-  rpc GetUserHistory(DbGetUserHistoryRequest) returns (DbGetUserHistoryResponse) {}
+  rpc CreateUserHistory(DatabaseServiceCreateUserHistoryRequest) returns (DatabaseServiceCreateUserHistoryResponse) {}
+  rpc GetUserHistory(DatabaseServiceGetUserHistoryRequest) returns (DatabaseServiceGetUserHistoryResponse) {}
   
   // Server operations
   rpc ListServers(ListServersRequest) returns (ListServersResponse) {}
