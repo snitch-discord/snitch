@@ -1,95 +1,71 @@
 package main
 
 import (
-	"context"
-	"crypto/ed25519"
+	"crypto/tls"
 	"crypto/x509"
-	_ "embed"
-	"encoding/base64"
-	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
-	"snitch/internal/backend/dbconfig"
-	"snitch/internal/backend/jwt"
-	"snitch/internal/backend/metadata"
+	"snitch/internal/backend/backendconfig"
 	"snitch/internal/backend/service"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
-
-func fatal(msg string, args ...any) {
-	slog.Error(msg, args...)
-	os.Exit(1)
-}
 
 func main() {
 	port := flag.Int("port", 4200, "port to listen on")
 	flag.Parse()
 
-	libSQLConfig, err := dbconfig.LibSQLConfigFromEnv()
+	config, err := backendconfig.FromEnv()
 	if err != nil {
-		fatal("Failed to load LibSQL configuration from environment", "error", err)
+		log.Fatalf("Failed to load backend configuration from environment: %v", err)
 	}
 
-	pemKey, err := base64.StdEncoding.DecodeString(libSQLConfig.AuthKey)
+	// Load CA certificate for database service validation
+	caCert, err := os.ReadFile(config.CaCertFilePath)
 	if err != nil {
-		fatal("Failed to decode LibSQL auth key", "error", err)
+		log.Fatal("Failed to read CA certificate", "error", err)
 	}
-	block, _ := pem.Decode([]byte(pemKey))
-	if block == nil {
-		fatal("Failed to decode PEM block from auth key")
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		log.Fatal("Failed to parse CA certificate")
 	}
 
-	parseResult, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	// Create database service client (Connect RPC over HTTPS)
+	dbServiceURL, err := config.DbURL()
 	if err != nil {
-		fatal("Failed to parse PKCS8 private key", "error", err)
+		log.Fatalf("Failed to load db URL from environment: %v", err)
 	}
+	dbClient := snitchv1connect.NewDatabaseServiceClient(
+		&http.Client{
+			Timeout: 30 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					RootCAs: caCertPool,
+				},
+			},
+		},
+		dbServiceURL.String(),
+	)
 
-	key, ok := parseResult.(ed25519.PrivateKey)
-	if !ok {
-		fatal("Auth key is not an Ed25519 private key")
-	}
+	eventService := service.NewEventService(dbClient)
+	registrar := service.NewRegisterServer(dbClient)
+	reportServer := service.NewReportServer(dbClient, eventService)
+	userServer := service.NewUserServer(dbClient)
 
-	jwtDuration := 10 * time.Minute
-	jwtCache := &jwt.TokenCache{}
-	jwt.StartGenerator(jwtDuration, jwtCache, key)
-
-	dbJwt, err := jwt.CreateToken(key)
+	// Load TLS certificate for backend service
+	cert, err := tls.LoadX509KeyPair(config.CertFilePath, config.KeyFilePath)
 	if err != nil {
-		fatal("Failed to create JWT token for database", "error", err)
+		log.Fatal("Failed to load TLS certificate", "error", err)
 	}
-
-	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	metadataDb, err := metadata.NewMetadataDB(dbCtx, dbJwt, libSQLConfig)
-	if err != nil {
-		fatal("Failed to initialize metadata database", "error", err)
-	}
-	defer func() {
-		if err := metadataDb.Close(); err != nil {
-			slog.Error("Failed to close metadata database", "error", err)
-		}
-	}()
-
-	if err := metadataDb.PingContext(dbCtx); err != nil {
-		fatal("Failed to ping metadata database", "error", err)
-	}
-
-	eventService := service.NewEventService(metadataDb)
-	registrar := service.NewRegisterServer(jwtCache, metadataDb, libSQLConfig)
-	reportServer := service.NewReportServer(jwtCache, libSQLConfig, eventService)
-	userServer := service.NewUserServer(jwtCache, libSQLConfig)
 
 	baseInterceptors := connect.WithInterceptors(
 		interceptor.NewRecoveryInterceptor(),
@@ -99,18 +75,27 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle(snitchv1connect.NewRegistrarServiceHandler(registrar, baseInterceptors))
-	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
-	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors, connect.WithInterceptors(interceptor.NewGroupContextInterceptor(metadataDb))))
+	mux.Handle(snitchv1connect.NewReportServiceHandler(reportServer, baseInterceptors))
+	mux.Handle(snitchv1connect.NewUserHistoryServiceHandler(userServer, baseInterceptors))
 	mux.Handle(snitchv1connect.NewEventServiceHandler(eventService, baseInterceptors))
+
+	// Configure TLS
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"h2"},
+	}
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", *port),
-		Handler:           h2c.NewHandler(mux, &http2.Server{}),
+		Handler:           mux,
+		TLSConfig:         tlsConfig,
 		ReadHeaderTimeout: 10 * time.Second,
 		// No ReadTimeout/WriteTimeout for streaming support
 	}
 
-	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+	slog.Info("Starting backend service with TLS", "port", *port, "db_url", dbServiceURL, "cert", config.CertFilePath)
+
+	if err := server.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		slog.Error(err.Error())
 	}
 }

@@ -39,7 +39,7 @@ const (
 
 // EventServiceClient is a client for the snitch.v1.EventService service.
 type EventServiceClient interface {
-	Subscribe(context.Context, *connect.Request[v1.SubscribeRequest]) (*connect.ServerStreamForClient[v1.Event], error)
+	Subscribe(context.Context, *connect.Request[v1.SubscribeRequest]) (*connect.ServerStreamForClient[v1.SubscribeResponse], error)
 }
 
 // NewEventServiceClient constructs a client for the snitch.v1.EventService service. By default, it
@@ -53,7 +53,7 @@ func NewEventServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 	baseURL = strings.TrimRight(baseURL, "/")
 	eventServiceMethods := v1.File_snitch_v1_events_proto.Services().ByName("EventService").Methods()
 	return &eventServiceClient{
-		subscribe: connect.NewClient[v1.SubscribeRequest, v1.Event](
+		subscribe: connect.NewClient[v1.SubscribeRequest, v1.SubscribeResponse](
 			httpClient,
 			baseURL+EventServiceSubscribeProcedure,
 			connect.WithSchema(eventServiceMethods.ByName("Subscribe")),
@@ -64,17 +64,17 @@ func NewEventServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // eventServiceClient implements EventServiceClient.
 type eventServiceClient struct {
-	subscribe *connect.Client[v1.SubscribeRequest, v1.Event]
+	subscribe *connect.Client[v1.SubscribeRequest, v1.SubscribeResponse]
 }
 
 // Subscribe calls snitch.v1.EventService.Subscribe.
-func (c *eventServiceClient) Subscribe(ctx context.Context, req *connect.Request[v1.SubscribeRequest]) (*connect.ServerStreamForClient[v1.Event], error) {
+func (c *eventServiceClient) Subscribe(ctx context.Context, req *connect.Request[v1.SubscribeRequest]) (*connect.ServerStreamForClient[v1.SubscribeResponse], error) {
 	return c.subscribe.CallServerStream(ctx, req)
 }
 
 // EventServiceHandler is an implementation of the snitch.v1.EventService service.
 type EventServiceHandler interface {
-	Subscribe(context.Context, *connect.Request[v1.SubscribeRequest], *connect.ServerStream[v1.Event]) error
+	Subscribe(context.Context, *connect.Request[v1.SubscribeRequest], *connect.ServerStream[v1.SubscribeResponse]) error
 }
 
 // NewEventServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -103,6 +103,6 @@ func NewEventServiceHandler(svc EventServiceHandler, opts ...connect.HandlerOpti
 // UnimplementedEventServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedEventServiceHandler struct{}
 
-func (UnimplementedEventServiceHandler) Subscribe(context.Context, *connect.Request[v1.SubscribeRequest], *connect.ServerStream[v1.Event]) error {
+func (UnimplementedEventServiceHandler) Subscribe(context.Context, *connect.Request[v1.SubscribeRequest], *connect.ServerStream[v1.SubscribeResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.EventService.Subscribe is not implemented"))
 }

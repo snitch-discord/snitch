@@ -3,8 +3,6 @@ option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
 
 package snitch.v1;
 
-message Empty { }
-
 message CreateReportRequest {
   string report_text = 1;
   string reporter_id = 2;

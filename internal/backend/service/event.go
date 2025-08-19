@@ -2,35 +2,34 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log/slog"
 	"sync"
 	"time"
 
-	"snitch/internal/backend/metadata"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 )
 
 type subscriber struct {
-	eventChan chan *snitchv1.Event
+	eventChan chan *snitchv1.SubscribeResponse
 	groupID   string
 }
 
 type EventService struct {
 	subscribers map[*subscriber]bool
 	mu          sync.RWMutex
-	metadataDB  *sql.DB
+	dbClient    snitchv1connect.DatabaseServiceClient
 }
 
-func NewEventService(metadataDB *sql.DB) *EventService {
+func NewEventService(dbClient snitchv1connect.DatabaseServiceClient) *EventService {
 	return &EventService{
 		subscribers: make(map[*subscriber]bool),
-		metadataDB:  metadataDB,
+		dbClient:    dbClient,
 	}
 }
 
@@ -38,7 +37,7 @@ func NewEventService(metadataDB *sql.DB) *EventService {
 func (s *EventService) Subscribe(
 	ctx context.Context,
 	req *connect.Request[snitchv1.SubscribeRequest],
-	stream *connect.ServerStream[snitchv1.Event],
+	stream *connect.ServerStream[snitchv1.SubscribeResponse],
 ) error {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
@@ -52,20 +51,25 @@ func (s *EventService) Subscribe(
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("server ID header is required"))
 	}
 
-	groupID, err := metadata.FindGroupIDByServerID(ctx, s.metadataDB, serverID)
+	// Find group ID for this server
+	findGroupReq := &snitchv1.FindGroupByServerRequest{
+		ServerId: serverID,
+	}
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err != nil {
 		slogger.Error("Failed to find group ID for server", "server_id", serverID, "error", err)
 		return connect.NewError(connect.CodeNotFound, err)
 	}
+	groupID := findGroupResp.Msg.GroupId
 
-	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID.String())
+	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID)
 
 	// Create a channel for this subscriber
-	eventChan := make(chan *snitchv1.Event, 256)
+	eventChan := make(chan *snitchv1.SubscribeResponse, 256)
 
 	sub := &subscriber{
 		eventChan: eventChan,
-		groupID:   groupID.String(),
+		groupID:   groupID,
 	}
 
 	// Register subscriber
@@ -98,12 +102,12 @@ func (s *EventService) Subscribe(
 }
 
 // PublishEvent broadcasts an event to all subscribers
-func (s *EventService) PublishEvent(ctx context.Context, event *snitchv1.Event) error {
+func (s *EventService) PublishEvent(ctx context.Context, event *snitchv1.SubscribeResponse) error {
 	return s.PublishEventWithRetry(ctx, event, 3, time.Millisecond*100)
 }
 
 // PublishEventWithRetry broadcasts an event with retry logic
-func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.Event, maxRetries int, retryDelay time.Duration) error {
+func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.SubscribeResponse, maxRetries int, retryDelay time.Duration) error {
 	var lastErr error
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
@@ -135,7 +139,7 @@ func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv
 }
 
 // publishEventOnce attempts to publish an event once
-func (s *EventService) publishEventOnce(ctx context.Context, event *snitchv1.Event) error {
+func (s *EventService) publishEventOnce(ctx context.Context, event *snitchv1.SubscribeResponse) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

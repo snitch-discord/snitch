@@ -9,7 +9,7 @@ import (
 )
 
 func CreateReportCreatedHandler(logger *slog.Logger) EventHandler {
-	return func(session *discordgo.Session, event *snitchv1.Event) error {
+	return func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		reportCreated := event.GetReportCreated()
 		if reportCreated == nil {
 			return fmt.Errorf("expected report created event data")
@@ -27,7 +27,7 @@ func CreateReportCreatedHandler(logger *slog.Logger) EventHandler {
 }
 
 func CreateReportDeletedHandler(logger *slog.Logger) EventHandler {
-	return func(session *discordgo.Session, event *snitchv1.Event) error {
+	return func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		reportDeleted := event.GetReportDeleted()
 		if reportDeleted == nil {
 			return fmt.Errorf("expected report deleted event data")
@@ -43,7 +43,7 @@ func CreateReportDeletedHandler(logger *slog.Logger) EventHandler {
 }
 
 func CreateUserBannedHandler(logger *slog.Logger) EventHandler {
-	return func(session *discordgo.Session, event *snitchv1.Event) error {
+	return func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		userBanned := event.GetUserBanned()
 		if userBanned == nil {
 			return fmt.Errorf("expected user banned event data")

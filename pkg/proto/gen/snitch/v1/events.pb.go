@@ -74,7 +74,7 @@ func (EventType) EnumDescriptor() ([]byte, []int) {
 	return file_snitch_v1_events_proto_rawDescGZIP(), []int{0}
 }
 
-type Event struct {
+type SubscribeResponse struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	Type      EventType              `protobuf:"varint,1,opt,name=type,proto3,enum=snitch.v1.EventType" json:"type,omitempty"`
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
@@ -82,28 +82,28 @@ type Event struct {
 	GroupId   string                 `protobuf:"bytes,4,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
 	// Types that are valid to be assigned to Data:
 	//
-	//	*Event_ReportCreated
-	//	*Event_ReportDeleted
-	//	*Event_UserBanned
-	Data          isEvent_Data `protobuf_oneof:"data"`
+	//	*SubscribeResponse_ReportCreated
+	//	*SubscribeResponse_ReportDeleted
+	//	*SubscribeResponse_UserBanned
+	Data          isSubscribeResponse_Data `protobuf_oneof:"data"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Event) Reset() {
-	*x = Event{}
+func (x *SubscribeResponse) Reset() {
+	*x = SubscribeResponse{}
 	mi := &file_snitch_v1_events_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Event) String() string {
+func (x *SubscribeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Event) ProtoMessage() {}
+func (*SubscribeResponse) ProtoMessage() {}
 
-func (x *Event) ProtoReflect() protoreflect.Message {
+func (x *SubscribeResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_snitch_v1_events_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -115,94 +115,94 @@ func (x *Event) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Event.ProtoReflect.Descriptor instead.
-func (*Event) Descriptor() ([]byte, []int) {
+// Deprecated: Use SubscribeResponse.ProtoReflect.Descriptor instead.
+func (*SubscribeResponse) Descriptor() ([]byte, []int) {
 	return file_snitch_v1_events_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Event) GetType() EventType {
+func (x *SubscribeResponse) GetType() EventType {
 	if x != nil {
 		return x.Type
 	}
 	return EventType_EVENT_TYPE_UNSPECIFIED
 }
 
-func (x *Event) GetTimestamp() *timestamppb.Timestamp {
+func (x *SubscribeResponse) GetTimestamp() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Timestamp
 	}
 	return nil
 }
 
-func (x *Event) GetServerId() string {
+func (x *SubscribeResponse) GetServerId() string {
 	if x != nil {
 		return x.ServerId
 	}
 	return ""
 }
 
-func (x *Event) GetGroupId() string {
+func (x *SubscribeResponse) GetGroupId() string {
 	if x != nil {
 		return x.GroupId
 	}
 	return ""
 }
 
-func (x *Event) GetData() isEvent_Data {
+func (x *SubscribeResponse) GetData() isSubscribeResponse_Data {
 	if x != nil {
 		return x.Data
 	}
 	return nil
 }
 
-func (x *Event) GetReportCreated() *ReportCreatedEvent {
+func (x *SubscribeResponse) GetReportCreated() *ReportCreatedEvent {
 	if x != nil {
-		if x, ok := x.Data.(*Event_ReportCreated); ok {
+		if x, ok := x.Data.(*SubscribeResponse_ReportCreated); ok {
 			return x.ReportCreated
 		}
 	}
 	return nil
 }
 
-func (x *Event) GetReportDeleted() *ReportDeletedEvent {
+func (x *SubscribeResponse) GetReportDeleted() *ReportDeletedEvent {
 	if x != nil {
-		if x, ok := x.Data.(*Event_ReportDeleted); ok {
+		if x, ok := x.Data.(*SubscribeResponse_ReportDeleted); ok {
 			return x.ReportDeleted
 		}
 	}
 	return nil
 }
 
-func (x *Event) GetUserBanned() *UserBannedEvent {
+func (x *SubscribeResponse) GetUserBanned() *UserBannedEvent {
 	if x != nil {
-		if x, ok := x.Data.(*Event_UserBanned); ok {
+		if x, ok := x.Data.(*SubscribeResponse_UserBanned); ok {
 			return x.UserBanned
 		}
 	}
 	return nil
 }
 
-type isEvent_Data interface {
-	isEvent_Data()
+type isSubscribeResponse_Data interface {
+	isSubscribeResponse_Data()
 }
 
-type Event_ReportCreated struct {
+type SubscribeResponse_ReportCreated struct {
 	ReportCreated *ReportCreatedEvent `protobuf:"bytes,5,opt,name=report_created,json=reportCreated,proto3,oneof"`
 }
 
-type Event_ReportDeleted struct {
+type SubscribeResponse_ReportDeleted struct {
 	ReportDeleted *ReportDeletedEvent `protobuf:"bytes,6,opt,name=report_deleted,json=reportDeleted,proto3,oneof"`
 }
 
-type Event_UserBanned struct {
+type SubscribeResponse_UserBanned struct {
 	UserBanned *UserBannedEvent `protobuf:"bytes,7,opt,name=user_banned,json=userBanned,proto3,oneof"`
 }
 
-func (*Event_ReportCreated) isEvent_Data() {}
+func (*SubscribeResponse_ReportCreated) isSubscribeResponse_Data() {}
 
-func (*Event_ReportDeleted) isEvent_Data() {}
+func (*SubscribeResponse_ReportDeleted) isSubscribeResponse_Data() {}
 
-func (*Event_UserBanned) isEvent_Data() {}
+func (*SubscribeResponse_UserBanned) isSubscribeResponse_Data() {}
 
 type ReportCreatedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -432,8 +432,8 @@ var File_snitch_v1_events_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_events_proto_rawDesc = "" +
 	"\n" +
-	"\x16snitch/v1/events.proto\x12\tsnitch.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfa\x02\n" +
-	"\x05Event\x12(\n" +
+	"\x16snitch/v1/events.proto\x12\tsnitch.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x03\n" +
+	"\x11SubscribeResponse\x12(\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x14.snitch.v1.EventTypeR\x04type\x128\n" +
 	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12\x1b\n" +
 	"\tserver_id\x18\x03 \x01(\tR\bserverId\x12\x19\n" +
@@ -465,9 +465,9 @@ const file_snitch_v1_events_proto_rawDesc = "" +
 	"\x16EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19EVENT_TYPE_REPORT_CREATED\x10\x01\x12\x1d\n" +
 	"\x19EVENT_TYPE_REPORT_DELETED\x10\x02\x12\x1a\n" +
-	"\x16EVENT_TYPE_USER_BANNED\x10\x032L\n" +
-	"\fEventService\x12<\n" +
-	"\tSubscribe\x12\x1b.snitch.v1.SubscribeRequest\x1a\x10.snitch.v1.Event0\x01B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
+	"\x16EVENT_TYPE_USER_BANNED\x10\x032X\n" +
+	"\fEventService\x12H\n" +
+	"\tSubscribe\x12\x1b.snitch.v1.SubscribeRequest\x1a\x1c.snitch.v1.SubscribeResponse0\x01B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
 	file_snitch_v1_events_proto_rawDescOnce sync.Once
@@ -485,7 +485,7 @@ var file_snitch_v1_events_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_snitch_v1_events_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_snitch_v1_events_proto_goTypes = []any{
 	(EventType)(0),                // 0: snitch.v1.EventType
-	(*Event)(nil),                 // 1: snitch.v1.Event
+	(*SubscribeResponse)(nil),     // 1: snitch.v1.SubscribeResponse
 	(*ReportCreatedEvent)(nil),    // 2: snitch.v1.ReportCreatedEvent
 	(*ReportDeletedEvent)(nil),    // 3: snitch.v1.ReportDeletedEvent
 	(*UserBannedEvent)(nil),       // 4: snitch.v1.UserBannedEvent
@@ -493,14 +493,14 @@ var file_snitch_v1_events_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_snitch_v1_events_proto_depIdxs = []int32{
-	0, // 0: snitch.v1.Event.type:type_name -> snitch.v1.EventType
-	6, // 1: snitch.v1.Event.timestamp:type_name -> google.protobuf.Timestamp
-	2, // 2: snitch.v1.Event.report_created:type_name -> snitch.v1.ReportCreatedEvent
-	3, // 3: snitch.v1.Event.report_deleted:type_name -> snitch.v1.ReportDeletedEvent
-	4, // 4: snitch.v1.Event.user_banned:type_name -> snitch.v1.UserBannedEvent
+	0, // 0: snitch.v1.SubscribeResponse.type:type_name -> snitch.v1.EventType
+	6, // 1: snitch.v1.SubscribeResponse.timestamp:type_name -> google.protobuf.Timestamp
+	2, // 2: snitch.v1.SubscribeResponse.report_created:type_name -> snitch.v1.ReportCreatedEvent
+	3, // 3: snitch.v1.SubscribeResponse.report_deleted:type_name -> snitch.v1.ReportDeletedEvent
+	4, // 4: snitch.v1.SubscribeResponse.user_banned:type_name -> snitch.v1.UserBannedEvent
 	0, // 5: snitch.v1.SubscribeRequest.event_types:type_name -> snitch.v1.EventType
 	5, // 6: snitch.v1.EventService.Subscribe:input_type -> snitch.v1.SubscribeRequest
-	1, // 7: snitch.v1.EventService.Subscribe:output_type -> snitch.v1.Event
+	1, // 7: snitch.v1.EventService.Subscribe:output_type -> snitch.v1.SubscribeResponse
 	7, // [7:8] is the sub-list for method output_type
 	6, // [6:7] is the sub-list for method input_type
 	6, // [6:6] is the sub-list for extension type_name
@@ -514,9 +514,9 @@ func file_snitch_v1_events_proto_init() {
 		return
 	}
 	file_snitch_v1_events_proto_msgTypes[0].OneofWrappers = []any{
-		(*Event_ReportCreated)(nil),
-		(*Event_ReportDeleted)(nil),
-		(*Event_UserBanned)(nil),
+		(*SubscribeResponse_ReportCreated)(nil),
+		(*SubscribeResponse_ReportDeleted)(nil),
+		(*SubscribeResponse_UserBanned)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

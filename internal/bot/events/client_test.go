@@ -1,7 +1,9 @@
 package events
 
 import (
+	"crypto/tls"
 	"log/slog"
+	"net/http"
 	"testing"
 
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
@@ -11,12 +13,24 @@ import (
 
 const TEST_GUILD_ID = "test-guild-id"
 
+// createTestHTTPClient creates an HTTP client suitable for testing with HTTPS
+func createTestHTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, // Skip certificate verification for tests
+			},
+		},
+	}
+}
+
 func TestClient_Creation(t *testing.T) {
 	// Test that client can be created without errors
 	session := &discordgo.Session{}
 	slogger := slog.Default()
+	httpClient := createTestHTTPClient()
 
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	if client.client == nil {
 		t.Error("Connect client should not be nil")
@@ -38,11 +52,12 @@ func TestClient_Creation(t *testing.T) {
 func TestClient_RegisterHandler(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Test handler registration
 	handlerCalled := false
-	testHandler := func(session *discordgo.Session, event *snitchv1.Event) error {
+	testHandler := func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		handlerCalled = true
 		return nil
 	}
@@ -55,7 +70,7 @@ func TestClient_RegisterHandler(t *testing.T) {
 	}
 
 	// Test that the handler can be called
-	testEvent := &snitchv1.Event{
+	testEvent := &snitchv1.SubscribeResponse{
 		Type: snitchv1.EventType_EVENT_TYPE_REPORT_CREATED,
 	}
 
@@ -69,10 +84,11 @@ func TestClient_RegisterHandler(t *testing.T) {
 func TestClient_HandlerNotFound(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Test handling an event type with no registered handler
-	testEvent := &snitchv1.Event{
+	testEvent := &snitchv1.SubscribeResponse{
 		Type: snitchv1.EventType_EVENT_TYPE_USER_BANNED,
 	}
 
@@ -85,18 +101,19 @@ func TestClient_HandlerNotFound(t *testing.T) {
 func TestClient_MultipleHandlers(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
-	client := NewClient("http://localhost:4200", session, slogger, TEST_GUILD_ID)
+	httpClient := createTestHTTPClient()
+	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
 
 	// Register multiple handlers
 	handler1Called := false
 	handler2Called := false
 
-	handler1 := func(session *discordgo.Session, event *snitchv1.Event) error {
+	handler1 := func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		handler1Called = true
 		return nil
 	}
 
-	handler2 := func(session *discordgo.Session, event *snitchv1.Event) error {
+	handler2 := func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error {
 		handler2Called = true
 		return nil
 	}
@@ -105,7 +122,7 @@ func TestClient_MultipleHandlers(t *testing.T) {
 	client.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, handler2)
 
 	// Test first handler
-	event1 := &snitchv1.Event{Type: snitchv1.EventType_EVENT_TYPE_REPORT_CREATED}
+	event1 := &snitchv1.SubscribeResponse{Type: snitchv1.EventType_EVENT_TYPE_REPORT_CREATED}
 	client.handleEvent(event1)
 
 	if !handler1Called {
@@ -119,7 +136,7 @@ func TestClient_MultipleHandlers(t *testing.T) {
 	handler1Called = false
 	handler2Called = false
 
-	event2 := &snitchv1.Event{Type: snitchv1.EventType_EVENT_TYPE_REPORT_DELETED}
+	event2 := &snitchv1.SubscribeResponse{Type: snitchv1.EventType_EVENT_TYPE_REPORT_DELETED}
 	client.handleEvent(event2)
 
 	if handler1Called {

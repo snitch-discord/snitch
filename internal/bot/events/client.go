@@ -21,14 +21,16 @@ type Client struct {
 	guildID  string // The guild this bot instance operates in
 }
 
-type EventHandler func(session *discordgo.Session, event *snitchv1.Event) error
+type EventHandler func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error
 
-func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, guildID string) *Client {
-	httpClient := &http.Client{
-		Timeout: 0, // No timeout for streaming connections
+func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, guildID string, httpClient *http.Client) *Client {
+	// Create a copy of the client for streaming with no timeout
+	streamingClient := &http.Client{
+		Timeout:   0,                    // No timeout for streaming connections
+		Transport: httpClient.Transport, // Use same TLS config
 	}
 
-	client := snitchv1connect.NewEventServiceClient(httpClient, backendURL)
+	client := snitchv1connect.NewEventServiceClient(streamingClient, backendURL)
 
 	return &Client{
 		client:   client,
@@ -112,7 +114,7 @@ func (c *Client) Stop() {
 	c.slogger.Info("Event client stopped")
 }
 
-func (c *Client) handleEvent(event *snitchv1.Event) {
+func (c *Client) handleEvent(event *snitchv1.SubscribeResponse) {
 	c.slogger.Debug("Received event", "type", event.Type, "server_id", event.ServerId)
 
 	// Skip events from our own guild to prevent self-triggering

@@ -1,0 +1,158 @@
+syntax = "proto3";
+option go_package = "snitch/pkg/proto/gen/snitch/v1;snitchv1";
+
+package snitch.v1;
+
+// Metadata database operations
+message CreateGroupRequest {
+  string group_id = 1;
+  string group_name = 2;
+}
+
+message CreateGroupResponse {
+  string group_id = 1;
+}
+
+message FindGroupByServerRequest {
+  string server_id = 1;
+}
+
+message FindGroupByServerResponse {
+  string group_id = 1;
+}
+
+message AddServerToGroupRequest {
+  string server_id = 1;
+  string group_id = 2;
+}
+
+message AddServerToGroupResponse {
+  string server_id = 1;
+}
+
+// Group database operations
+message CreateGroupDatabaseRequest {
+  string group_id = 1;
+}
+
+message CreateGroupDatabaseResponse {
+  string group_id = 1;
+}
+
+message DatabaseServiceCreateReportRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string reporter_id = 3;
+  string server_id = 4;
+  string reason = 5;
+  optional string evidence_url = 6;
+}
+
+message DatabaseServiceCreateReportResponse {
+  int64 report_id = 1;
+}
+
+message DatabaseServiceGetReportRequest {
+  string group_id = 1;
+  int64 report_id = 2;
+}
+
+message DatabaseServiceGetReportResponse {
+  int64 id = 1;
+  string user_id = 2;
+  string reporter_id = 3;
+  string server_id = 4;
+  string reason = 5;
+  optional string evidence_url = 6;
+  string created_at = 7;
+}
+
+message DatabaseServiceListReportsRequest {
+  string group_id = 1;
+  optional string user_id = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message DatabaseServiceDeleteReportResponse {
+  int64 report_id = 1;
+}
+
+message DatabaseServiceListReportsResponse {
+  repeated DatabaseServiceGetReportResponse reports = 1;
+}
+
+message DatabaseServiceDeleteReportRequest {
+  string group_id = 1;
+  int64 report_id = 2;
+}
+
+message DatabaseServiceCreateUserHistoryRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string server_id = 3;
+  string action = 4;
+  optional string reason = 5;
+  optional string evidence_url = 6;
+}
+
+message DatabaseServiceCreateUserHistoryResponse {
+  int64 history_id = 1;
+}
+
+message DatabaseServiceGetUserHistoryRequest {
+  string group_id = 1;
+  string user_id = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+}
+
+message DbUserHistoryEntry {
+  int64 id = 1;
+  string user_id = 2;
+  string server_id = 3;
+  string action = 4;
+  optional string reason = 5;
+  optional string evidence_url = 6;
+  string created_at = 7;
+}
+
+message DatabaseServiceGetUserHistoryResponse {
+  repeated DbUserHistoryEntry entries = 1;
+}
+
+message ListServersRequest {
+  string group_id = 1;
+}
+
+message ServerEntry {
+  string server_id = 1;
+  string group_id = 2;
+}
+
+message ListServersResponse {
+  repeated ServerEntry servers = 1;
+}
+
+service DatabaseService {
+  // Metadata operations
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
+  rpc FindGroupByServer(FindGroupByServerRequest) returns (FindGroupByServerResponse) {}
+  rpc AddServerToGroup(AddServerToGroupRequest) returns (AddServerToGroupResponse) {}
+  
+  // Group database operations
+  rpc CreateGroupDatabase(CreateGroupDatabaseRequest) returns (CreateGroupDatabaseResponse) {}
+  
+  // Report operations
+  rpc CreateReport(DatabaseServiceCreateReportRequest) returns (DatabaseServiceCreateReportResponse) {}
+  rpc GetReport(DatabaseServiceGetReportRequest) returns (DatabaseServiceGetReportResponse) {}
+  rpc ListReports(DatabaseServiceListReportsRequest) returns (DatabaseServiceListReportsResponse) {}
+  rpc DeleteReport(DatabaseServiceDeleteReportRequest) returns (DatabaseServiceDeleteReportResponse) {}
+  
+  // User history operations
+  rpc CreateUserHistory(DatabaseServiceCreateUserHistoryRequest) returns (DatabaseServiceCreateUserHistoryResponse) {}
+  rpc GetUserHistory(DatabaseServiceGetUserHistoryRequest) returns (DatabaseServiceGetUserHistoryResponse) {}
+  
+  // Server operations
+  rpc ListServers(ListServersRequest) returns (ListServersResponse) {}
+}

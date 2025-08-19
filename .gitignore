@@ -21,6 +21,15 @@
 go.work
 tmp/
 
+# Built binaries
+/db
+/backend  
+/bot
+
 bin/
+data/
 bruno/
 .env
+
+# TLS certificates (generated automatically by scripts/generate-certs.sh)
+certs/

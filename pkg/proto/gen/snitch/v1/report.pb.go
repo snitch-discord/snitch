@@ -21,42 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Empty struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Empty) Reset() {
-	*x = Empty{}
-	mi := &file_snitch_v1_report_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Empty) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Empty) ProtoMessage() {}
-
-func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
-func (*Empty) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{0}
-}
-
 type CreateReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ReportText    string                 `protobuf:"bytes,1,opt,name=report_text,json=reportText,proto3" json:"report_text,omitempty"`
@@ -68,7 +32,7 @@ type CreateReportRequest struct {
 
 func (x *CreateReportRequest) Reset() {
 	*x = CreateReportRequest{}
-	mi := &file_snitch_v1_report_proto_msgTypes[1]
+	mi := &file_snitch_v1_report_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -80,7 +44,7 @@ func (x *CreateReportRequest) String() string {
 func (*CreateReportRequest) ProtoMessage() {}
 
 func (x *CreateReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[1]
+	mi := &file_snitch_v1_report_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -93,7 +57,7 @@ func (x *CreateReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateReportRequest.ProtoReflect.Descriptor instead.
 func (*CreateReportRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{1}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateReportRequest) GetReportText() string {
@@ -126,7 +90,7 @@ type CreateReportResponse struct {
 
 func (x *CreateReportResponse) Reset() {
 	*x = CreateReportResponse{}
-	mi := &file_snitch_v1_report_proto_msgTypes[2]
+	mi := &file_snitch_v1_report_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -138,7 +102,7 @@ func (x *CreateReportResponse) String() string {
 func (*CreateReportResponse) ProtoMessage() {}
 
 func (x *CreateReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[2]
+	mi := &file_snitch_v1_report_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -151,7 +115,7 @@ func (x *CreateReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateReportResponse.ProtoReflect.Descriptor instead.
 func (*CreateReportResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{2}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateReportResponse) GetReportId() int64 {
@@ -171,7 +135,7 @@ type ListReportsRequest struct {
 
 func (x *ListReportsRequest) Reset() {
 	*x = ListReportsRequest{}
-	mi := &file_snitch_v1_report_proto_msgTypes[3]
+	mi := &file_snitch_v1_report_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -183,7 +147,7 @@ func (x *ListReportsRequest) String() string {
 func (*ListReportsRequest) ProtoMessage() {}
 
 func (x *ListReportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[3]
+	mi := &file_snitch_v1_report_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -196,7 +160,7 @@ func (x *ListReportsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListReportsRequest.ProtoReflect.Descriptor instead.
 func (*ListReportsRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{3}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListReportsRequest) GetReporterId() string {
@@ -222,7 +186,7 @@ type ListReportsResponse struct {
 
 func (x *ListReportsResponse) Reset() {
 	*x = ListReportsResponse{}
-	mi := &file_snitch_v1_report_proto_msgTypes[4]
+	mi := &file_snitch_v1_report_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -234,7 +198,7 @@ func (x *ListReportsResponse) String() string {
 func (*ListReportsResponse) ProtoMessage() {}
 
 func (x *ListReportsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[4]
+	mi := &file_snitch_v1_report_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -247,7 +211,7 @@ func (x *ListReportsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListReportsResponse.ProtoReflect.Descriptor instead.
 func (*ListReportsResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{4}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListReportsResponse) GetReports() []*CreateReportRequest {
@@ -266,7 +230,7 @@ type DeleteReportRequest struct {
 
 func (x *DeleteReportRequest) Reset() {
 	*x = DeleteReportRequest{}
-	mi := &file_snitch_v1_report_proto_msgTypes[5]
+	mi := &file_snitch_v1_report_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +242,7 @@ func (x *DeleteReportRequest) String() string {
 func (*DeleteReportRequest) ProtoMessage() {}
 
 func (x *DeleteReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[5]
+	mi := &file_snitch_v1_report_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -291,7 +255,7 @@ func (x *DeleteReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteReportRequest.ProtoReflect.Descriptor instead.
 func (*DeleteReportRequest) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{5}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DeleteReportRequest) GetReportId() int64 {
@@ -310,7 +274,7 @@ type DeleteReportResponse struct {
 
 func (x *DeleteReportResponse) Reset() {
 	*x = DeleteReportResponse{}
-	mi := &file_snitch_v1_report_proto_msgTypes[6]
+	mi := &file_snitch_v1_report_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -322,7 +286,7 @@ func (x *DeleteReportResponse) String() string {
 func (*DeleteReportResponse) ProtoMessage() {}
 
 func (x *DeleteReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_snitch_v1_report_proto_msgTypes[6]
+	mi := &file_snitch_v1_report_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,7 +299,7 @@ func (x *DeleteReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteReportResponse.ProtoReflect.Descriptor instead.
 func (*DeleteReportResponse) Descriptor() ([]byte, []int) {
-	return file_snitch_v1_report_proto_rawDescGZIP(), []int{6}
+	return file_snitch_v1_report_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DeleteReportResponse) GetReportId() int64 {
@@ -349,8 +313,7 @@ var File_snitch_v1_report_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_report_proto_rawDesc = "" +
 	"\n" +
-	"\x16snitch/v1/report.proto\x12\tsnitch.v1\"\a\n" +
-	"\x05Empty\"x\n" +
+	"\x16snitch/v1/report.proto\x12\tsnitch.v1\"x\n" +
 	"\x13CreateReportRequest\x12\x1f\n" +
 	"\vreport_text\x18\x01 \x01(\tR\n" +
 	"reportText\x12\x1f\n" +
@@ -390,24 +353,23 @@ func file_snitch_v1_report_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_report_proto_rawDescData
 }
 
-var file_snitch_v1_report_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_snitch_v1_report_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_snitch_v1_report_proto_goTypes = []any{
-	(*Empty)(nil),                // 0: snitch.v1.Empty
-	(*CreateReportRequest)(nil),  // 1: snitch.v1.CreateReportRequest
-	(*CreateReportResponse)(nil), // 2: snitch.v1.CreateReportResponse
-	(*ListReportsRequest)(nil),   // 3: snitch.v1.ListReportsRequest
-	(*ListReportsResponse)(nil),  // 4: snitch.v1.ListReportsResponse
-	(*DeleteReportRequest)(nil),  // 5: snitch.v1.DeleteReportRequest
-	(*DeleteReportResponse)(nil), // 6: snitch.v1.DeleteReportResponse
+	(*CreateReportRequest)(nil),  // 0: snitch.v1.CreateReportRequest
+	(*CreateReportResponse)(nil), // 1: snitch.v1.CreateReportResponse
+	(*ListReportsRequest)(nil),   // 2: snitch.v1.ListReportsRequest
+	(*ListReportsResponse)(nil),  // 3: snitch.v1.ListReportsResponse
+	(*DeleteReportRequest)(nil),  // 4: snitch.v1.DeleteReportRequest
+	(*DeleteReportResponse)(nil), // 5: snitch.v1.DeleteReportResponse
 }
 var file_snitch_v1_report_proto_depIdxs = []int32{
-	1, // 0: snitch.v1.ListReportsResponse.reports:type_name -> snitch.v1.CreateReportRequest
-	1, // 1: snitch.v1.ReportService.CreateReport:input_type -> snitch.v1.CreateReportRequest
-	3, // 2: snitch.v1.ReportService.ListReports:input_type -> snitch.v1.ListReportsRequest
-	5, // 3: snitch.v1.ReportService.DeleteReport:input_type -> snitch.v1.DeleteReportRequest
-	2, // 4: snitch.v1.ReportService.CreateReport:output_type -> snitch.v1.CreateReportResponse
-	4, // 5: snitch.v1.ReportService.ListReports:output_type -> snitch.v1.ListReportsResponse
-	6, // 6: snitch.v1.ReportService.DeleteReport:output_type -> snitch.v1.DeleteReportResponse
+	0, // 0: snitch.v1.ListReportsResponse.reports:type_name -> snitch.v1.CreateReportRequest
+	0, // 1: snitch.v1.ReportService.CreateReport:input_type -> snitch.v1.CreateReportRequest
+	2, // 2: snitch.v1.ReportService.ListReports:input_type -> snitch.v1.ListReportsRequest
+	4, // 3: snitch.v1.ReportService.DeleteReport:input_type -> snitch.v1.DeleteReportRequest
+	1, // 4: snitch.v1.ReportService.CreateReport:output_type -> snitch.v1.CreateReportResponse
+	3, // 5: snitch.v1.ReportService.ListReports:output_type -> snitch.v1.ListReportsResponse
+	5, // 6: snitch.v1.ReportService.DeleteReport:output_type -> snitch.v1.DeleteReportResponse
 	4, // [4:7] is the sub-list for method output_type
 	1, // [1:4] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -420,14 +382,14 @@ func file_snitch_v1_report_proto_init() {
 	if File_snitch_v1_report_proto != nil {
 		return
 	}
-	file_snitch_v1_report_proto_msgTypes[3].OneofWrappers = []any{}
+	file_snitch_v1_report_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_report_proto_rawDesc), len(file_snitch_v1_report_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
