@@ -1,0 +1,21 @@
+name: Run Buf CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  buf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-action@v1
+        with:
+          lint: true
+          format: true
+          breaking: ${{ !contains(github.event.head_commit.message, 'buf skip breaking') }}
+          breaking_against: .git#branch=main
