@@ -36,7 +36,7 @@ func (s *ReportServer) CreateReport(
 	// Get server ID from header
 	serverID := req.Header().Get(ServerIDHeader)
 	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, 
+		return nil, connect.NewError(connect.CodeInvalidArgument,
 			fmt.Errorf("server ID header is required"))
 	}
 
@@ -104,7 +104,7 @@ func (s *ReportServer) ListReports(
 	// Get server ID from header
 	serverID := req.Header().Get(ServerIDHeader)
 	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, 
+		return nil, connect.NewError(connect.CodeInvalidArgument,
 			fmt.Errorf("server ID header is required"))
 	}
 
@@ -159,7 +159,7 @@ func (s *ReportServer) DeleteReport(
 	// Get server ID from header
 	serverID := req.Header().Get(ServerIDHeader)
 	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, 
+		return nil, connect.NewError(connect.CodeInvalidArgument,
 			fmt.Errorf("server ID header is required"))
 	}
 

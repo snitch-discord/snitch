@@ -39,7 +39,7 @@ func (s *RegisterServer) Register(
 	if !ok {
 		slogger = slog.Default()
 	}
-	
+
 	serverID, err := getServerIDFromHeader(req)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -83,7 +83,7 @@ func (s *RegisterServer) Register(
 		}
 
 		groupID = uuid.New()
-		
+
 		// Create the group
 		createGroupReq := &snitchpb.CreateGroupRequest{
 			GroupId:   groupID.String(),

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"snitch/internal/db/sqlcgen/groupdb"
+	"snitch/internal/db/sqlc/gen/groupdb"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
@@ -49,10 +49,10 @@ func (r *ReportRepository) CreateReport(
 
 	// Create report using sqlc
 	reportID, err := queries.CreateReport(ctx, groupdb.CreateReportParams{
-		ReportText:       req.Msg.Reason,
-		ReporterID:       req.Msg.ReporterId,
-		ReportedUserID:   req.Msg.UserId,
-		OriginServerID:   req.Msg.ServerId,
+		ReportText:     req.Msg.Reason,
+		ReporterID:     req.Msg.ReporterId,
+		ReportedUserID: req.Msg.UserId,
+		OriginServerID: req.Msg.ServerId,
 	})
 	if err != nil {
 		r.service.logger.Error("Failed to create report", "group_id", req.Msg.GroupId, "error", err)
@@ -118,14 +118,14 @@ func (r *ReportRepository) ListReports(
 	queries := groupdb.New(db)
 
 	var reportRows []groupdb.Report
-	
+
 	// Use appropriate sqlc query based on whether user_id filter is provided
 	if req.Msg.UserId != nil {
 		reportRows, err = queries.ListReportsByUser(ctx, *req.Msg.UserId)
 	} else {
 		reportRows, err = queries.ListReports(ctx)
 	}
-	
+
 	if err != nil {
 		r.service.logger.Error("Failed to list reports", "group_id", req.Msg.GroupId, "error", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to list reports: %w", err))
@@ -136,7 +136,7 @@ func (r *ReportRepository) ListReports(
 	if req.Msg.Offset != nil {
 		start = int(*req.Msg.Offset)
 	}
-	
+
 	end := len(reportRows)
 	if req.Msg.Limit != nil {
 		end = start + int(*req.Msg.Limit)
@@ -144,7 +144,7 @@ func (r *ReportRepository) ListReports(
 			end = len(reportRows)
 		}
 	}
-	
+
 	if start >= len(reportRows) {
 		reportRows = []groupdb.Report{}
 	} else {
@@ -160,12 +160,12 @@ func (r *ReportRepository) ListReports(
 			UserId:     reportRow.ReportedUserID,
 			ServerId:   reportRow.OriginServerID,
 		}
-		
+
 		// Handle nullable CreatedAt field
 		if reportRow.CreatedAt.Valid {
 			report.CreatedAt = reportRow.CreatedAt.String
 		}
-		
+
 		reports = append(reports, report)
 	}
 

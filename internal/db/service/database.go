@@ -11,14 +11,14 @@ import (
 	"sync"
 
 	"snitch/internal/db/migrations"
-	"snitch/internal/db/sqlcgen/groupdb"
-	"snitch/internal/db/sqlcgen/metadata"
+	"snitch/internal/db/sqlc/gen/groupdb"
+	"snitch/internal/db/sqlc/gen/metadata"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
 	"github.com/pressly/goose/v3"
-	"google.golang.org/protobuf/types/known/emptypb"
 	_ "github.com/tursodatabase/go-libsql"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Migration directory paths within embedded filesystem
@@ -27,15 +27,14 @@ const (
 	tenantMigrationsPath   = "tenant"
 )
 
-
 type DatabaseService struct {
-	metadataDB     *sql.DB
+	metadataDB      *sql.DB
 	metadataQueries *metadata.Queries
-	groupDBs       map[string]*sql.DB
-	groupQueries   map[string]*groupdb.Queries
-	groupDBMutex   sync.RWMutex
-	dbDir          string
-	logger         *slog.Logger
+	groupDBs        map[string]*sql.DB
+	groupQueries    map[string]*groupdb.Queries
+	groupDBMutex    sync.RWMutex
+	dbDir           string
+	logger          *slog.Logger
 
 	// Repository pattern
 	GroupRepository  *GroupRepository
@@ -133,12 +132,12 @@ func runMetadataMigrations(ctx context.Context, db *sql.DB, logger *slog.Logger)
 // configureConnection applies Rails-inspired PRAGMA settings for optimal SQLite performance
 func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) error {
 	pragmas := []string{
-		"PRAGMA foreign_keys=ON",              // Enable foreign key constraints for data integrity
-		"PRAGMA journal_mode=WAL",             // Enable WAL mode for better concurrency
-		"PRAGMA synchronous=NORMAL",           // Balance between safety and performance
-		"PRAGMA mmap_size=134217728",          // 128MB memory mapping
+		"PRAGMA foreign_keys=ON",             // Enable foreign key constraints for data integrity
+		"PRAGMA journal_mode=WAL",            // Enable WAL mode for better concurrency
+		"PRAGMA synchronous=NORMAL",          // Balance between safety and performance
+		"PRAGMA mmap_size=134217728",         // 128MB memory mapping
 		"PRAGMA journal_size_limit=67108864", // 64MB WAL file limit (triggers auto-checkpoint)
-		"PRAGMA cache_size=2000",              // 2000 pages cache (~8MB with 4KB pages)
+		"PRAGMA cache_size=2000",             // 2000 pages cache (~8MB with 4KB pages)
 	}
 
 	for _, pragma := range pragmas {
@@ -147,7 +146,7 @@ func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) e
 		if err != nil {
 			// Log the error but continue with other pragmas
 			logger.Warn("Failed to execute PRAGMA", "pragma", pragma, "error", err)
-			
+
 			// Only fail on critical pragmas
 			if pragma == "PRAGMA foreign_keys=ON" || pragma == "PRAGMA journal_mode=WAL" {
 				return fmt.Errorf("failed to execute critical pragma %q: %w", pragma, err)
@@ -168,11 +167,11 @@ func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) e
 func (s *DatabaseService) getGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
 	s.groupDBMutex.RLock()
 	defer s.groupDBMutex.RUnlock()
-	
+
 	if db, exists := s.groupDBs[groupID]; exists {
 		return db, nil
 	}
-	
+
 	return nil, fmt.Errorf("group database not found for group %s", groupID)
 }
 

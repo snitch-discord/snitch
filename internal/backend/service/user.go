@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 
-	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 )
@@ -34,7 +34,7 @@ func (s *UserServer) CreateUserHistory(
 	// Get server ID from header
 	serverID := req.Header().Get(ServerIDHeader)
 	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, 
+		return nil, connect.NewError(connect.CodeInvalidArgument,
 			fmt.Errorf("server ID header is required"))
 	}
 
@@ -84,7 +84,7 @@ func (s *UserServer) ListUserHistory(
 	// Get server ID from header
 	serverID := req.Header().Get(ServerIDHeader)
 	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, 
+		return nil, connect.NewError(connect.CodeInvalidArgument,
 			fmt.Errorf("server ID header is required"))
 	}
 
@@ -120,7 +120,7 @@ func (s *UserServer) ListUserHistory(
 		if entry.Reason != nil {
 			username = *entry.Reason
 		}
-		
+
 		userHistory = append(userHistory, &snitchv1.CreateUserHistoryRequest{
 			UserId:     entry.UserId,
 			Username:   username,

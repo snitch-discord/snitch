@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"snitch/internal/db/sqlcgen/groupdb"
+	"snitch/internal/db/sqlc/gen/groupdb"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"

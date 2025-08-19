@@ -6,7 +6,7 @@ sql:
     gen:
       go:
         package: "metadata"
-        out: "internal/db/sqlcgen/metadata"
+        out: "internal/db/sqlc/gen/metadata"
         sql_package: "database/sql"
         emit_interface: true
         emit_json_tags: true
@@ -17,7 +17,7 @@ sql:
     gen:
       go:
         package: "groupdb"
-        out: "internal/db/sqlcgen/groupdb"
+        out: "internal/db/sqlc/gen/groupdb"
         sql_package: "database/sql"
         emit_interface: true
         emit_json_tags: true

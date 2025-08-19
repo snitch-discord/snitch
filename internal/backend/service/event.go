@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 
 	"connectrpc.com/connect"
 )

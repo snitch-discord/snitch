@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"snitch/internal/db/sqlcgen/metadata"
+	"snitch/internal/db/sqlc/gen/metadata"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"connectrpc.com/connect"
