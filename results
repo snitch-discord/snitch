@@ -1,0 +1,1115 @@
+cmd/bot/main.go:24:1: calculated cyclomatic complexity for function main is 15, max is 10 (cyclop)
+func main() {
+^
+internal/db/service/user_repository.go:81:1: calculated cyclomatic complexity for function GetUserHistory is 11, max is 10 (cyclop)
+func (r *UserRepository) GetUserHistory(
+^
+cmd/backend/main.go:15:2: import 'snitch/internal/backend/backendconfig' is not allowed from list 'Main' (depguard)
+	"snitch/internal/backend/backendconfig"
+	^
+cmd/backend/main.go:16:2: import 'snitch/internal/backend/service' is not allowed from list 'Main' (depguard)
+	"snitch/internal/backend/service"
+	^
+cmd/backend/main.go:17:2: import 'snitch/internal/backend/service/interceptor' is not allowed from list 'Main' (depguard)
+	"snitch/internal/backend/service/interceptor"
+	^
+cmd/bot/main.go:14:2: import 'snitch/internal/bot/botconfig' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/botconfig"
+	^
+cmd/bot/main.go:15:2: import 'snitch/internal/bot/events' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/events"
+	^
+cmd/bot/main.go:16:2: import 'snitch/internal/bot/slashcommand' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/slashcommand"
+	^
+cmd/bot/main.go:17:2: import 'snitch/internal/bot/slashcommand/handler' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/slashcommand/handler"
+	^
+cmd/bot/main.go:18:2: import 'snitch/internal/bot/slashcommand/middleware' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/slashcommand/middleware"
+	^
+cmd/bot/main.go:19:2: import 'snitch/pkg/proto/gen/snitch/v1' is not allowed from list 'Main' (depguard)
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	^
+cmd/bot/main.go:21:2: import 'github.com/bwmarrin/discordgo' is not allowed from list 'Main' (depguard)
+	"github.com/bwmarrin/discordgo"
+	^
+cmd/db/main.go:15:2: import 'snitch/internal/db/dbconfig' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/dbconfig"
+	^
+cmd/db/main.go:16:2: import 'snitch/internal/db/service' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/service"
+	^
+cmd/db/main.go:17:2: import 'snitch/pkg/proto/gen/snitch/v1/snitchv1connect' is not allowed from list 'Main' (depguard)
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	^
+cmd/db/main.go:19:2: import 'connectrpc.com/connect' is not allowed from list 'Main' (depguard)
+	"connectrpc.com/connect"
+	^
+internal/backend/service/event.go:10:2: import 'snitch/internal/backend/service/interceptor' is not allowed from list 'Main' (depguard)
+	"snitch/internal/backend/service/interceptor"
+	^
+internal/backend/service/event.go:11:2: import 'snitch/internal/shared/ctxutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/shared/ctxutil"
+	^
+internal/backend/service/event.go:12:2: import 'snitch/pkg/proto/gen/snitch/v1' is not allowed from list 'Main' (depguard)
+	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
+	^
+internal/backend/service/event.go:13:2: import 'snitch/pkg/proto/gen/snitch/v1/snitchv1connect' is not allowed from list 'Main' (depguard)
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	^
+internal/backend/service/event.go:15:2: import 'connectrpc.com/connect' is not allowed from list 'Main' (depguard)
+	"connectrpc.com/connect"
+	^
+internal/backend/service/event_test.go:9:2: import 'google.golang.org/protobuf/types/known/timestamppb' is not allowed from list 'Main' (depguard)
+	"google.golang.org/protobuf/types/known/timestamppb"
+	^
+internal/backend/service/interceptor/interceptor.go:9:2: import 'snitch/internal/shared/trace' is not allowed from list 'Main' (depguard)
+	"snitch/internal/shared/trace"
+	^
+internal/backend/service/interceptor/interceptor.go:12:2: import 'github.com/google/uuid' is not allowed from list 'Main' (depguard)
+	"github.com/google/uuid"
+	^
+internal/backend/service/register.go:7:2: import 'snitch/internal/shared/ctxutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/shared/ctxutil"
+	^
+internal/backend/service/register.go:8:2: import 'snitch/pkg/proto/gen/snitch/v1' is not allowed from list 'Main' (depguard)
+	snitchpb "snitch/pkg/proto/gen/snitch/v1"
+	^
+internal/backend/service/register.go:9:2: import 'snitch/pkg/proto/gen/snitch/v1/snitchv1connect' is not allowed from list 'Main' (depguard)
+	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
+	^
+internal/backend/service/register.go:11:2: import 'connectrpc.com/connect' is not allowed from list 'Main' (depguard)
+	"connectrpc.com/connect"
+	^
+internal/backend/service/register.go:12:2: import 'github.com/google/uuid' is not allowed from list 'Main' (depguard)
+	"github.com/google/uuid"
+	^
+internal/backend/service/report.go:8:2: import 'snitch/internal/shared/ctxutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/shared/ctxutil"
+	^
+internal/bot/messageutil/embed.go:3:8: import 'github.com/bwmarrin/discordgo' is not allowed from list 'Main' (depguard)
+import "github.com/bwmarrin/discordgo"
+       ^
+internal/bot/messageutil/response.go:8:2: import 'github.com/bwmarrin/discordgo' is not allowed from list 'Main' (depguard)
+	"github.com/bwmarrin/discordgo"
+	^
+internal/bot/slashcommand/handler/register.go:9:2: import 'snitch/internal/bot/botconfig' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/botconfig"
+	^
+internal/bot/slashcommand/handler/register.go:10:2: import 'snitch/internal/bot/messageutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/messageutil"
+	^
+internal/bot/slashcommand/handler/register.go:11:2: import 'snitch/internal/bot/slashcommand' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/slashcommand"
+	^
+internal/bot/slashcommand/handler/report.go:9:2: import 'snitch/internal/bot/botconfig' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/botconfig"
+	^
+internal/bot/slashcommand/handler/report.go:10:2: import 'snitch/internal/bot/messageutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/messageutil"
+	^
+internal/bot/slashcommand/handler/report.go:11:2: import 'snitch/internal/bot/slashcommand' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/slashcommand"
+	^
+internal/bot/slashcommand/handler/user.go:10:2: import 'snitch/internal/bot/messageutil' is not allowed from list 'Main' (depguard)
+	"snitch/internal/bot/messageutil"
+	^
+internal/db/service/database.go:13:2: import 'snitch/internal/db/migrations' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/migrations"
+	^
+internal/db/service/database.go:14:2: import 'snitch/internal/db/sqlc/gen/groupdb' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/sqlc/gen/groupdb"
+	^
+internal/db/service/database.go:15:2: import 'snitch/internal/db/sqlc/gen/metadata' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/sqlc/gen/metadata"
+	^
+internal/db/service/database.go:19:2: import 'github.com/pressly/goose/v3' is not allowed from list 'Main' (depguard)
+	"github.com/pressly/goose/v3"
+	^
+internal/db/service/database.go:21:2: import 'google.golang.org/protobuf/types/known/emptypb' is not allowed from list 'Main' (depguard)
+	"google.golang.org/protobuf/types/known/emptypb"
+	^
+internal/db/service/group_repository.go:10:2: import 'google.golang.org/protobuf/types/known/emptypb' is not allowed from list 'Main' (depguard)
+	"google.golang.org/protobuf/types/known/emptypb"
+	^
+internal/db/service/report_repository.go:8:2: import 'snitch/internal/db/sqlc/gen/groupdb' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/sqlc/gen/groupdb"
+	^
+internal/db/service/report_repository.go:12:2: import 'google.golang.org/protobuf/types/known/emptypb' is not allowed from list 'Main' (depguard)
+	"google.golang.org/protobuf/types/known/emptypb"
+	^
+internal/db/service/server_repository.go:8:2: import 'snitch/internal/db/sqlc/gen/metadata' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/sqlc/gen/metadata"
+	^
+internal/db/service/user_repository.go:8:2: import 'snitch/internal/db/sqlc/gen/groupdb' is not allowed from list 'Main' (depguard)
+	"snitch/internal/db/sqlc/gen/groupdb"
+	^
+internal/shared/trace/trace.go:3:8: import 'github.com/google/uuid' is not allowed from list 'Main' (depguard)
+import "github.com/google/uuid"
+       ^
+internal/backend/backendconfig/backendconfig.go:37:15: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"missing required environment variables: %v\", missing)" (err113)
+		return cfg, fmt.Errorf("missing required environment variables: %v", missing)
+		            ^
+internal/backend/service/event.go:51:56: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server ID header is required\")" (err113)
+		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("server ID header is required"))
+		                                                     ^
+internal/backend/service/event.go:185:10: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"event delivery failed: %d delivered, %d dropped\", deliveredCount, droppedCount)" (err113)
+		return fmt.Errorf("event delivery failed: %d delivered, %d dropped", deliveredCount, droppedCount)
+		       ^
+internal/backend/service/interceptor/group.go:59:14: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server ID not found in context\")" (err113)
+		return "", fmt.Errorf("server ID not found in context")
+		           ^
+internal/backend/service/interceptor/group.go:67:14: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"group ID not found in context\")" (err113)
+		return "", fmt.Errorf("group ID not found in context")
+		           ^
+internal/backend/service/register.go:28:14: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server ID header is required\")" (err113)
+		return "", fmt.Errorf("server ID header is required")
+		           ^
+internal/backend/service/register.go:55:59: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server already registered\")" (err113)
+		return nil, connect.NewError(connect.CodeAlreadyExists, fmt.Errorf("server already registered"))
+		                                                        ^
+internal/backend/service/register.go:82:62: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"group name required\")" (err113)
+			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("group name required"))
+			                                                          ^
+internal/backend/service/report.go:40:4: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server ID header is required\")" (err113)
+			fmt.Errorf("server ID header is required"))
+			^
+internal/bot/botconfig/botconfig.go:36:15: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"missing required environment variables: %v\", missing)" (err113)
+		return cfg, fmt.Errorf("missing required environment variables: %v", missing)
+		            ^
+internal/bot/events/handlers.go:15:11: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"expected report created event data\")" (err113)
+			return fmt.Errorf("expected report created event data")
+			       ^
+internal/bot/events/handlers.go:33:11: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"expected report deleted event data\")" (err113)
+			return fmt.Errorf("expected report deleted event data")
+			       ^
+internal/bot/events/handlers.go:49:11: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"expected user banned event data\")" (err113)
+			return fmt.Errorf("expected user banned event data")
+			       ^
+internal/db/dbconfig/dbconfig.go:33:15: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"missing required environment variables: %v\", missing)" (err113)
+		return cfg, fmt.Errorf("missing required environment variables: %v", missing)
+		            ^
+internal/db/service/database.go:175:14: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"group database not found for group %s\", groupID)" (err113)
+	return nil, fmt.Errorf("group database not found for group %s", groupID)
+	            ^
+internal/db/service/report_repository.go:85:6: do not compare errors directly "err == sql.ErrNoRows", use "errors.Is(err, sql.ErrNoRows)" instead (err113)
+		if err == sql.ErrNoRows {
+		   ^
+internal/db/service/report_repository.go:86:55: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"report not found: %d\", req.Msg.ReportId)" (err113)
+			return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("report not found: %d", req.Msg.ReportId))
+			                                                   ^
+internal/db/service/report_repository.go:199:54: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"report not found: %d\", req.Msg.ReportId)" (err113)
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("report not found: %d", req.Msg.ReportId))
+		                                                   ^
+internal/db/service/server_repository.go:56:6: do not compare errors directly "err == sql.ErrNoRows", use "errors.Is(err, sql.ErrNoRows)" instead (err113)
+		if err == sql.ErrNoRows {
+		   ^
+internal/db/service/server_repository.go:57:55: do not define dynamic errors, use wrapped static errors instead: "fmt.Errorf(\"server not found: %s\", req.Msg.ServerId)" (err113)
+			return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("server not found: %s", req.Msg.ServerId))
+			                                                   ^
+cmd/backend/main.go:48:4: http.Client is missing fields CheckRedirect, Jar (exhaustruct)
+		&http.Client{
+		 ^
+cmd/backend/main.go:50:16: http.Transport is missing fields Proxy, OnProxyConnectResponse, DialContext, Dial, DialTLSContext, DialTLS, TLSHandshakeTimeout, DisableKeepAlives, DisableCompression, MaxIdleConns, MaxIdleConnsPerHost, MaxConnsPerHost, IdleConnTimeout, ResponseHeaderTimeout, ExpectContinueTimeout, TLSNextProto, ProxyConnectHeader, GetProxyConnectHeader, MaxResponseHeaderBytes, WriteBufferSize, ReadBufferSize, ForceAttemptHTTP2, HTTP2, Protocols (exhaustruct)
+			Transport: &http.Transport{
+			            ^
+cmd/backend/main.go:88:13: http.Server is missing fields DisableGeneralOptionsHandler, ReadTimeout, WriteTimeout, IdleTimeout, MaxHeaderBytes, TLSNextProto, ConnState, ErrorLog, BaseContext, ConnContext, HTTP2, Protocols (exhaustruct)
+	server := &http.Server{
+	           ^
+cmd/bot/main.go:43:16: http.Client is missing fields CheckRedirect, Jar (exhaustruct)
+	httpClient := http.Client{
+	              ^
+cmd/bot/main.go:45:15: http.Transport is missing fields Proxy, OnProxyConnectResponse, DialContext, Dial, DialTLSContext, DialTLS, TLSHandshakeTimeout, DisableKeepAlives, DisableCompression, MaxIdleConns, MaxIdleConnsPerHost, MaxConnsPerHost, IdleConnTimeout, ResponseHeaderTimeout, ExpectContinueTimeout, TLSNextProto, ProxyConnectHeader, GetProxyConnectHeader, MaxResponseHeaderBytes, WriteBufferSize, ReadBufferSize, ForceAttemptHTTP2, HTTP2, Protocols (exhaustruct)
+		Transport: &http.Transport{
+		            ^
+cmd/db/main.go:71:13: http.Server is missing fields DisableGeneralOptionsHandler, ReadTimeout, WriteTimeout, IdleTimeout, MaxHeaderBytes, TLSNextProto, ConnState, ErrorLog, BaseContext, ConnContext, HTTP2, Protocols (exhaustruct)
+	server := &http.Server{
+	           ^
+internal/backend/service/event.go:30:10: service.EventService is missing field mu (exhaustruct)
+	return &EventService{
+	        ^
+internal/backend/service/event_test.go:33:16: snitchv1.Event is missing field Data (exhaustruct)
+	testEvent := &snitchv1.Event{
+	              ^
+internal/backend/service/event_test.go:85:16: snitchv1.Event is missing field Data (exhaustruct)
+	testEvent := &snitchv1.Event{
+	              ^
+internal/backend/service/event_test.go:121:16: snitchv1.Event is missing fields ServerId, Data (exhaustruct)
+	testEvent := &snitchv1.Event{
+	              ^
+internal/backend/service/report.go:55:22: snitchv1.DbCreateReportRequest is missing field EvidenceUrl (exhaustruct)
+	createReportReq := &snitchv1.DbCreateReportRequest{
+	                    ^
+internal/backend/service/report.go:71:12: snitchv1.Event is missing field Timestamp (exhaustruct)
+	event := &snitchv1.Event{
+	          ^
+internal/backend/service/report.go:189:12: snitchv1.Event is missing field Timestamp (exhaustruct)
+	event := &snitchv1.Event{
+	          ^
+internal/bot/events/client.go:28:22: http.Client is missing fields CheckRedirect, Jar (exhaustruct)
+	streamingClient := &http.Client{
+	                    ^
+internal/bot/events/client.go:81:29: snitchv1.SubscribeRequest is missing field GroupId (exhaustruct)
+	req := connect.NewRequest(&snitchv1.SubscribeRequest{
+	                           ^
+internal/bot/events/client_test.go:18:10: http.Client is missing fields CheckRedirect, Jar, Timeout (exhaustruct)
+	return &http.Client{
+	        ^
+internal/bot/events/client_test.go:19:15: http.Transport is missing fields Proxy, OnProxyConnectResponse, DialContext, Dial, DialTLSContext, DialTLS, TLSHandshakeTimeout, DisableKeepAlives, DisableCompression, MaxIdleConns, MaxIdleConnsPerHost, MaxConnsPerHost, IdleConnTimeout, ResponseHeaderTimeout, ExpectContinueTimeout, TLSNextProto, ProxyConnectHeader, GetProxyConnectHeader, MaxResponseHeaderBytes, WriteBufferSize, ReadBufferSize, ForceAttemptHTTP2, HTTP2, Protocols (exhaustruct)
+		Transport: &http.Transport{
+		            ^
+internal/bot/events/client_test.go:20:22: tls.Config is missing fields Rand, Time, Certificates, NameToCertificate, GetCertificate, GetClientCertificate, GetConfigForClient, VerifyPeerCertificate, VerifyConnection, RootCAs, NextProtos, ServerName, ClientAuth, ClientCAs, CipherSuites, PreferServerCipherSuites, SessionTicketsDisabled, SessionTicketKey, ClientSessionCache, UnwrapSession, WrapSession, MinVersion, MaxVersion, CurvePreferences, DynamicRecordSizingDisabled, Renegotiation, KeyLogWriter, EncryptedClientHelloConfigList, EncryptedClientHelloRejectionVerify, GetEncryptedClientHelloKeys, EncryptedClientHelloKeys (exhaustruct)
+			TLSClientConfig: &tls.Config{
+			                  ^
+internal/bot/events/client_test.go:29:14: discordgo.Session is missing fields RWMutex, Token, MFA, Debug, LogLevel, ShouldReconnectOnError, ShouldReconnectVoiceOnSessionError, ShouldRetryOnRateLimit, Identify, Compress, ShardID, ShardCount, StateEnabled, SyncEvents, DataReady, MaxRestRetries, VoiceReady, UDPReady, VoiceConnections, State, Client, Dialer, UserAgent, LastHeartbeatAck, LastHeartbeatSent, Ratelimiter (exhaustruct)
+	session := &discordgo.Session{}
+	            ^
+internal/bot/events/client_test.go:53:14: discordgo.Session is missing fields RWMutex, Token, MFA, Debug, LogLevel, ShouldReconnectOnError, ShouldReconnectVoiceOnSessionError, ShouldRetryOnRateLimit, Identify, Compress, ShardID, ShardCount, StateEnabled, SyncEvents, DataReady, MaxRestRetries, VoiceReady, UDPReady, VoiceConnections, State, Client, Dialer, UserAgent, LastHeartbeatAck, LastHeartbeatSent, Ratelimiter (exhaustruct)
+	session := &discordgo.Session{}
+	            ^
+internal/bot/events/client_test.go:73:16: snitchv1.Event is missing fields Timestamp, ServerId, GroupId, Data (exhaustruct)
+	testEvent := &snitchv1.Event{
+	              ^
+internal/bot/events/client_test.go:85:14: discordgo.Session is missing fields RWMutex, Token, MFA, Debug, LogLevel, ShouldReconnectOnError, ShouldReconnectVoiceOnSessionError, ShouldRetryOnRateLimit, Identify, Compress, ShardID, ShardCount, StateEnabled, SyncEvents, DataReady, MaxRestRetries, VoiceReady, UDPReady, VoiceConnections, State, Client, Dialer, UserAgent, LastHeartbeatAck, LastHeartbeatSent, Ratelimiter (exhaustruct)
+	session := &discordgo.Session{}
+	            ^
+internal/bot/events/client_test.go:91:16: snitchv1.Event is missing fields Timestamp, ServerId, GroupId, Data (exhaustruct)
+	testEvent := &snitchv1.Event{
+	              ^
+internal/bot/events/client_test.go:125:13: snitchv1.Event is missing fields Timestamp, ServerId, GroupId, Data (exhaustruct)
+	event1 := &snitchv1.Event{Type: snitchv1.EventType_EVENT_TYPE_REPORT_CREATED}
+	           ^
+internal/bot/messageutil/embed.go:23:17: discordgo.MessageEmbed is missing fields URL, Type, Title, Description, Timestamp, Color, Footer, Image, Thumbnail, Video, Provider, Author, Fields (exhaustruct)
+	return &Embed{&discordgo.MessageEmbed{}}
+	               ^
+internal/bot/messageutil/embed.go:51:31: discordgo.MessageEmbedField is missing field Inline (exhaustruct)
+	e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+	                             ^
+internal/bot/messageutil/embed.go:102:13: discordgo.MessageEmbedImage is missing fields Width, Height (exhaustruct)
+	e.Image = &discordgo.MessageEmbedImage{
+	           ^
+internal/bot/messageutil/embed.go:123:17: discordgo.MessageEmbedThumbnail is missing fields Width, Height (exhaustruct)
+	e.Thumbnail = &discordgo.MessageEmbedThumbnail{
+	               ^
+internal/bot/messageutil/response.go:19:10: discordgo.InteractionResponseData is missing fields TTS, Components, Embeds, AllowedMentions, Files, Attachments, Poll, Flags, Choices, CustomID, Title (exhaustruct)
+		Data: &discordgo.InteractionResponseData{
+		       ^
+internal/bot/messageutil/response.go:35:10: discordgo.InteractionResponseData is missing fields TTS, Content, Components, AllowedMentions, Files, Attachments, Poll, Flags, Choices, CustomID, Title (exhaustruct)
+		Data: &discordgo.InteractionResponseData{
+		       ^
+internal/bot/slashcommand/handler/register.go:32:41: snitchv1.RegisterRequest is missing field GroupId (exhaustruct)
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupName: &groupName})
+	                                       ^
+internal/bot/slashcommand/handler/user.go:49:39: snitchv1.CreateUserHistoryRequest is missing field GlobalName (exhaustruct)
+	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedUser.ID, Username: reportedUser.Username, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
+	                                     ^
+internal/bot/slashcommand/middleware/manageserver.go:30:12: discordgo.InteractionResponseData is missing fields TTS, Components, Embeds, AllowedMentions, Files, Attachments, Poll, Flags, Choices, CustomID, Title (exhaustruct)
+				Data: &discordgo.InteractionResponseData{
+				       ^
+internal/db/service/database.go:75:14: service.DatabaseService is missing fields groupDBMutex, GroupRepository, ReportRepository, UserRepository, ServerRepository (exhaustruct)
+	service := &DatabaseService{
+	            ^
+internal/db/service/report_repository.go:92:15: snitchv1.DbGetReportResponse is missing fields EvidenceUrl, CreatedAt (exhaustruct)
+	response := &snitchv1.DbGetReportResponse{
+	             ^
+internal/db/service/report_repository.go:156:14: snitchv1.DbGetReportResponse is missing fields EvidenceUrl, CreatedAt (exhaustruct)
+		report := &snitchv1.DbGetReportResponse{
+		           ^
+internal/db/service/user_repository.go:121:13: snitchv1.DbUserHistoryEntry is missing fields Reason, EvidenceUrl, CreatedAt (exhaustruct)
+		entry := &snitchv1.DbUserHistoryEntry{
+		          ^
+internal/bot/events/client.go:53:1: unexported method "maintainConnection" for struct "Client" should be placed after the exported method "Stop" (funcorder)
+func (c *Client) maintainConnection(ctx context.Context) {
+^
+internal/bot/events/client.go:79:1: unexported method "connectAndListen" for struct "Client" should be placed after the exported method "Stop" (funcorder)
+func (c *Client) connectAndListen(ctx context.Context) error {
+^
+internal/db/service/database.go:179:1: unexported method "createGroupDB" for struct "DatabaseService" should be placed after the exported method "ListServers" (funcorder)
+func (s *DatabaseService) createGroupDB(ctx context.Context, groupID string) (*sql.DB, error) {
+^
+internal/db/service/database.go:219:1: unexported method "runTenantMigrations" for struct "DatabaseService" should be placed after the exported method "ListServers" (funcorder)
+func (s *DatabaseService) runTenantMigrations(ctx context.Context, db *sql.DB, groupID string) error {
+^
+cmd/backend/main.go:23:6: Function 'main' is too long (72 > 60) (funlen)
+func main() {
+     ^
+internal/db/service/report_repository.go:109:28: Function 'ListReports' is too long (64 > 60) (funlen)
+func (r *ReportRepository) ListReports(
+                           ^
+cmd/bot/main.go:97:3: exitAfterDefer: log.Fatalf will exit, and `defer func(){...}(...)` will not run (gocritic)
+		log.Fatalf("Failed to open Discord session: %v", err)
+		^
+internal/bot/messageutil/embed.go:166:24: captLocal: `URL' should not be capitalized (gocritic)
+func (e *Embed) SetURL(URL string) *Embed {
+                       ^
+internal/backend/service/event.go:36:1: Comment should end in a period (godot)
+// Subscribe implements the streaming RPC for real-time events
+^
+internal/backend/service/event.go:104:1: Comment should end in a period (godot)
+// PublishEvent broadcasts an event to all subscribers
+^
+internal/backend/service/event.go:109:1: Comment should end in a period (godot)
+// PublishEventWithRetry broadcasts an event with retry logic
+^
+internal/bot/slashcommand/handler/register.go:55:3: Line contains TODO/BUG/FIXME: "TODO: implement" (godox)
+	// TODO: implement
+	 ^
+cmd/backend/main.go:51:23: G402: TLS MinVersion too low. (gosec)
+				TLSClientConfig: &tls.Config{
+					RootCAs: caCertPool,
+				},
+cmd/bot/main.go:46:22: G402: TLS MinVersion too low. (gosec)
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+cmd/db/main.go:66:16: G402: TLS MinVersion too low. (gosec)
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{"h2"},
+	}
+internal/bot/events/client_test.go:21:25: G402: TLS InsecureSkipVerify set true. (gosec)
+				InsecureSkipVerify: true, // Skip certificate verification for tests
+				                    ^
+internal/db/service/database.go:48:12: G301: Expect directory permissions to be 0750 or less (gosec)
+	if err := os.MkdirAll(dbDir, 0755); err != nil {
+	          ^
+internal/shared/ctxutil/ctxutil.go:11:1: Value returns generic interface (T) of type param any (ireturn)
+func Value[T any](ctx context.Context) (T, bool) {
+^
+cmd/bot/main.go:122:1: The line is 124 characters long, which exceeds the maximum of 120 characters. (lll)
+		createdCommand, err := mainSession.ApplicationCommandCreate(mainSession.State.User.ID, testingGuildID, applicationCommand)
+^
+cmd/bot/main.go:138:1: The line is 126 characters long, which exceeds the maximum of 120 characters. (lll)
+		if err = mainSession.ApplicationCommandDelete(mainSession.State.User.ID, testingGuildID, registeredCommand.ID); err != nil {
+^
+cmd/db/main.go:78:1: The line is 123 characters long, which exceeds the maximum of 120 characters. (lll)
+	slogger.Info("Starting database service with TLS", "port", *port, "db_dir", config.DbDirPath, "cert", config.CertFilePath)
+^
+internal/backend/service/event.go:110:1: The line is 138 characters long, which exceeds the maximum of 120 characters. (lll)
+func (s *EventService) PublishEventWithRetry(ctx context.Context, event *snitchv1.Event, maxRetries int, retryDelay time.Duration) error {
+^
+internal/backend/service/event.go:175:1: The line is 135 characters long, which exceeds the maximum of 120 characters. (lll)
+			slogger.Error("Subscriber channel full, dropping event", "type", event.Type, "server_id", event.ServerId, "group_id", event.GroupId)
+^
+internal/backend/service/event.go:188:1: The line is 122 characters long, which exceeds the maximum of 120 characters. (lll)
+	slogger.Debug("Event delivered successfully", "type", event.Type, "delivered", deliveredCount, "filtered", filteredCount)
+^
+internal/bot/events/client.go:66:1: The line is 126 characters long, which exceeds the maximum of 120 characters. (lll)
+				c.slogger.Error(fmt.Sprintf("Event stream connection failed, retrying in %f seconds", retryDelay.Seconds()), "error", err)
+^
+internal/bot/slashcommand/handler/register.go:20:1: The line is 162 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+^
+internal/bot/slashcommand/handler/register.go:38:1: The line is 125 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't register group, error: %s", err.Error()))
+^
+internal/bot/slashcommand/handler/register.go:42:1: The line is 140 characters long, which exceeds the maximum of 120 characters. (lll)
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Created group %s for this server.", registerResponse.Msg.GroupId))
+^
+internal/bot/slashcommand/handler/register.go:45:1: The line is 160 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+^
+internal/bot/slashcommand/handler/register.go:58:1: The line is 164 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+^
+internal/bot/slashcommand/handler/report.go:21:1: The line is 210 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, userClient snitchv1connect.UserHistoryServiceClient) {
+^
+internal/bot/slashcommand/handler/report.go:50:1: The line is 146 characters long, which exceeds the maximum of 120 characters. (lll)
+	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: reporterID, ReportedId: reportedUser.ID})
+^
+internal/bot/slashcommand/handler/report.go:55:1: The line is 122 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't report user, error: %s", err.Error()))
+^
+internal/bot/slashcommand/handler/report.go:59:1: The line is 210 characters long, which exceeds the maximum of 120 characters. (lll)
+	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
+^
+internal/bot/slashcommand/handler/report.go:68:1: The line is 151 characters long, which exceeds the maximum of 120 characters. (lll)
+	messageContent := fmt.Sprintf("Reported user: %s; Report reason: %s; Report ID: %d", reportedUser.Username, reportReason, reportResponse.Msg.ReportId)
+^
+internal/bot/slashcommand/handler/report.go:72:1: The line is 159 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+^
+internal/bot/slashcommand/handler/report.go:99:1: The line is 126 characters long, which exceeds the maximum of 120 characters. (lll)
+	listReportRequest := connect.NewRequest(&snitchv1.ListReportsRequest{ReporterId: reporterUserID, ReportedId: reportedUserID})
+^
+internal/bot/slashcommand/handler/report.go:105:1: The line is 123 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't list reports, error: %s", err.Error()))
+^
+internal/bot/slashcommand/handler/report.go:122:1: The line is 160 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+^
+internal/bot/slashcommand/handler/report.go:145:1: The line is 124 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't delete report, error: %s", err.Error()))
+^
+internal/bot/slashcommand/handler/report.go:149:1: The line is 129 characters long, which exceeds the maximum of 120 characters. (lll)
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
+^
+internal/bot/slashcommand/handler/user.go:22:1: The line is 164 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient) {
+^
+internal/bot/slashcommand/handler/user.go:54:1: The line is 130 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't create user history, error: %s", err.Error()))
+^
+internal/bot/slashcommand/handler/user.go:62:1: The line is 168 characters long, which exceeds the maximum of 120 characters. (lll)
+func handleListUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient) {
+^
+internal/bot/slashcommand/handler/user.go:94:1: The line is 128 characters long, which exceeds the maximum of 120 characters. (lll)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't list user history, error: %s", err.Error()))
+^
+internal/bot/slashcommand/middleware/manageserver.go:23:1: The line is 163 characters long, which exceeds the maximum of 120 characters. (lll)
+		slogger.InfoContext(ctx, "Permissions", "Member", strconv.FormatInt(interaction.Member.Permissions, 2), "Manage Server", strconv.FormatInt(MANAGE_SERVER_BIT, 2))
+^
+internal/db/service/database.go:293:1: The line is 169 characters long, which exceeds the maximum of 120 characters. (lll)
+func (s *DatabaseService) CreateGroupDatabase(ctx context.Context, req *connect.Request[snitchv1.CreateGroupDatabaseRequest]) (*connect.Response[emptypb.Empty], error) {
+^
+internal/db/service/database.go:298:1: The line is 175 characters long, which exceeds the maximum of 120 characters. (lll)
+func (s *DatabaseService) CreateReport(ctx context.Context, req *connect.Request[snitchv1.DbCreateReportRequest]) (*connect.Response[snitchv1.DbCreateReportResponse], error) {
+^
+internal/db/service/database.go:315:1: The line is 190 characters long, which exceeds the maximum of 120 characters. (lll)
+func (s *DatabaseService) CreateUserHistory(ctx context.Context, req *connect.Request[snitchv1.DbCreateUserHistoryRequest]) (*connect.Response[snitchv1.DbCreateUserHistoryResponse], error) {
+^
+internal/db/service/database.go:324:1: The line is 153 characters long, which exceeds the maximum of 120 characters. (lll)
+func (s *DatabaseService) CreateGroup(ctx context.Context, req *connect.Request[snitchv1.CreateGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+^
+internal/db/service/report_repository.go:88:1: The line is 122 characters long, which exceeds the maximum of 120 characters. (lll)
+		r.service.logger.Error("Failed to get report", "group_id", req.Msg.GroupId, "report_id", req.Msg.ReportId, "error", err)
+^
+internal/db/service/report_repository.go:194:1: The line is 125 characters long, which exceeds the maximum of 120 characters. (lll)
+		r.service.logger.Error("Failed to delete report", "group_id", req.Msg.GroupId, "report_id", req.Msg.ReportId, "error", err)
+^
+internal/db/service/user_repository.go:63:1: The line is 127 characters long, which exceeds the maximum of 120 characters. (lll)
+		r.service.logger.Error("Failed to create user history", "group_id", req.Msg.GroupId, "user_id", req.Msg.UserId, "error", err)
+^
+internal/db/service/user_repository.go:95:1: The line is 124 characters long, which exceeds the maximum of 120 characters. (lll)
+		r.service.logger.Error("Failed to get user history", "group_id", req.Msg.GroupId, "user_id", req.Msg.UserId, "error", err)
+^
+cmd/backend/main.go:24:27: Magic number: 4200, in <argument> detected (mnd)
+	port := flag.Int("port", 4200, "port to listen on")
+	                         ^
+cmd/backend/main.go:49:13: Magic number: 30, in <assign> detected (mnd)
+			Timeout: 30 * time.Second,
+			         ^
+cmd/backend/main.go:92:22: Magic number: 10, in <assign> detected (mnd)
+		ReadHeaderTimeout: 10 * time.Second,
+		                   ^
+cmd/bot/main.go:44:12: Magic number: 10, in <assign> detected (mnd)
+		Timeout: 10 * time.Second,
+		         ^
+cmd/bot/main.go:93:56: Magic number: 10, in <argument> detected (mnd)
+	handler = middleware.WithTimeout(handler, time.Second*10)
+	                                                      ^
+cmd/db/main.go:28:27: Magic number: 5200, in <argument> detected (mnd)
+	port := flag.Int("port", 5200, "port to listen on")
+	                         ^
+cmd/db/main.go:75:22: Magic number: 10, in <assign> detected (mnd)
+		ReadHeaderTimeout: 10 * time.Second,
+		                   ^
+internal/backend/service/event.go:68:42: Magic number: 256, in <argument> detected (mnd)
+	eventChan := make(chan *snitchv1.Event, 256)
+	                                        ^
+internal/backend/service/event.go:106:45: Magic number: 3, in <argument> detected (mnd)
+	return s.PublishEventWithRetry(ctx, event, 3, time.Millisecond*100)
+	                                           ^
+internal/bot/events/client.go:55:16: Magic number: 5, in <operation> detected (mnd)
+	retryDelay := 5 * time.Second
+	              ^
+internal/bot/messageutil/embed.go:34:24: Magic number: 2048, in <condition> detected (mnd)
+	if len(description) > 2048 {
+	                      ^
+internal/bot/messageutil/embed.go:43:18: Magic number: 1024, in <condition> detected (mnd)
+	if len(value) > 1024 {
+	                ^
+internal/bot/messageutil/embed.go:47:17: Magic number: 1024, in <condition> detected (mnd)
+	if len(name) > 1024 {
+	               ^
+internal/bot/messageutil/embed.go:67:19: Magic number: 2, in <case> detected (mnd)
+	case len(args) > 2:
+	                 ^
+internal/bot/messageutil/embed.go:148:17: Magic number: 2, in <condition> detected (mnd)
+	if len(args) > 2 {
+	               ^
+internal/bot/messageutil/embed.go:151:17: Magic number: 3, in <condition> detected (mnd)
+	if len(args) > 3 {
+	               ^
+internal/bot/messageutil/embed.go:196:21: Magic number: 25, in <condition> detected (mnd)
+	if len(e.Fields) > 25 {
+	                   ^
+internal/db/service/server_repository.go:80:20: Magic number: 69420, in <assign> detected (mnd)
+		OutputChannel:   69420,
+		                 ^
+internal/db/service/server_repository.go:82:20: Magic number: 777, in <assign> detected (mnd)
+		PermissionLevel: 777,
+		                 ^
+internal/backend/service/register.go:60:1: `if req.Msg.GroupId != nil` has complex nested blocks (complexity: 7) (nestif)
+	if req.Msg.GroupId != nil {
+^
+internal/backend/service/event.go:61:3: return with no blank line before (nlreturn)
+		return connect.NewError(connect.CodeNotFound, err)
+		^
+internal/backend/service/event.go:98:5: return with no blank line before (nlreturn)
+				return err
+				^
+internal/backend/service/event.go:166:4: continue with no blank line before (nlreturn)
+			continue
+			^
+internal/backend/service/event.go:189:2: return with no blank line before (nlreturn)
+	return nil
+	^
+internal/bot/messageutil/embed.go:69:3: fallthrough with no blank line before (nlreturn)
+		fallthrough
+		^
+internal/bot/messageutil/embed.go:72:3: fallthrough with no blank line before (nlreturn)
+		fallthrough
+		^
+internal/db/service/database.go:257:4: continue with no blank line before (nlreturn)
+			continue
+			^
+internal/db/service/database.go:266:4: continue with no blank line before (nlreturn)
+			continue
+			^
+cmd/bot/main.go:74:6: avoid inline error handling using `if err := ...; err != nil`; use plain assignment `err := ...` (noinlineerr)
+		if err := mainSession.Close(); err != nil {
+		   ^
+cmd/bot/main.go:96:5: avoid inline error handling using `if err := ...; err != nil`; use plain assignment `err := ...` (noinlineerr)
+	if err = mainSession.Open(); err != nil {
+	   ^
+cmd/db/main.go:45:6: avoid inline error handling using `if err := ...; err != nil`; use plain assignment `err := ...` (noinlineerr)
+		if err := dbService.Close(); err != nil {
+		   ^
+internal/backend/service/event_test.go:15:1: Function TestEventService_PublishEvent missing the call to method parallel (paralleltest)
+func TestEventService_PublishEvent(t *testing.T) {
+^
+internal/backend/service/event_test.go:58:1: Function TestEventService_GroupFiltering missing the call to method parallel (paralleltest)
+func TestEventService_GroupFiltering(t *testing.T) {
+^
+internal/backend/service/event_test.go:116:1: Function TestEventService_ChannelFullHandling missing the call to method parallel (paralleltest)
+func TestEventService_ChannelFullHandling(t *testing.T) {
+^
+internal/bot/events/client_test.go:27:1: Function TestClient_Creation missing the call to method parallel (paralleltest)
+func TestClient_Creation(t *testing.T) {
+^
+internal/bot/events/client_test.go:52:1: Function TestClient_RegisterHandler missing the call to method parallel (paralleltest)
+func TestClient_RegisterHandler(t *testing.T) {
+^
+internal/bot/events/client_test.go:101:1: Function TestClient_MultipleHandlers missing the call to method parallel (paralleltest)
+func TestClient_MultipleHandlers(t *testing.T) {
+^
+internal/backend/service/report.go:136:2: Consider pre-allocating `reports` (prealloc)
+	var reports []*snitchv1.CreateReportRequest
+	^
+internal/backend/service/user.go:116:2: Consider pre-allocating `userHistory` (prealloc)
+	var userHistory []*snitchv1.CreateUserHistoryRequest
+	^
+internal/db/service/report_repository.go:154:2: Consider pre-allocating `reports` (prealloc)
+	var reports []*snitchv1.DbGetReportResponse
+	^
+internal/db/service/server_repository.go:112:2: Consider pre-allocating `servers` (prealloc)
+	var servers []*snitchv1.ServerEntry
+	^
+internal/db/service/user_repository.go:119:2: Consider pre-allocating `entries` (prealloc)
+	var entries []*snitchv1.DbUserHistoryEntry
+	^
+internal/backend/service/event.go:63:13: avoid direct access to proto field findGroupResp.Msg.GroupId, use findGroupResp.Msg.GetGroupId() instead (protogetter)
+	groupID := findGroupResp.Msg.GroupId
+	           ^
+internal/backend/service/event.go:65:61: avoid direct access to proto field req.Msg.EventTypes, use req.Msg.GetEventTypes() instead (protogetter)
+	slogger.Info("Client subscribed to events", "event_types", req.Msg.EventTypes, "group_id", groupID)
+	                                                           ^
+internal/backend/service/event.go:135:12: avoid direct access to proto field event.Type, use event.GetType() instead (protogetter)
+			"type", event.Type)
+			        ^
+internal/backend/service/event.go:150:44: avoid direct access to proto field event.Type, use event.GetType() instead (protogetter)
+	slogger.Debug("Publishing event", "type", event.Type, "server_id", event.ServerId)
+	                                          ^
+internal/backend/service/event.go:153:63: avoid direct access to proto field event.Type, use event.GetType() instead (protogetter)
+		slogger.Debug("No subscribers available for event", "type", event.Type)
+		                                                            ^
+internal/backend/service/event.go:164:21: avoid direct access to proto field event.GroupId, use event.GetGroupId() instead (protogetter)
+		if sub.groupID != event.GroupId {
+		                  ^
+internal/backend/service/event_test.go:47:6: avoid direct access to proto field receivedEvent.Type, use receivedEvent.GetType() instead (protogetter)
+		if receivedEvent.Type != snitchv1.EventType_EVENT_TYPE_REPORT_CREATED {
+		   ^
+internal/backend/service/event_test.go:48:84: avoid direct access to proto field receivedEvent.Type, use receivedEvent.GetType() instead (protogetter)
+			t.Errorf("Expected '%s', got %v", snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, receivedEvent.Type)
+			                                                                                ^
+internal/backend/service/event_test.go:50:6: avoid direct access to proto field receivedEvent.GroupId, use receivedEvent.GetGroupId() instead (protogetter)
+		if receivedEvent.GroupId != TEST_GROUP_ID {
+		   ^
+internal/backend/service/event_test.go:51:62: avoid direct access to proto field receivedEvent.GroupId, use receivedEvent.GetGroupId() instead (protogetter)
+			t.Errorf("Expected group_id '%s', got %v", TEST_GROUP_ID, receivedEvent.GroupId)
+			                                                          ^
+internal/backend/service/event_test.go:100:6: avoid direct access to proto field receivedEvent.GroupId, use receivedEvent.GetGroupId() instead (protogetter)
+		if receivedEvent.GroupId != group1ID {
+		   ^
+internal/backend/service/register.go:62:29: avoid direct access to proto field *req.Msg.GroupId, use req.Msg.GetGroupId() instead (protogetter)
+		groupID, err = uuid.Parse(*req.Msg.GroupId)
+		                          ^
+internal/backend/service/register.go:80:34: avoid direct access to proto field *req.Msg.GroupName, use req.Msg.GetGroupName() instead (protogetter)
+		if req.Msg.GroupName == nil || *req.Msg.GroupName == "" {
+		                               ^
+internal/backend/service/register.go:90:15: avoid direct access to proto field *req.Msg.GroupName, use req.Msg.GetGroupName() instead (protogetter)
+			GroupName: *req.Msg.GroupName,
+			           ^
+internal/backend/service/report.go:52:13: avoid direct access to proto field findGroupResp.Msg.GroupId, use findGroupResp.Msg.GetGroupId() instead (protogetter)
+	groupID := findGroupResp.Msg.GroupId
+	           ^
+internal/backend/service/report.go:57:15: avoid direct access to proto field req.Msg.ReportedId, use req.Msg.GetReportedId() instead (protogetter)
+		UserId:     req.Msg.ReportedId,
+		            ^
+internal/backend/service/report.go:58:15: avoid direct access to proto field req.Msg.ReporterId, use req.Msg.GetReporterId() instead (protogetter)
+		ReporterId: req.Msg.ReporterId,
+		            ^
+internal/backend/service/report.go:60:15: avoid direct access to proto field req.Msg.ReportText, use req.Msg.GetReportText() instead (protogetter)
+		Reason:     req.Msg.ReportText,
+		            ^
+internal/backend/service/report.go:68:14: avoid direct access to proto field createReportResp.Msg.ReportId, use createReportResp.Msg.GetReportId() instead (protogetter)
+	reportID := createReportResp.Msg.ReportId
+	            ^
+internal/backend/service/report.go:78:17: avoid direct access to proto field req.Msg.ReportedId, use req.Msg.GetReportedId() instead (protogetter)
+				ReportedId: req.Msg.ReportedId,
+				            ^
+internal/backend/service/report.go:79:17: avoid direct access to proto field req.Msg.ReporterId, use req.Msg.GetReporterId() instead (protogetter)
+				ReporterId: req.Msg.ReporterId,
+				            ^
+internal/backend/service/report.go:80:17: avoid direct access to proto field req.Msg.ReportText, use req.Msg.GetReportText() instead (protogetter)
+				ReportText: req.Msg.ReportText,
+				            ^
+internal/backend/service/report.go:120:13: avoid direct access to proto field findGroupResp.Msg.GroupId, use findGroupResp.Msg.GetGroupId() instead (protogetter)
+	groupID := findGroupResp.Msg.GroupId
+	           ^
+internal/backend/service/report.go:137:27: avoid direct access to proto field listReportsResp.Msg.Reports, use listReportsResp.Msg.GetReports() instead (protogetter)
+	for _, dbReport := range listReportsResp.Msg.Reports {
+	                         ^
+internal/backend/service/report.go:139:16: avoid direct access to proto field dbReport.Reason, use dbReport.GetReason() instead (protogetter)
+			ReportText: dbReport.Reason,
+			            ^
+internal/backend/service/report.go:140:16: avoid direct access to proto field dbReport.ReporterId, use dbReport.GetReporterId() instead (protogetter)
+			ReporterId: dbReport.ReporterId,
+			            ^
+internal/backend/service/report.go:141:16: avoid direct access to proto field dbReport.UserId, use dbReport.GetUserId() instead (protogetter)
+			ReportedId: dbReport.UserId,
+			            ^
+internal/backend/service/report.go:180:13: avoid direct access to proto field req.Msg.ReportId, use req.Msg.GetReportId() instead (protogetter)
+		ReportId: req.Msg.ReportId,
+		          ^
+internal/backend/service/report.go:184:78: avoid direct access to proto field req.Msg.ReportId, use req.Msg.GetReportId() instead (protogetter)
+		slogger.Error("Failed to delete report", "group_id", groupID, "report_id", req.Msg.ReportId, "error", err)
+		                                                                           ^
+internal/backend/service/report.go:195:15: avoid direct access to proto field req.Msg.ReportId, use req.Msg.GetReportId() instead (protogetter)
+				ReportId: req.Msg.ReportId,
+				          ^
+internal/backend/service/user.go:55:16: avoid direct access to proto field req.Msg.UserId, use req.Msg.GetUserId() instead (protogetter)
+		UserId:      req.Msg.UserId,
+		             ^
+internal/backend/service/user.go:67:15: avoid direct access to proto field createHistoryResp.Msg.HistoryId, use createHistoryResp.Msg.GetHistoryId() instead (protogetter)
+	historyID := createHistoryResp.Msg.HistoryId
+	             ^
+internal/backend/service/user.go:68:96: avoid direct access to proto field req.Msg.UserId, use req.Msg.GetUserId() instead (protogetter)
+	slogger.Info("User history created", "history_id", historyID, "group_id", groupID, "user_id", req.Msg.UserId)
+	                                                                                              ^
+internal/backend/service/user.go:71:11: avoid direct access to proto field req.Msg.UserId, use req.Msg.GetUserId() instead (protogetter)
+		UserId: req.Msg.UserId,
+		        ^
+internal/backend/service/user.go:117:24: avoid direct access to proto field getUserHistoryResp.Msg.Entries, use getUserHistoryResp.Msg.GetEntries() instead (protogetter)
+	for _, entry := range getUserHistoryResp.Msg.Entries {
+	                      ^
+internal/backend/service/user.go:121:15: avoid direct access to proto field *entry.Reason, use entry.GetReason() instead (protogetter)
+			username = *entry.Reason
+			           ^
+internal/backend/service/user.go:125:16: avoid direct access to proto field entry.UserId, use entry.GetUserId() instead (protogetter)
+			UserId:     entry.UserId,
+			            ^
+internal/backend/service/user.go:128:16: avoid direct access to proto field entry.CreatedAt, use entry.GetCreatedAt() instead (protogetter)
+			ChangedAt:  entry.CreatedAt,
+			            ^
+internal/db/service/group_repository.go:30:41: avoid direct access to proto field req.Msg.GroupId, use req.Msg.GetGroupId() instead (protogetter)
+	_, err := r.service.createGroupDB(ctx, req.Msg.GroupId)
+	                                       ^
+internal/db/service/group_repository.go:32:73: avoid direct access to proto field req.Msg.GroupId, use req.Msg.GetGroupId() instead (protogetter)
+		r.service.logger.Error("Failed to create group database", "group_id", req.Msg.GroupId, "error", err)
+		                                                                      ^
+internal/db/service/report_repository.go:32:39: avoid direct access to proto field req.Msg.GroupId, use req.Msg.GetGroupId() instead (protogetter)
+	db, err := r.service.getGroupDB(ctx, req.Msg.GroupId)
+	                                     ^
+internal/db/service/report_repository.go:52:19: avoid direct access to proto field req.Msg.Reason, use req.Msg.GetReason() instead (protogetter)
+		ReportText:     req.Msg.Reason,
+		                ^
+internal/db/service/report_repository.go:53:19: avoid direct access to proto field req.Msg.ReporterId, use req.Msg.GetReporterId() instead (protogetter)
+		ReporterID:     req.Msg.ReporterId,
+		                ^
+internal/db/service/report_repository.go:55:19: avoid direct access to proto field req.Msg.ServerId, use req.Msg.GetServerId() instead (protogetter)
+		OriginServerID: req.Msg.ServerId,
+		                ^
+internal/db/service/report_repository.go:124:52: avoid direct access to proto field *req.Msg.UserId, use req.Msg.GetUserId() instead (protogetter)
+		reportRows, err = queries.ListReportsByUser(ctx, *req.Msg.UserId)
+		                                                 ^
+internal/db/service/report_repository.go:137:15: avoid direct access to proto field *req.Msg.Offset, use req.Msg.GetOffset() instead (protogetter)
+		start = int(*req.Msg.Offset)
+		            ^
+internal/db/service/report_repository.go:142:21: avoid direct access to proto field *req.Msg.Limit, use req.Msg.GetLimit() instead (protogetter)
+		end = start + int(*req.Msg.Limit)
+		                  ^
+internal/db/service/server_repository.go:36:14: avoid direct access to proto field req.Msg.GroupName, use req.Msg.GetGroupName() instead (protogetter)
+		GroupName: req.Msg.GroupName,
+		           ^
+internal/db/service/server_repository.go:54:49: avoid direct access to proto field req.Msg.ServerId, use req.Msg.GetServerId() instead (protogetter)
+	groupID, err := queries.FindGroupByServer(ctx, req.Msg.ServerId)
+	                                               ^
+internal/db/service/server_repository.go:59:73: avoid direct access to proto field req.Msg.ServerId, use req.Msg.GetServerId() instead (protogetter)
+		r.service.logger.Error("Failed to find group by server", "server_id", req.Msg.ServerId, "error", err)
+		                                                                      ^
+cmd/bot/main.go:1:1: package-comments: should have a package comment (revive)
+package main
+^
+internal/backend/backendconfig/backendconfig.go:1:1: package-comments: should have a package comment (revive)
+package backendconfig
+^
+internal/backend/backendconfig/backendconfig.go:11:6: exported: exported type BackendConfig should have comment or be unexported (revive)
+type BackendConfig struct {
+     ^
+internal/backend/backendconfig/backendconfig.go:15:1: exported: exported function FromEnv should have comment or be unexported (revive)
+func FromEnv() (BackendConfig, error) {
+^
+internal/backend/backendconfig/backendconfig.go:43:1: exported: exported method BackendConfig.DbURL should have comment or be unexported (revive)
+func (backendConfig BackendConfig) DbURL() (*url.URL, error) {
+^
+internal/backend/service/event.go:23:6: exported: exported type EventService should have comment or be unexported (revive)
+type EventService struct {
+     ^
+internal/backend/service/event.go:29:1: exported: exported function NewEventService should have comment or be unexported (revive)
+func NewEventService(dbClient snitchv1connect.DatabaseServiceClient) *EventService {
+^
+internal/backend/service/event_test.go:12:7: var-naming: don't use ALL_CAPS in Go names; use CamelCase (revive)
+const TEST_GROUP_ID = "test-group-id"
+      ^
+internal/backend/service/event_test.go:13:7: var-naming: don't use ALL_CAPS in Go names; use CamelCase (revive)
+const TEST_SERVER_ID = "test-server-id"
+      ^
+internal/backend/service/interceptor/group.go:16:2: exported: exported const ServerIDHeader should have comment (or a comment on this block) or be unexported (revive)
+	ServerIDHeader     = "X-Server-ID"
+	^
+internal/backend/service/interceptor/group.go:30:1: exported: exported function NewGroupContextInterceptor should have comment or be unexported (revive)
+func NewGroupContextInterceptor(dbClient snitchv1connect.DatabaseServiceClient) connect.UnaryInterceptorFunc {
+^
+internal/backend/service/interceptor/group.go:56:1: exported: exported function GetServerID should have comment or be unexported (revive)
+func GetServerID(ctx context.Context) (string, error) {
+^
+internal/backend/service/interceptor/group.go:64:1: exported: exported function GetGroupID should have comment or be unexported (revive)
+func GetGroupID(ctx context.Context) (string, error) {
+^
+internal/backend/service/interceptor/interceptor.go:15:1: exported: exported function NewTraceInterceptor should have comment or be unexported (revive)
+func NewTraceInterceptor() connect.UnaryInterceptorFunc {
+^
+internal/backend/service/interceptor/interceptor.go:40:1: exported: exported function NewLogInterceptor should have comment or be unexported (revive)
+func NewLogInterceptor() connect.UnaryInterceptorFunc {
+^
+internal/backend/service/interceptor/interceptor.go:64:1: exported: exported function NewRecoveryInterceptor should have comment or be unexported (revive)
+func NewRecoveryInterceptor() connect.UnaryInterceptorFunc {
+^
+internal/backend/service/register.go:15:6: exported: exported type RegisterServer should have comment or be unexported (revive)
+type RegisterServer struct {
+     ^
+internal/backend/service/register.go:19:1: exported: exported function NewRegisterServer should have comment or be unexported (revive)
+func NewRegisterServer(dbClient snitchv1connect.DatabaseServiceClient) *RegisterServer {
+^
+internal/backend/service/register.go:23:7: exported: exported const ServerIDHeader should have comment or be unexported (revive)
+const ServerIDHeader = "X-Server-ID"
+      ^
+internal/backend/service/register.go:34:1: exported: exported method RegisterServer.Register should have comment or be unexported (revive)
+func (s *RegisterServer) Register(
+^
+internal/backend/service/report.go:15:6: exported: exported type ReportServer should have comment or be unexported (revive)
+type ReportServer struct {
+     ^
+internal/backend/service/report.go:20:1: exported: exported function NewReportServer should have comment or be unexported (revive)
+func NewReportServer(dbClient snitchv1connect.DatabaseServiceClient, eventService *EventService) *ReportServer {
+^
+internal/backend/service/report.go:27:1: exported: exported method ReportServer.CreateReport should have comment or be unexported (revive)
+func (s *ReportServer) CreateReport(
+^
+internal/backend/service/report.go:95:1: exported: exported method ReportServer.ListReports should have comment or be unexported (revive)
+func (s *ReportServer) ListReports(
+^
+internal/backend/service/report.go:150:1: exported: exported method ReportServer.DeleteReport should have comment or be unexported (revive)
+func (s *ReportServer) DeleteReport(
+^
+internal/backend/service/user.go:15:6: exported: exported type UserServer should have comment or be unexported (revive)
+type UserServer struct {
+     ^
+internal/backend/service/user.go:19:1: exported: exported function NewUserServer should have comment or be unexported (revive)
+func NewUserServer(dbClient snitchv1connect.DatabaseServiceClient) *UserServer {
+^
+internal/backend/service/user.go:25:1: exported: exported method UserServer.CreateUserHistory should have comment or be unexported (revive)
+func (s *UserServer) CreateUserHistory(
+^
+internal/backend/service/user.go:75:1: exported: exported method UserServer.ListUserHistory should have comment or be unexported (revive)
+func (s *UserServer) ListUserHistory(
+^
+internal/bot/messageutil/response.go:11:1: exported: exported function SimpleRespondContext should have comment or be unexported (revive)
+func SimpleRespondContext(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, messageContent string) {
+^
+internal/bot/messageutil/response.go:27:1: exported: exported function EmbedRespondContext should have comment or be unexported (revive)
+func EmbedRespondContext(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, embeds []*discordgo.MessageEmbed) {
+^
+internal/db/dbconfig/dbconfig.go:9:6: exported: exported type DbConfig should have comment or be unexported (revive)
+type DbConfig struct {
+     ^
+internal/db/dbconfig/dbconfig.go:13:1: exported: exported function FromEnv should have comment or be unexported (revive)
+func FromEnv() (DbConfig, error) {
+^
+internal/db/migrations/migrations.go:1:1: package-comments: should have a package comment (revive)
+package migrations
+^
+internal/db/migrations/migrations.go:7:1: exported: comment on exported var MetadataMigrations should be of the form "MetadataMigrations ..." (revive)
+// Embedded migration files for metadata database
+^
+internal/db/migrations/migrations.go:12:1: exported: comment on exported var TenantMigrations should be of the form "TenantMigrations ..." (revive)
+// Embedded migration files for tenant databases
+^
+internal/db/service/database.go:20:2: blank-imports: a blank import should be only in a main or test package, or have a comment justifying it (revive)
+	_ "github.com/tursodatabase/go-libsql"
+	^
+internal/db/service/database.go:30:6: exported: exported type DatabaseService should have comment or be unexported (revive)
+type DatabaseService struct {
+     ^
+internal/db/service/database.go:46:1: exported: exported function NewDatabaseService should have comment or be unexported (revive)
+func NewDatabaseService(ctx context.Context, dbDir string, logger *slog.Logger) (*DatabaseService, error) {
+^
+internal/db/service/database.go:93:1: exported: exported method DatabaseService.Close should have comment or be unexported (revive)
+func (s *DatabaseService) Close() error {
+^
+internal/db/service/database.go:292:1: exported: comment on exported method DatabaseService.CreateGroupDatabase should be of the form "CreateGroupDatabase ..." (revive)
+// Group operations
+^
+internal/db/service/database.go:297:1: exported: comment on exported method DatabaseService.CreateReport should be of the form "CreateReport ..." (revive)
+// Report operations
+^
+internal/db/service/database.go:302:1: exported: exported method DatabaseService.GetReport should have comment or be unexported (revive)
+func (s *DatabaseService) GetReport(ctx context.Context, req *connect.Request[snitchv1.DbGetReportRequest]) (*connect.Response[snitchv1.DbGetReportResponse], error) {
+^
+internal/db/service/database.go:306:1: exported: exported method DatabaseService.ListReports should have comment or be unexported (revive)
+func (s *DatabaseService) ListReports(ctx context.Context, req *connect.Request[snitchv1.DbListReportsRequest]) (*connect.Response[snitchv1.DbListReportsResponse], error) {
+^
+internal/db/service/database.go:310:1: exported: exported method DatabaseService.DeleteReport should have comment or be unexported (revive)
+func (s *DatabaseService) DeleteReport(ctx context.Context, req *connect.Request[snitchv1.DbDeleteReportRequest]) (*connect.Response[emptypb.Empty], error) {
+^
+internal/db/service/database.go:314:1: exported: comment on exported method DatabaseService.CreateUserHistory should be of the form "CreateUserHistory ..." (revive)
+// User operations
+^
+internal/db/service/database.go:319:1: exported: exported method DatabaseService.GetUserHistory should have comment or be unexported (revive)
+func (s *DatabaseService) GetUserHistory(ctx context.Context, req *connect.Request[snitchv1.DbGetUserHistoryRequest]) (*connect.Response[snitchv1.DbGetUserHistoryResponse], error) {
+^
+internal/db/service/database.go:323:1: exported: comment on exported method DatabaseService.CreateGroup should be of the form "CreateGroup ..." (revive)
+// Server and metadata operations
+^
+internal/db/service/database.go:328:1: exported: exported method DatabaseService.FindGroupByServer should have comment or be unexported (revive)
+func (s *DatabaseService) FindGroupByServer(ctx context.Context, req *connect.Request[snitchv1.FindGroupByServerRequest]) (*connect.Response[snitchv1.FindGroupByServerResponse], error) {
+^
+internal/db/service/database.go:332:1: exported: exported method DatabaseService.AddServerToGroup should have comment or be unexported (revive)
+func (s *DatabaseService) AddServerToGroup(ctx context.Context, req *connect.Request[snitchv1.AddServerToGroupRequest]) (*connect.Response[emptypb.Empty], error) {
+^
+internal/db/service/database.go:145:31: rows.Err must be checked (rowserrcheck)
+		rows, err := db.QueryContext(ctx, pragma)
+		                            ^
+internal/backend/service/event_test.go:1:9: package should be `service_test` instead of `service` (testpackage)
+package service
+        ^
+internal/bot/events/client_test.go:1:9: package should be `events_test` instead of `events` (testpackage)
+package events
+        ^
+internal/bot/messageutil/embed.go:200:6: variable name 'v' is too short for the scope of its usage (varnamelen)
+	for _, v := range e.Fields {
+	    ^
+internal/bot/slashcommand/handler/report.go:22:2: variable name 'ok' is too short for the scope of its usage (varnamelen)
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	^
+internal/bot/slashcommand/handler/user.go:23:2: variable name 'ok' is too short for the scope of its usage (varnamelen)
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	^
+internal/bot/slashcommand/handler/user.go:63:2: variable name 'ok' is too short for the scope of its usage (varnamelen)
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	^
+internal/db/service/database.go:114:49: parameter name 'db' is too short for the scope of its usage (varnamelen)
+func runMetadataMigrations(ctx context.Context, db *sql.DB, logger *slog.Logger) error {
+                                                ^
+internal/db/service/database.go:133:47: parameter name 'db' is too short for the scope of its usage (varnamelen)
+func configureConnection(ctx context.Context, db *sql.DB, logger *slog.Logger) error {
+                                              ^
+internal/db/service/database.go:190:2: variable name 'db' is too short for the scope of its usage (varnamelen)
+	db, err := sql.Open("libsql", "file:"+groupPath)
+	^
+internal/db/service/database.go:254:3: variable name 'db' is too short for the scope of its usage (varnamelen)
+		db, err := sql.Open("libsql", "file:"+file)
+		^
+internal/bot/messageutil/embed.go:58:1: unnecessary trailing newline (whitespace)
+}
+^
+internal/bot/messageutil/embed.go:210:2: unnecessary trailing newline (whitespace)
+	}
+	^
+internal/bot/messageutil/response.go:16:2: unnecessary trailing newline (whitespace)
+	}
+	^
+internal/backend/backendconfig/backendconfig.go:44:9: error returned from external package is unwrapped: sig: func net/url.Parse(rawURL string) (*net/url.URL, error) (wrapcheck)
+	return url.Parse("https://" + net.JoinHostPort(backendConfig.DbHost, backendConfig.DbPort))
+	       ^
+internal/backend/service/event.go:94:11: error returned from interface method should be wrapped: sig: func (context.Context).Err() error (wrapcheck)
+			return ctx.Err()
+			       ^
+internal/bot/botconfig/botconfig.go:43:9: error returned from external package is unwrapped: sig: func net/url.Parse(rawURL string) (*net/url.URL, error) (wrapcheck)
+	return url.Parse("https://" + net.JoinHostPort(botConfig.BackendHost, botConfig.BackendPort))
+	       ^
+cmd/bot/main.go:73:2: only one cuddle assignment allowed before defer statement (wsl)
+	defer func() {
+	^
+cmd/bot/main.go:102:2: only one cuddle assignment allowed before if statement (wsl)
+	if err != nil {
+	^
+cmd/db/main.go:44:2: only one cuddle assignment allowed before defer statement (wsl)
+	defer func() {
+	^
+internal/backend/service/event.go:59:2: only one cuddle assignment allowed before if statement (wsl)
+	if err != nil {
+	^
+internal/backend/service/event_test.go:113:2: block should not end with a whitespace (or comment) (wsl)
+	}
+	^
+internal/backend/service/register.go:53:2: only one cuddle assignment allowed before if statement (wsl)
+	if err == nil {
+	^
+internal/bot/events/client_test.go:99:1: block should not end with a whitespace (or comment) (wsl)
+}
+^
+internal/bot/messageutil/embed.go:37:2: assignments should only be cuddled with other assignments (wsl)
+	e.Description = description
+	^
+internal/bot/messageutil/embed.go:91:2: declarations should never be cuddled (wsl)
+	var proxyURL string
+	^
+internal/bot/messageutil/embed.go:96:2: if statements should only be cuddled with assignments (wsl)
+	if len(args) > 0 {
+	^
+internal/bot/messageutil/embed.go:99:2: if statements should only be cuddled with assignments (wsl)
+	if len(args) > 1 {
+	^
+internal/bot/messageutil/embed.go:112:2: declarations should never be cuddled (wsl)
+	var proxyURL string
+	^
+internal/bot/messageutil/embed.go:120:2: if statements should only be cuddled with assignments (wsl)
+	if len(args) > 1 {
+	^
+internal/bot/slashcommand/handler/register.go:56:1: block should not end with a whitespace (or comment) (wsl)
+}
+^
+internal/bot/slashcommand/handler/report.go:29:2: only one cuddle assignment allowed before range statement (wsl)
+	for _, opt := range options {
+	^
+internal/bot/slashcommand/handler/report.go:80:2: only one cuddle assignment allowed before range statement (wsl)
+	for _, opt := range options {
+	^
+internal/bot/slashcommand/handler/report.go:85:2: assignments should only be cuddled with other assignments (wsl)
+	reporterUserOption, ok := optionMap["reporter-user"]
+	^
+internal/bot/slashcommand/handler/report.go:130:2: only one cuddle assignment allowed before range statement (wsl)
+	for _, opt := range options {
+	^
+internal/bot/slashcommand/middleware/middleware.go:45:3: only cuddled expressions if assigning variable or using from line above (wsl)
+		next(ctx, session, interaction)
+		^
+internal/db/service/database.go:159:4: expressions should not be cuddled with blocks (wsl)
+			logger.Debug("Applied PRAGMA successfully", "pragma", pragma)
+			^
+internal/db/service/database.go:251:3: assignments should only be cuddled with other assignments (wsl)
+		groupID := strings.TrimSuffix(strings.TrimPrefix(basename, "group_"), ".db")
+		^
+internal/db/service/report_repository.go:155:2: ranges should only be cuddled with assignments used in the iteration (wsl)
+	for _, reportRow := range reportRows {
+	^
+internal/db/service/server_repository.go:113:2: ranges should only be cuddled with assignments used in the iteration (wsl)
+	for _, serverRow := range serverRows {
+	^
+internal/db/service/user_repository.go:120:2: ranges should only be cuddled with assignments used in the iteration (wsl)
+	for _, historyRow := range historyRows {
+	^
+cmd/bot/main.go:101:2: missing whitespace above this line (too many statements above if) (wsl_v5)
+	backendURL, err := config.BackendURL()
+	^
+internal/backend/service/event.go:58:2: missing whitespace above this line (too many statements above if) (wsl_v5)
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	^
+internal/backend/service/register.go:113:3: missing whitespace above this line (too many statements above if) (wsl_v5)
+		_, err = s.dbClient.AddServerToGroup(ctx, connect.NewRequest(addServerToNewGroupReq))
+		^
+internal/bot/events/client.go:50:2: missing whitespace above this line (invalid statement above go) (wsl_v5)
+	go c.maintainConnection(ctx)
+	^
+internal/bot/events/client.go:67:5: missing whitespace above this line (invalid statement above select) (wsl_v5)
+				select {
+				^
+internal/bot/messageutil/embed.go:57:1: unnecessary whitespace (trailing-whitespace) (wsl_v5)
+
+^
+internal/bot/messageutil/embed.go:201:1: unnecessary whitespace (leading-whitespace) (wsl_v5)
+
+^
+internal/bot/messageutil/embed.go:209:1: unnecessary whitespace (trailing-whitespace) (wsl_v5)
+
+^
+internal/bot/messageutil/response.go:15:1: unnecessary whitespace (trailing-whitespace) (wsl_v5)
+
+^
+internal/bot/slashcommand/handler/register.go:35:1: unnecessary whitespace (err) (wsl_v5)
+
+^
+internal/bot/slashcommand/handler/report.go:28:2: missing whitespace above this line (too many statements above range) (wsl_v5)
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	^
+internal/bot/slashcommand/handler/report.go:79:2: missing whitespace above this line (too many statements above range) (wsl_v5)
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	^
+internal/bot/slashcommand/handler/report.go:102:1: unnecessary whitespace (err) (wsl_v5)
+
+^
+internal/bot/slashcommand/handler/report.go:129:2: missing whitespace above this line (too many statements above range) (wsl_v5)
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	^
+internal/bot/slashcommand/handler/user.go:91:1: unnecessary whitespace (err) (wsl_v5)
+
+^
+internal/bot/slashcommand/middleware/middleware.go:20:3: missing whitespace above this line (invalid statement above expr) (wsl_v5)
+		next(timeoutCtx, session, interaction)
+		^
+internal/bot/slashcommand/middleware/middleware.go:65:3: missing whitespace above this line (invalid statement above expr) (wsl_v5)
+		next(ctx, session, interaction)
+		^
+361 issues:
+* cyclop: 2
+* depguard: 48
+* err113: 20
+* exhaustruct: 37
+* funcorder: 4
+* funlen: 2
+* gocritic: 2
+* godot: 3
+* godox: 1
+* gosec: 5
+* ireturn: 1
+* lll: 36
+* mnd: 19
+* nestif: 1
+* nlreturn: 8
+* noinlineerr: 3
+* paralleltest: 6
+* prealloc: 5
+* protogetter: 50
+* revive: 50
+* rowserrcheck: 1
+* testpackage: 2
+* varnamelen: 8
+* whitespace: 3
+* wrapcheck: 3
+* wsl: 24
+* wsl_v5: 17
