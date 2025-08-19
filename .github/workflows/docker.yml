@@ -2,7 +2,8 @@ name: Build Docker Image
 
 on:
   pull_request:
-    branches: main
+    branches:
+      - main
   push:
     branches:
       - main
@@ -24,6 +25,8 @@ jobs:
             image: snitch-backend
           - containerfile: bot.Containerfile
             image: snitch-bot
+          - containerfile: db.Containerfile
+            image: snitch-db
 
     runs-on: ubuntu-latest
 
