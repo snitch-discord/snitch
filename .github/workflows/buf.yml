@@ -1,0 +1,14 @@
+name: Run Buf CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  buf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
