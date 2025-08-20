@@ -1343,6 +1343,191 @@ func (x *ListServersResponse) GetServers() []*ServerEntry {
 	return nil
 }
 
+// Backup operations
+type CreateBackupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackupPath    string                 `protobuf:"bytes,1,opt,name=backup_path,json=backupPath,proto3" json:"backup_path,omitempty"`
+	GroupId       *string                `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3,oneof" json:"group_id,omitempty"` // If specified, backup single group; if empty, backup metadata
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupRequest) Reset() {
+	*x = CreateBackupRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupRequest) ProtoMessage() {}
+
+func (x *CreateBackupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupRequest.ProtoReflect.Descriptor instead.
+func (*CreateBackupRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *CreateBackupRequest) GetBackupPath() string {
+	if x != nil {
+		return x.BackupPath
+	}
+	return ""
+}
+
+func (x *CreateBackupRequest) GetGroupId() string {
+	if x != nil && x.GroupId != nil {
+		return *x.GroupId
+	}
+	return ""
+}
+
+type CreateBackupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackupPath    string                 `protobuf:"bytes,1,opt,name=backup_path,json=backupPath,proto3" json:"backup_path,omitempty"`
+	SizeBytes     int64                  `protobuf:"varint,2,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupResponse) Reset() {
+	*x = CreateBackupResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupResponse) ProtoMessage() {}
+
+func (x *CreateBackupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupResponse.ProtoReflect.Descriptor instead.
+func (*CreateBackupResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CreateBackupResponse) GetBackupPath() string {
+	if x != nil {
+		return x.BackupPath
+	}
+	return ""
+}
+
+func (x *CreateBackupResponse) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+type ListGroupIDsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupIDsRequest) Reset() {
+	*x = ListGroupIDsRequest{}
+	mi := &file_snitch_v1_database_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupIDsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupIDsRequest) ProtoMessage() {}
+
+func (x *ListGroupIDsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupIDsRequest.ProtoReflect.Descriptor instead.
+func (*ListGroupIDsRequest) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{26}
+}
+
+type ListGroupIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupIds      []string               `protobuf:"bytes,1,rep,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupIDsResponse) Reset() {
+	*x = ListGroupIDsResponse{}
+	mi := &file_snitch_v1_database_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupIDsResponse) ProtoMessage() {}
+
+func (x *ListGroupIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_snitch_v1_database_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupIDsResponse.ProtoReflect.Descriptor instead.
+func (*ListGroupIDsResponse) Descriptor() ([]byte, []int) {
+	return file_snitch_v1_database_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListGroupIDsResponse) GetGroupIds() []string {
+	if x != nil {
+		return x.GroupIds
+	}
+	return nil
+}
+
 var File_snitch_v1_database_proto protoreflect.FileDescriptor
 
 const file_snitch_v1_database_proto_rawDesc = "" +
@@ -1446,7 +1631,21 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\tR\agroupId\"G\n" +
 	"\x13ListServersResponse\x120\n" +
-	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers2\x89\t\n" +
+	"\aservers\x18\x01 \x03(\v2\x16.snitch.v1.ServerEntryR\aservers\"c\n" +
+	"\x13CreateBackupRequest\x12\x1f\n" +
+	"\vbackup_path\x18\x01 \x01(\tR\n" +
+	"backupPath\x12\x1e\n" +
+	"\bgroup_id\x18\x02 \x01(\tH\x00R\agroupId\x88\x01\x01B\v\n" +
+	"\t_group_id\"V\n" +
+	"\x14CreateBackupResponse\x12\x1f\n" +
+	"\vbackup_path\x18\x01 \x01(\tR\n" +
+	"backupPath\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x02 \x01(\x03R\tsizeBytes\"\x15\n" +
+	"\x13ListGroupIDsRequest\"3\n" +
+	"\x14ListGroupIDsResponse\x12\x1b\n" +
+	"\tgroup_ids\x18\x01 \x03(\tR\bgroupIds2\xaf\n" +
+	"\n" +
 	"\x0fDatabaseService\x12N\n" +
 	"\vCreateGroup\x12\x1d.snitch.v1.CreateGroupRequest\x1a\x1e.snitch.v1.CreateGroupResponse\"\x00\x12`\n" +
 	"\x11FindGroupByServer\x12#.snitch.v1.FindGroupByServerRequest\x1a$.snitch.v1.FindGroupByServerResponse\"\x00\x12]\n" +
@@ -1458,7 +1657,9 @@ const file_snitch_v1_database_proto_rawDesc = "" +
 	"\fDeleteReport\x12-.snitch.v1.DatabaseServiceDeleteReportRequest\x1a..snitch.v1.DatabaseServiceDeleteReportResponse\"\x00\x12~\n" +
 	"\x11CreateUserHistory\x122.snitch.v1.DatabaseServiceCreateUserHistoryRequest\x1a3.snitch.v1.DatabaseServiceCreateUserHistoryResponse\"\x00\x12u\n" +
 	"\x0eGetUserHistory\x12/.snitch.v1.DatabaseServiceGetUserHistoryRequest\x1a0.snitch.v1.DatabaseServiceGetUserHistoryResponse\"\x00\x12N\n" +
-	"\vListServers\x12\x1d.snitch.v1.ListServersRequest\x1a\x1e.snitch.v1.ListServersResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
+	"\vListServers\x12\x1d.snitch.v1.ListServersRequest\x1a\x1e.snitch.v1.ListServersResponse\"\x00\x12Q\n" +
+	"\fCreateBackup\x12\x1e.snitch.v1.CreateBackupRequest\x1a\x1f.snitch.v1.CreateBackupResponse\"\x00\x12Q\n" +
+	"\fListGroupIDs\x12\x1e.snitch.v1.ListGroupIDsRequest\x1a\x1f.snitch.v1.ListGroupIDsResponse\"\x00B)Z'snitch/pkg/proto/gen/snitch/v1;snitchv1b\x06proto3"
 
 var (
 	file_snitch_v1_database_proto_rawDescOnce sync.Once
@@ -1472,7 +1673,7 @@ func file_snitch_v1_database_proto_rawDescGZIP() []byte {
 	return file_snitch_v1_database_proto_rawDescData
 }
 
-var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_snitch_v1_database_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_snitch_v1_database_proto_goTypes = []any{
 	(*CreateGroupRequest)(nil),                       // 0: snitch.v1.CreateGroupRequest
 	(*CreateGroupResponse)(nil),                      // 1: snitch.v1.CreateGroupResponse
@@ -1498,6 +1699,10 @@ var file_snitch_v1_database_proto_goTypes = []any{
 	(*ListServersRequest)(nil),                       // 21: snitch.v1.ListServersRequest
 	(*ServerEntry)(nil),                              // 22: snitch.v1.ServerEntry
 	(*ListServersResponse)(nil),                      // 23: snitch.v1.ListServersResponse
+	(*CreateBackupRequest)(nil),                      // 24: snitch.v1.CreateBackupRequest
+	(*CreateBackupResponse)(nil),                     // 25: snitch.v1.CreateBackupResponse
+	(*ListGroupIDsRequest)(nil),                      // 26: snitch.v1.ListGroupIDsRequest
+	(*ListGroupIDsResponse)(nil),                     // 27: snitch.v1.ListGroupIDsResponse
 }
 var file_snitch_v1_database_proto_depIdxs = []int32{
 	11, // 0: snitch.v1.DatabaseServiceListReportsResponse.reports:type_name -> snitch.v1.DatabaseServiceGetReportResponse
@@ -1514,19 +1719,23 @@ var file_snitch_v1_database_proto_depIdxs = []int32{
 	16, // 11: snitch.v1.DatabaseService.CreateUserHistory:input_type -> snitch.v1.DatabaseServiceCreateUserHistoryRequest
 	18, // 12: snitch.v1.DatabaseService.GetUserHistory:input_type -> snitch.v1.DatabaseServiceGetUserHistoryRequest
 	21, // 13: snitch.v1.DatabaseService.ListServers:input_type -> snitch.v1.ListServersRequest
-	1,  // 14: snitch.v1.DatabaseService.CreateGroup:output_type -> snitch.v1.CreateGroupResponse
-	3,  // 15: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
-	5,  // 16: snitch.v1.DatabaseService.AddServerToGroup:output_type -> snitch.v1.AddServerToGroupResponse
-	7,  // 17: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> snitch.v1.CreateGroupDatabaseResponse
-	9,  // 18: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DatabaseServiceCreateReportResponse
-	11, // 19: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DatabaseServiceGetReportResponse
-	14, // 20: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DatabaseServiceListReportsResponse
-	13, // 21: snitch.v1.DatabaseService.DeleteReport:output_type -> snitch.v1.DatabaseServiceDeleteReportResponse
-	17, // 22: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DatabaseServiceCreateUserHistoryResponse
-	20, // 23: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DatabaseServiceGetUserHistoryResponse
-	23, // 24: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
-	14, // [14:25] is the sub-list for method output_type
-	3,  // [3:14] is the sub-list for method input_type
+	24, // 14: snitch.v1.DatabaseService.CreateBackup:input_type -> snitch.v1.CreateBackupRequest
+	26, // 15: snitch.v1.DatabaseService.ListGroupIDs:input_type -> snitch.v1.ListGroupIDsRequest
+	1,  // 16: snitch.v1.DatabaseService.CreateGroup:output_type -> snitch.v1.CreateGroupResponse
+	3,  // 17: snitch.v1.DatabaseService.FindGroupByServer:output_type -> snitch.v1.FindGroupByServerResponse
+	5,  // 18: snitch.v1.DatabaseService.AddServerToGroup:output_type -> snitch.v1.AddServerToGroupResponse
+	7,  // 19: snitch.v1.DatabaseService.CreateGroupDatabase:output_type -> snitch.v1.CreateGroupDatabaseResponse
+	9,  // 20: snitch.v1.DatabaseService.CreateReport:output_type -> snitch.v1.DatabaseServiceCreateReportResponse
+	11, // 21: snitch.v1.DatabaseService.GetReport:output_type -> snitch.v1.DatabaseServiceGetReportResponse
+	14, // 22: snitch.v1.DatabaseService.ListReports:output_type -> snitch.v1.DatabaseServiceListReportsResponse
+	13, // 23: snitch.v1.DatabaseService.DeleteReport:output_type -> snitch.v1.DatabaseServiceDeleteReportResponse
+	17, // 24: snitch.v1.DatabaseService.CreateUserHistory:output_type -> snitch.v1.DatabaseServiceCreateUserHistoryResponse
+	20, // 25: snitch.v1.DatabaseService.GetUserHistory:output_type -> snitch.v1.DatabaseServiceGetUserHistoryResponse
+	23, // 26: snitch.v1.DatabaseService.ListServers:output_type -> snitch.v1.ListServersResponse
+	25, // 27: snitch.v1.DatabaseService.CreateBackup:output_type -> snitch.v1.CreateBackupResponse
+	27, // 28: snitch.v1.DatabaseService.ListGroupIDs:output_type -> snitch.v1.ListGroupIDsResponse
+	16, // [16:29] is the sub-list for method output_type
+	3,  // [3:16] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1543,13 +1752,14 @@ func file_snitch_v1_database_proto_init() {
 	file_snitch_v1_database_proto_msgTypes[16].OneofWrappers = []any{}
 	file_snitch_v1_database_proto_msgTypes[18].OneofWrappers = []any{}
 	file_snitch_v1_database_proto_msgTypes[19].OneofWrappers = []any{}
+	file_snitch_v1_database_proto_msgTypes[24].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_snitch_v1_database_proto_rawDesc), len(file_snitch_v1_database_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
