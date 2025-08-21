@@ -125,15 +125,15 @@ func main() {
 
 	// Add event handlers for when bot joins/leaves servers
 	mainSession.AddHandler(func(s *discordgo.Session, g *discordgo.GuildCreate) {
-		slogger.Info("Bot joined server", "guild_id", g.Guild.ID, "guild_name", g.Guild.Name)
-		if err := eventClient.AddServer(ctx, g.Guild.ID); err != nil {
-			slogger.Error("Failed to add server to event subscription", "guild_id", g.Guild.ID, "error", err)
+		slogger.Info("Bot joined server", "guild_id", g.ID, "guild_name", g.Name)
+		if err := eventClient.AddServer(ctx, g.ID); err != nil {
+			slogger.Error("Failed to add server to event subscription", "guild_id", g.ID, "error", err)
 		}
 	})
 
 	mainSession.AddHandler(func(s *discordgo.Session, g *discordgo.GuildDelete) {
-		slogger.Info("Bot left server", "guild_id", g.Guild.ID)
-		eventClient.RemoveServer(g.Guild.ID)
+		slogger.Info("Bot left server", "guild_id", g.ID)
+		eventClient.RemoveServer(g.ID)
 	})
 
 	// Register commands globally (works across all servers)

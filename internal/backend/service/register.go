@@ -148,3 +148,30 @@ func (s *RegisterServer) Register(
 		GroupId:  groupID.String(),
 	}), nil
 }
+
+func (s *RegisterServer) HasGroup(
+	ctx context.Context,
+	req *connect.Request[snitchpb.HasGroupRequest],
+) (*connect.Response[snitchpb.HasGroupResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	findGroupReq := &snitchpb.FindGroupByServerRequest{
+		ServerId: req.Msg.ServerId,
+	}
+
+	var hasGroup = false
+
+	_, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	if err == nil {
+		hasGroup = true
+	} else {
+		slogger.DebugContext(ctx, "logs when running find group by server", "error", err)
+	}
+
+	return connect.NewResponse(&snitchpb.HasGroupResponse{
+		HasGroup: hasGroup,
+	}), nil
+}

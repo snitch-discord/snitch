@@ -39,12 +39,16 @@ const (
 	// RegistrarServiceGetGroupForServerProcedure is the fully-qualified name of the RegistrarService's
 	// GetGroupForServer RPC.
 	RegistrarServiceGetGroupForServerProcedure = "/snitch.v1.RegistrarService/GetGroupForServer"
+	// RegistrarServiceHasGroupProcedure is the fully-qualified name of the RegistrarService's HasGroup
+	// RPC.
+	RegistrarServiceHasGroupProcedure = "/snitch.v1.RegistrarService/HasGroup"
 )
 
 // RegistrarServiceClient is a client for the snitch.v1.RegistrarService service.
 type RegistrarServiceClient interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	GetGroupForServer(context.Context, *connect.Request[v1.GetGroupForServerRequest]) (*connect.Response[v1.GetGroupForServerResponse], error)
+	HasGroup(context.Context, *connect.Request[v1.HasGroupRequest]) (*connect.Response[v1.HasGroupResponse], error)
 }
 
 // NewRegistrarServiceClient constructs a client for the snitch.v1.RegistrarService service. By
@@ -70,6 +74,12 @@ func NewRegistrarServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(registrarServiceMethods.ByName("GetGroupForServer")),
 			connect.WithClientOptions(opts...),
 		),
+		hasGroup: connect.NewClient[v1.HasGroupRequest, v1.HasGroupResponse](
+			httpClient,
+			baseURL+RegistrarServiceHasGroupProcedure,
+			connect.WithSchema(registrarServiceMethods.ByName("HasGroup")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -77,6 +87,7 @@ func NewRegistrarServiceClient(httpClient connect.HTTPClient, baseURL string, op
 type registrarServiceClient struct {
 	register          *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
 	getGroupForServer *connect.Client[v1.GetGroupForServerRequest, v1.GetGroupForServerResponse]
+	hasGroup          *connect.Client[v1.HasGroupRequest, v1.HasGroupResponse]
 }
 
 // Register calls snitch.v1.RegistrarService.Register.
@@ -89,10 +100,16 @@ func (c *registrarServiceClient) GetGroupForServer(ctx context.Context, req *con
 	return c.getGroupForServer.CallUnary(ctx, req)
 }
 
+// HasGroup calls snitch.v1.RegistrarService.HasGroup.
+func (c *registrarServiceClient) HasGroup(ctx context.Context, req *connect.Request[v1.HasGroupRequest]) (*connect.Response[v1.HasGroupResponse], error) {
+	return c.hasGroup.CallUnary(ctx, req)
+}
+
 // RegistrarServiceHandler is an implementation of the snitch.v1.RegistrarService service.
 type RegistrarServiceHandler interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	GetGroupForServer(context.Context, *connect.Request[v1.GetGroupForServerRequest]) (*connect.Response[v1.GetGroupForServerResponse], error)
+	HasGroup(context.Context, *connect.Request[v1.HasGroupRequest]) (*connect.Response[v1.HasGroupResponse], error)
 }
 
 // NewRegistrarServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -114,12 +131,20 @@ func NewRegistrarServiceHandler(svc RegistrarServiceHandler, opts ...connect.Han
 		connect.WithSchema(registrarServiceMethods.ByName("GetGroupForServer")),
 		connect.WithHandlerOptions(opts...),
 	)
+	registrarServiceHasGroupHandler := connect.NewUnaryHandler(
+		RegistrarServiceHasGroupProcedure,
+		svc.HasGroup,
+		connect.WithSchema(registrarServiceMethods.ByName("HasGroup")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/snitch.v1.RegistrarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RegistrarServiceRegisterProcedure:
 			registrarServiceRegisterHandler.ServeHTTP(w, r)
 		case RegistrarServiceGetGroupForServerProcedure:
 			registrarServiceGetGroupForServerHandler.ServeHTTP(w, r)
+		case RegistrarServiceHasGroupProcedure:
+			registrarServiceHasGroupHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -135,4 +160,8 @@ func (UnimplementedRegistrarServiceHandler) Register(context.Context, *connect.R
 
 func (UnimplementedRegistrarServiceHandler) GetGroupForServer(context.Context, *connect.Request[v1.GetGroupForServerRequest]) (*connect.Response[v1.GetGroupForServerResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.RegistrarService.GetGroupForServer is not implemented"))
+}
+
+func (UnimplementedRegistrarServiceHandler) HasGroup(context.Context, *connect.Request[v1.HasGroupRequest]) (*connect.Response[v1.HasGroupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("snitch.v1.RegistrarService.HasGroup is not implemented"))
 }

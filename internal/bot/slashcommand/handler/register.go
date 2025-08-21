@@ -48,11 +48,22 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 		slogger = slog.Default()
 	}
 
-	options := interaction.ApplicationCommandData().Options
+	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
-	slogger.DebugContext(ctx, "Join Options", "Options", options, "Session", session, "Client", client)
+	userID := interaction.Member.User.ID
+	groupId := options[0].StringValue()
 
-	// TODO: implement
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupId})
+	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	registerResponse, err := client.Register(ctx, registerRequest)
+
+	if err != nil {
+		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Couldn't join group, error: %s", err.Error()))
+		return
+	}
+
+	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Joined group %s", registerResponse.Msg.GroupId))
 }
 
 func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {

@@ -68,8 +68,16 @@ func (c *Client) AddServer(ctx context.Context, serverID string) error {
 		return nil
 	}
 
-	// Get group ID for this server by making a test subscription request
-	// The backend will resolve serverID -> groupID for us
+	hasGroup, err := c.serverHasGroup(ctx, serverID)
+	if err != nil {
+		return fmt.Errorf("failed to check if server %s has group", serverID)
+	}
+
+	if !hasGroup {
+		c.slogger.WarnContext(ctx, "server doesn't have a group, moving on", "server id", serverID)
+		return nil
+	}
+
 	groupID, err := c.getGroupIDForServer(ctx, serverID)
 	if err != nil {
 		return fmt.Errorf("failed to get group ID for server %s: %w", serverID, err)
@@ -141,18 +149,30 @@ func (c *Client) countServersInGroup(groupID string) int {
 	return count
 }
 
-// GetGroupIDForServer returns the group ID for a server by making a backend request
 func (c *Client) getGroupIDForServer(ctx context.Context, serverID string) (string, error) {
 	req := connect.NewRequest(&snitchv1.GetGroupForServerRequest{
 		ServerId: serverID,
 	})
 
-	groupID, err := c.registerClient.GetGroupForServer(ctx, req)
+	getGroupIdResponse, err := c.registerClient.GetGroupForServer(ctx, req)
 	if err != nil {
-		return "", fmt.Errorf("failed to test subscribe for server %s: %w", serverID, err)
+		return "", fmt.Errorf("failed to get group id for server %s: %w", serverID, err)
 	}
 
-	return groupID.Msg.GroupId, nil
+	return getGroupIdResponse.Msg.GroupId, nil
+}
+
+func (c *Client) serverHasGroup(ctx context.Context, serverID string) (bool, error) {
+	req := connect.NewRequest(&snitchv1.HasGroupRequest{
+		ServerId: serverID,
+	})
+
+	hasGroupResponse, err := c.registerClient.HasGroup(ctx, req)
+	if err != nil {
+		return false, fmt.Errorf("failed to check if server %s is in a group. message: %w", serverID, err)
+	}
+
+	return hasGroupResponse.Msg.HasGroup, nil
 }
 
 func (c *Client) maintainGroupConnection(ctx context.Context, groupID, serverID string) {
