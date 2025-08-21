@@ -1,7 +1,9 @@
 package bucketclient
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
+	"github.com/minio/crc64nvme"
 )
 
 type Config struct {
@@ -49,16 +52,61 @@ func New(cfg Config) (*Client, error) {
 	}, nil
 }
 
+// calculateCRC64NVME calculates CRC64NVME checksum from io.Reader and returns base64 encoded string
+func calculateCRC64NVME(reader io.Reader) (string, error) {
+	hash := crc64nvme.New()
+	_, err := io.Copy(hash, reader)
+	if err != nil {
+		return "", fmt.Errorf("failed to calculate checksum: %w", err)
+	}
+	checksum := hash.Sum64()
+	// Convert to base64 as required by AWS API
+	checksumBytes := make([]byte, 8)
+	for i := 0; i < 8; i++ {
+		checksumBytes[7-i] = byte(checksum >> (8 * i))
+	}
+	return base64.StdEncoding.EncodeToString(checksumBytes), nil
+}
+
+// calculateCRC64NVMEFromFile calculates CRC64NVME checksum from file and returns base64 encoded string
+func calculateCRC64NVMEFromFile(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file for checksum: %w", err)
+	}
+	defer file.Close()
+	return calculateCRC64NVME(file)
+}
+
 func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, contentType string) error {
-	// For R2 compatibility, avoid checksum algorithms that can cause signature issues
-	// Let R2 handle integrity checking on its end
-	_, err := c.s3Client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket:      aws.String(c.bucket),
-		Key:         aws.String(key),
-		Body:        reader,
-		ContentType: aws.String(contentType),
-		// Remove ChecksumAlgorithm - can cause signature calculation issues with R2
-		// R2 will validate integrity using its own mechanisms
+	// Calculate CRC64NVME checksum while reading the data
+	var checksumReader io.Reader
+	var checksumB64 string
+	
+	// Use TeeReader to calculate checksum while uploading
+	hash := crc64nvme.New()
+	checksumReader = io.TeeReader(reader, hash)
+	
+	// Read all data to calculate checksum
+	data, err := io.ReadAll(checksumReader)
+	if err != nil {
+		return fmt.Errorf("failed to read data for upload: %w", err)
+	}
+	
+	// Calculate final checksum
+	checksum := hash.Sum64()
+	checksumBytes := make([]byte, 8)
+	for i := 0; i < 8; i++ {
+		checksumBytes[7-i] = byte(checksum >> (8 * i))
+	}
+	checksumB64 = base64.StdEncoding.EncodeToString(checksumBytes)
+	
+	_, err = c.s3Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:            aws.String(c.bucket),
+		Key:               aws.String(key),
+		Body:              bytes.NewReader(data),
+		ContentType:       aws.String(contentType),
+		ChecksumCRC64NVME: aws.String(checksumB64),
 	})
 	if err != nil {
 		// Enhanced error context for debugging R2 issues
@@ -74,6 +122,12 @@ func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, conte
 // UploadFile uploads a file directly from filesystem with explicit content length
 // This method is more R2-compatible as it provides seekable content with known size
 func (c *Client) UploadFile(ctx context.Context, key string, filePath string, contentType string) error {
+	// Calculate CRC64NVME checksum from file
+	checksumB64, err := calculateCRC64NVMEFromFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to calculate checksum: %w", err)
+	}
+
 	// Open file and get size for explicit content length
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -87,14 +141,14 @@ func (c *Client) UploadFile(ctx context.Context, key string, filePath string, co
 		return fmt.Errorf("failed to get file info: %w", err)
 	}
 
-	// Use explicit content length for better R2 compatibility
+	// Upload with CRC64NVME checksum
 	_, err = c.s3Client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket:        aws.String(c.bucket),
-		Key:           aws.String(key),
-		Body:          file,
-		ContentType:   aws.String(contentType),
-		ContentLength: aws.Int64(fileInfo.Size()),
-		// No checksum algorithm - let R2 handle integrity
+		Bucket:            aws.String(c.bucket),
+		Key:               aws.String(key),
+		Body:              file,
+		ContentType:       aws.String(contentType),
+		ContentLength:     aws.Int64(fileInfo.Size()),
+		ChecksumCRC64NVME: aws.String(checksumB64),
 	})
 	if err != nil {
 		// Enhanced error context for debugging R2 issues
