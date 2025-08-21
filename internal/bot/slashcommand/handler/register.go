@@ -15,6 +15,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 )
 
 func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
@@ -51,9 +52,18 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
 	userID := interaction.Member.User.ID
-	groupId := options[0].StringValue()
+	groupIdInput := options[0].StringValue()
+	groupId, err := uuid.Parse(groupIdInput)
 
-	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupId})
+	if err != nil {
+		slogger.ErrorContext(ctx, "parsed recieved UUID", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Invalid group ID: %s", groupIdInput))
+		return
+	}
+
+	groupIDStr := groupId.String()
+
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupIDStr})
 	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	registerResponse, err := client.Register(ctx, registerRequest)
 

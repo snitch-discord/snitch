@@ -44,7 +44,7 @@ func (s *RegisterServer) GetGroupForServer(ctx context.Context, req *connect.Req
 	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
 	if err != nil {
 		slogger.ErrorContext(ctx, "group not found for server", "server ID", req.Msg.ServerId)
-		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("group now found"))
+		return nil, connect.NewError(connect.CodeNotFound, err)
 	}
 
 	return connect.NewResponse(&snitchpb.GetGroupForServerResponse{
