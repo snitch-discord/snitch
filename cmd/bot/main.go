@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"time"
 
+	"snitch/internal/bot/auth"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/events"
 	"snitch/internal/bot/slashcommand"
@@ -48,11 +49,13 @@ func main() {
 		},
 	}
 
+	tokenGenerator := auth.NewTokenGenerator(config.JwtSecret)
+
 	// initialize map of command name to command handler
 	commandHandlers := map[string]slashcommand.SlashCommandHandlerFunc{
-		"register": handler.CreateRegisterCommandHandler(config, httpClient),
-		"report":   handler.CreateReportCommandHandler(config, httpClient),
-		"user":     handler.CreateUserCommandHandler(config, httpClient),
+		"register": handler.CreateRegisterCommandHandler(config, httpClient, tokenGenerator),
+		"report":   handler.CreateReportCommandHandler(config, httpClient, tokenGenerator),
+		"user":     handler.CreateUserCommandHandler(config, httpClient, tokenGenerator),
 	}
 
 	commands := slashcommand.InitializeCommands()
@@ -81,7 +84,7 @@ func main() {
 		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, &httpClient)
+	eventClient := events.NewClient(backendURL.String(), config.JwtSecret, mainSession, slogger, &httpClient)
 
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))

@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"snitch/internal/bot/auth"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
@@ -19,10 +20,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient) {
+func handleUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options
@@ -47,7 +55,7 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 	reportedUser := reportedUserOption.UserValue(session)
 
 	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedUser.ID, Username: reportedUser.Username, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
-	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	reportRequest.Header().Add("Authorization", "Bearer "+token)
 	reportResponse, err := client.CreateUserHistory(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -59,10 +67,17 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
-func handleListUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient) {
+func handleListUserHistory(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.UserHistoryServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options
@@ -86,7 +101,7 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 	userID := user.ID
 
 	listUserHistoryRequest := connect.NewRequest(&snitchv1.ListUserHistoryRequest{UserId: userID})
-	listUserHistoryRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	listUserHistoryRequest.Header().Add("Authorization", "Bearer "+token)
 	listUserHistoryResponse, err := client.ListUserHistory(ctx, listUserHistoryRequest)
 
 	if err != nil {
@@ -106,7 +121,7 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 	messageutil.EmbedRespondContext(ctx, session, interaction, []*discordgo.MessageEmbed{messageHistoryEmbed.MessageEmbed})
 }
 
-func CreateUserCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
+func CreateUserCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client, tokenGenerator *auth.TokenGenerator) slashcommand.SlashCommandHandlerFunc {
 	backendURL, err := botconfig.BackendURL()
 	if err != nil {
 		log.Fatal(backendURL)
@@ -123,9 +138,9 @@ func CreateUserCommandHandler(botconfig botconfig.BotConfig, httpClient http.Cli
 
 		switch options[0].Name {
 		case "new":
-			handleUserHistory(ctx, session, interaction, userHistoryServiceClient)
+			handleUserHistory(ctx, session, interaction, userHistoryServiceClient, tokenGenerator)
 		case "list":
-			handleListUserHistory(ctx, session, interaction, userHistoryServiceClient)
+			handleListUserHistory(ctx, session, interaction, userHistoryServiceClient, tokenGenerator)
 		default:
 			slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[0].Name)
 		}

@@ -56,7 +56,7 @@ func main() {
 		dbServiceURL.String(),
 	)
 
-	eventService := service.NewEventService(dbClient)
+	eventService := service.NewEventService(dbClient, config.JwtSecret)
 	registrar := service.NewRegisterServer(dbClient)
 	reportServer := service.NewReportServer(dbClient, eventService)
 	userServer := service.NewUserServer(dbClient)
@@ -70,6 +70,7 @@ func main() {
 	baseInterceptors := connect.WithInterceptors(
 		interceptor.NewRecoveryInterceptor(),
 		interceptor.NewLogInterceptor(),
+		interceptor.NewAuthInterceptor(config.JwtSecret, dbClient),
 		interceptor.NewTraceInterceptor(),
 	)
 

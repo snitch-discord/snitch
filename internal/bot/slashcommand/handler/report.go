@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"snitch/internal/bot/auth"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
@@ -18,10 +19,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, userClient snitchv1connect.UserHistoryServiceClient) {
+func handleNewReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, userClient snitchv1connect.UserHistoryServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options
@@ -48,7 +56,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: reporterID, ReportedId: reportedUser.ID})
-	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	reportRequest.Header().Add("Authorization", "Bearer "+token)
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -57,7 +65,7 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
-	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	userRequest.Header().Add("Authorization", "Bearer "+token)
 	_, err = userClient.CreateUserHistory(ctx, userRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -69,10 +77,17 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	messageutil.SimpleRespondContext(ctx, session, interaction, messageContent)
 }
 
-func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+func handleListReports(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options
@@ -97,7 +112,7 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 	slogger.InfoContext(ctx, "List Params", "Reporter", reporterUserID, "Reported", reportedUserID)
 
 	listReportRequest := connect.NewRequest(&snitchv1.ListReportsRequest{ReporterId: reporterUserID, ReportedId: reportedUserID})
-	listReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	listReportRequest.Header().Add("Authorization", "Bearer "+token)
 	listReportResponse, err := client.ListReports(ctx, listReportRequest)
 
 	if err != nil {
@@ -119,10 +134,17 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 	messageutil.EmbedRespondContext(ctx, session, interaction, []*discordgo.MessageEmbed{reportEmbed.MessageEmbed})
 }
 
-func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient) {
+func handleDeleteReport(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.ReportServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options
@@ -138,7 +160,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 	}
 
 	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
-	deleteReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	deleteReportRequest.Header().Add("Authorization", "Bearer "+token)
 	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -149,7 +171,7 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Deleted report %d", deleteReportResponse.Msg.ReportId))
 }
 
-func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
+func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client, tokenGenerator *auth.TokenGenerator) slashcommand.SlashCommandHandlerFunc {
 	backendURL, err := botconfig.BackendURL()
 	if err != nil {
 		log.Fatal(backendURL)
@@ -167,11 +189,11 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 
 		switch options[0].Name {
 		case "new":
-			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient)
+			handleNewReport(ctx, session, interaction, reportServiceClient, userServiceClient, tokenGenerator)
 		case "list":
-			handleListReports(ctx, session, interaction, reportServiceClient)
+			handleListReports(ctx, session, interaction, reportServiceClient, tokenGenerator)
 		case "delete":
-			handleDeleteReport(ctx, session, interaction, reportServiceClient)
+			handleDeleteReport(ctx, session, interaction, reportServiceClient, tokenGenerator)
 		default:
 			slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[0].Name)
 		}

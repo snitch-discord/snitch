@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"snitch/internal/bot/auth"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
@@ -18,10 +19,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+func handleCreateGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
@@ -31,7 +39,7 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 	groupName := options[0].StringValue()
 
 	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupName: &groupName})
-	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	registerRequest.Header().Add("Authorization", "Bearer "+token)
 	registerResponse, err := client.Register(ctx, registerRequest)
 
 	if err != nil {
@@ -43,17 +51,24 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Created group %s for this server.", registerResponse.Msg.GroupId))
 }
 
-func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+func handleJoinGroup(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
+	}
+
+	token, err := tokenGenerator.Generate(interaction.GuildID)
+	if err != nil {
+		slogger.ErrorContext(ctx, "failed to generate token", "error", err)
+		messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to generate token.")
+		return
 	}
 
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
 	userID := interaction.Member.User.ID
 	groupId := options[0].StringValue()
-	err := uuid.Validate(groupId)
+	err = uuid.Validate(groupId)
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "invalid group id", "error", err)
@@ -62,7 +77,7 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupId})
-	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
+	registerRequest.Header().Add("Authorization", "Bearer "+token)
 	registerResponse, err := client.Register(ctx, registerRequest)
 
 	if err != nil {
@@ -74,7 +89,7 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Joined group %s", registerResponse.Msg.GroupId))
 }
 
-func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient) {
+func handleGroupCommands(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate, client snitchv1connect.RegistrarServiceClient, tokenGenerator *auth.TokenGenerator) {
 	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 	if !ok {
 		slogger = slog.Default()
@@ -84,15 +99,15 @@ func handleGroupCommands(ctx context.Context, session *discordgo.Session, intera
 
 	switch options[0].Name {
 	case "create":
-		handleCreateGroup(ctx, session, interaction, client)
+		handleCreateGroup(ctx, session, interaction, client, tokenGenerator)
 	case "join":
-		handleJoinGroup(ctx, session, interaction, client)
+		handleJoinGroup(ctx, session, interaction, client, tokenGenerator)
 	default:
 		slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[1].Name)
 	}
 }
 
-func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client) slashcommand.SlashCommandHandlerFunc {
+func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http.Client, tokenGenerator *auth.TokenGenerator) slashcommand.SlashCommandHandlerFunc {
 	backendURL, err := botconfig.BackendURL()
 	if err != nil {
 		log.Fatal(backendURL)
@@ -110,7 +125,7 @@ func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http
 
 		switch options[0].Name {
 		case "group":
-			handleGroupCommands(ctx, session, interaction, registrarServiceClient)
+			handleGroupCommands(ctx, session, interaction, registrarServiceClient, tokenGenerator)
 		default:
 			slogger.ErrorContext(ctx, "Invalid subcommand", "Subcommand Name", options[0].Name)
 		}

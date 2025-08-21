@@ -9,7 +9,7 @@ import (
 )
 
 type BotConfig struct {
-	DiscordToken, BackendHost, BackendPort, CaCertPath string
+	DiscordToken, BackendHost, BackendPort, CaCertPath, JwtSecret string
 }
 
 func FromEnv() (BotConfig, error) {
@@ -29,6 +29,7 @@ func FromEnv() (BotConfig, error) {
 		BackendHost:  get("SNITCH_BACKEND_HOST"),
 		BackendPort:  get("SNITCH_BACKEND_PORT"),
 		CaCertPath:   get("CA_CERT_FILE_PATH"),
+		JwtSecret:    get("SNITCH_JWT_SECRET"),
 	}
 
 	if len(missing) > 0 {

@@ -2,9 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-
+	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -31,23 +30,15 @@ func (s *UserServer) CreateUserHistory(
 		slogger = slog.Default()
 	}
 
-	// Get server ID from header
-	serverID := req.Header().Get(ServerIDHeader)
-	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument,
-			fmt.Errorf("server ID header is required"))
+	serverID, err := interceptor.GetServerID(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
 
-	// Find group ID for this server
-	findGroupReq := &snitchv1.FindGroupByServerRequest{
-		ServerId: serverID,
-	}
-	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	groupID, err := interceptor.GetGroupID(ctx)
 	if err != nil {
-		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
-		return nil, connect.NewError(connect.CodeNotFound, err)
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
-	groupID := findGroupResp.Msg.GroupId
 
 	// Create user history entry
 	createHistoryReq := &snitchv1.DatabaseServiceCreateUserHistoryRequest{
@@ -81,23 +72,10 @@ func (s *UserServer) ListUserHistory(
 		slogger = slog.Default()
 	}
 
-	// Get server ID from header
-	serverID := req.Header().Get(ServerIDHeader)
-	if serverID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument,
-			fmt.Errorf("server ID header is required"))
-	}
-
-	// Find group ID for this server
-	findGroupReq := &snitchv1.FindGroupByServerRequest{
-		ServerId: serverID,
-	}
-	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	groupID, err := interceptor.GetGroupID(ctx)
 	if err != nil {
-		slogger.Error("Failed to find group for server", "server_id", serverID, "error", err)
-		return nil, connect.NewError(connect.CodeNotFound, err)
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
-	groupID := findGroupResp.Msg.GroupId
 
 	// Get user history
 	getUserHistoryReq := &snitchv1.DatabaseServiceGetUserHistoryRequest{

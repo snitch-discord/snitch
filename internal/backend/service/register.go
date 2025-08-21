@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"snitch/internal/backend/service/interceptor"
 	"snitch/internal/shared/ctxutil"
 	snitchpb "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -18,17 +19,6 @@ type RegisterServer struct {
 
 func NewRegisterServer(dbClient snitchv1connect.DatabaseServiceClient) *RegisterServer {
 	return &RegisterServer{dbClient: dbClient}
-}
-
-const ServerIDHeader = "X-Server-ID"
-
-func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (string, error) {
-	serverID := r.Header().Get(ServerIDHeader)
-	if serverID == "" {
-		return "", fmt.Errorf("server ID header is required")
-	}
-
-	return serverID, nil
 }
 
 func (s *RegisterServer) GetGroupForServer(ctx context.Context, req *connect.Request[snitchpb.GetGroupForServerRequest]) (*connect.Response[snitchpb.GetGroupForServerResponse], error) {
@@ -61,9 +51,9 @@ func (s *RegisterServer) Register(
 		slogger = slog.Default()
 	}
 
-	serverID, err := getServerIDFromHeader(req)
+	serverID, err := interceptor.GetServerID(ctx)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
 
 	// Check if server is already registered
