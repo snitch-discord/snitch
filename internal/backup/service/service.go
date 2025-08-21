@@ -217,8 +217,9 @@ func (s *BackupService) compressBrotli(inputPath, outputPath string) error {
 	brotliWriter := brotli.NewWriter(outputFile)
 	defer brotliWriter.Close()
 	
-	// Copy and compress
-	_, err = io.Copy(brotliWriter, inputFile)
+	// Copy and compress with fixed buffer to limit memory usage
+	buffer := make([]byte, 64*1024) // 64KB buffer
+	_, err = io.CopyBuffer(brotliWriter, inputFile, buffer)
 	if err != nil {
 		return fmt.Errorf("brotli compression failed: %w", err)
 	}
