@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check for required dependencies
 if ! command -v docker &> /dev/null; then
