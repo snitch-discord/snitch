@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -93,7 +94,7 @@ func main() {
 	defer eventClient.Stop()
 
 	mainSession.AddHandler(func(session *discordgo.Session, ready *discordgo.Ready) {
-		log.Printf("Logged in as: %s#%s", session.State.User.Username, session.State.User.Discriminator)
+		slogger.InfoContext(ctx, "logged in", "username", fmt.Sprintf("%s#%s", session.State.User.Username, session.State.User.Discriminator))
 
 		// Initialize event subscriptions for all guilds the bot is already in
 		slogger.Info("Initializing event subscriptions for existing guilds", "guild_count", len(ready.Guilds))

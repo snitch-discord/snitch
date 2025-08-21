@@ -56,7 +56,7 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	err := uuid.Validate(groupId)
 
 	if err != nil {
-		slogger.ErrorContext(ctx, "parsed recieved UUID", "error", err)
+		slogger.ErrorContext(ctx, "invalid group id", "error", err)
 		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Invalid group ID: %s", groupId))
 		return
 	}
