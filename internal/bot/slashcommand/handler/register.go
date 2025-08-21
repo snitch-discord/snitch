@@ -52,18 +52,16 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	options := interaction.ApplicationCommandData().Options[0].Options[0].Options
 
 	userID := interaction.Member.User.ID
-	groupIdInput := options[0].StringValue()
-	groupId, err := uuid.Parse(groupIdInput)
+	groupId := options[0].StringValue()
+	err := uuid.Validate(groupId)
 
 	if err != nil {
 		slogger.ErrorContext(ctx, "parsed recieved UUID", "error", err)
-		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Invalid group ID: %s", groupIdInput))
+		messageutil.SimpleRespondContext(ctx, session, interaction, fmt.Sprintf("Invalid group ID: %s", groupId))
 		return
 	}
 
-	groupIDStr := groupId.String()
-
-	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupIDStr})
+	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupId})
 	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	registerResponse, err := client.Register(ctx, registerRequest)
 
