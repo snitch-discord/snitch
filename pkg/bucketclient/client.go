@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/smithy-go"
 	"github.com/minio/crc64nvme"
 )
 
@@ -109,12 +107,7 @@ func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, conte
 		ChecksumCRC64NVME: aws.String(checksumB64),
 	})
 	if err != nil {
-		// Enhanced error context for debugging R2 issues
-		var ae smithy.APIError
-		if errors.As(err, &ae) {
-			return fmt.Errorf("failed to upload to bucket [%s]: %s - %w", ae.ErrorCode(), ae.ErrorMessage(), err)
-		}
-		return fmt.Errorf("failed to upload to bucket: %w", err)
+		return fmt.Errorf("failed to upload key '%s' to bucket '%s': %w", key, c.bucket, err)
 	}
 	return nil
 }
@@ -151,12 +144,7 @@ func (c *Client) UploadFile(ctx context.Context, key string, filePath string, co
 		ChecksumCRC64NVME: aws.String(checksumB64),
 	})
 	if err != nil {
-		// Enhanced error context for debugging R2 issues
-		var ae smithy.APIError
-		if errors.As(err, &ae) {
-			return fmt.Errorf("failed to upload file to bucket [%s]: %s - %w", ae.ErrorCode(), ae.ErrorMessage(), err)
-		}
-		return fmt.Errorf("failed to upload file to bucket: %w", err)
+		return fmt.Errorf("failed to upload file '%s' as key '%s' to bucket '%s': %w", filePath, key, c.bucket, err)
 	}
 	return nil
 }
