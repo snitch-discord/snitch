@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Certificate generation script for Snitch Discord bot system
 # Generates Ed25519 TLS certificates for internal service communication

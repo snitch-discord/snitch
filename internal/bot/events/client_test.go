@@ -30,9 +30,9 @@ func TestClient_Creation(t *testing.T) {
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
 
-	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
+	client := NewClient("https://localhost:4200", session, slogger, httpClient)
 
-	if client.client == nil {
+	if client.eventClient == nil {
 		t.Error("Connect client should not be nil")
 	}
 
@@ -47,13 +47,21 @@ func TestClient_Creation(t *testing.T) {
 	if client.handlers == nil {
 		t.Error("Handlers map should be initialized")
 	}
+
+	if client.groupSubscriptions == nil {
+		t.Error("Group subscriptions map should be initialized")
+	}
+
+	if client.serverToGroup == nil {
+		t.Error("Server to group map should be initialized")
+	}
 }
 
 func TestClient_RegisterHandler(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
+	client := NewClient("https://localhost:4200", session, slogger, httpClient)
 
 	// Test handler registration
 	handlerCalled := false
@@ -85,7 +93,7 @@ func TestClient_HandlerNotFound(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
+	client := NewClient("https://localhost:4200", session, slogger, httpClient)
 
 	// Test handling an event type with no registered handler
 	testEvent := &snitchv1.SubscribeResponse{
@@ -102,7 +110,7 @@ func TestClient_MultipleHandlers(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, TEST_GUILD_ID, httpClient)
+	client := NewClient("https://localhost:4200", session, slogger, httpClient)
 
 	// Register multiple handlers
 	handler1Called := false
@@ -146,3 +154,5 @@ func TestClient_MultipleHandlers(t *testing.T) {
 		t.Error("Handler 2 should have been called")
 	}
 }
+
+// TODO: create new multi-server test

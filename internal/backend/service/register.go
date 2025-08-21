@@ -31,6 +31,27 @@ func getServerIDFromHeader(r *connect.Request[snitchpb.RegisterRequest]) (string
 	return serverID, nil
 }
 
+func (s *RegisterServer) GetGroupForServer(ctx context.Context, req *connect.Request[snitchpb.GetGroupForServerRequest]) (*connect.Response[snitchpb.GetGroupForServerResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	findGroupReq := &snitchpb.FindGroupByServerRequest{
+		ServerId: req.Msg.ServerId,
+	}
+
+	findGroupResp, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	if err != nil {
+		slogger.ErrorContext(ctx, "group not found for server", "server ID", req.Msg.ServerId)
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	}
+
+	return connect.NewResponse(&snitchpb.GetGroupForServerResponse{
+		GroupId: findGroupResp.Msg.GroupId,
+	}), nil
+}
+
 func (s *RegisterServer) Register(
 	ctx context.Context,
 	req *connect.Request[snitchpb.RegisterRequest],
@@ -125,5 +146,32 @@ func (s *RegisterServer) Register(
 	return connect.NewResponse(&snitchpb.RegisterResponse{
 		ServerId: serverID,
 		GroupId:  groupID.String(),
+	}), nil
+}
+
+func (s *RegisterServer) HasGroup(
+	ctx context.Context,
+	req *connect.Request[snitchpb.HasGroupRequest],
+) (*connect.Response[snitchpb.HasGroupResponse], error) {
+	slogger, ok := ctxutil.Value[*slog.Logger](ctx)
+	if !ok {
+		slogger = slog.Default()
+	}
+
+	findGroupReq := &snitchpb.FindGroupByServerRequest{
+		ServerId: req.Msg.ServerId,
+	}
+
+	var hasGroup = false
+
+	_, err := s.dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
+	if err == nil {
+		hasGroup = true
+	} else {
+		slogger.DebugContext(ctx, "logs when running find group by server", "error", err)
+	}
+
+	return connect.NewResponse(&snitchpb.HasGroupResponse{
+		HasGroup: hasGroup,
 	}), nil
 }
