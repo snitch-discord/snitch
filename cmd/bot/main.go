@@ -12,11 +12,13 @@ import (
 	"os/signal"
 	"time"
 
+	"snitch/internal/bot/auth"
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/events"
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/bot/slashcommand/handler"
 	"snitch/internal/bot/slashcommand/middleware"
+	"snitch/internal/bot/transport"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"github.com/bwmarrin/discordgo"
@@ -39,13 +41,15 @@ func main() {
 		log.Fatalf("Failed to parse CA certificate")
 	}
 
+	tokenGenerator := auth.NewTokenGenerator(config.JwtSecret)
+
 	httpClient := http.Client{
 		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
+		Transport: transport.NewAuthTransport(tokenGenerator, &http.Transport{
 			TLSClientConfig: &tls.Config{
 				RootCAs: caCertPool,
 			},
-		},
+		}),
 	}
 
 	// initialize map of command name to command handler
@@ -81,7 +85,7 @@ func main() {
 		log.Fatalf("Failed to get backend URL: %v", err)
 	}
 
-	eventClient := events.NewClient(backendURL.String(), mainSession, slogger, &httpClient)
+	eventClient := events.NewClient(backendURL.String(), config.JwtSecret, mainSession, slogger, &httpClient)
 
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_CREATED, events.CreateReportCreatedHandler(slogger))
 	eventClient.RegisterHandler(snitchv1.EventType_EVENT_TYPE_REPORT_DELETED, events.CreateReportDeletedHandler(slogger))

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"snitch/internal/bot/auth"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 	"sync"
@@ -15,12 +16,12 @@ import (
 )
 
 type Client struct {
-	eventClient    snitchv1connect.EventServiceClient
-	registerClient snitchv1connect.RegistrarServiceClient
-	slogger        *slog.Logger
-	session        *discordgo.Session
-	handlers       map[snitchv1.EventType]EventHandler
-
+	eventClient      snitchv1connect.EventServiceClient
+	registerClient   snitchv1connect.RegistrarServiceClient
+	slogger          *slog.Logger
+	session          *discordgo.Session
+	handlers         map[snitchv1.EventType]EventHandler
+	tokenGenerator   *auth.TokenGenerator
 	// Group-based subscriptions for efficiency
 	groupSubscriptions map[string]context.CancelFunc // groupID -> cancel function
 	serverToGroup      map[string]string             // serverID -> groupID
@@ -29,7 +30,7 @@ type Client struct {
 
 type EventHandler func(session *discordgo.Session, event *snitchv1.SubscribeResponse) error
 
-func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logger, httpClient *http.Client) *Client {
+func NewClient(backendURL string, jwtSecret string, session *discordgo.Session, slogger *slog.Logger, httpClient *http.Client) *Client {
 	streamingClient := &http.Client{
 		Timeout:   0,                    // No timeout for streaming connections
 		Transport: httpClient.Transport, // Use same TLS config
@@ -37,6 +38,7 @@ func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logg
 
 	eventClient := snitchv1connect.NewEventServiceClient(streamingClient, backendURL)
 	registerClient := snitchv1connect.NewRegistrarServiceClient(streamingClient, backendURL)
+	tokenGenerator := auth.NewTokenGenerator(jwtSecret)
 
 	return &Client{
 		eventClient:        eventClient,
@@ -44,6 +46,7 @@ func NewClient(backendURL string, session *discordgo.Session, slogger *slog.Logg
 		slogger:            slogger,
 		session:            session,
 		handlers:           make(map[snitchv1.EventType]EventHandler),
+		tokenGenerator:     tokenGenerator,
 		groupSubscriptions: make(map[string]context.CancelFunc),
 		serverToGroup:      make(map[string]string),
 	}
@@ -215,8 +218,11 @@ func (c *Client) connectAndListenForGroup(ctx context.Context, groupID, serverID
 		GroupId: groupID,
 	})
 
-	// Add server ID header so backend can validate access to this group
-	req.Header().Add("X-Server-ID", serverID)
+	token, err := c.tokenGenerator.Generate(serverID, groupID)
+	if err != nil {
+		return fmt.Errorf("failed to generate token for server %s: %w", serverID, err)
+	}
+	req.Header().Add("Authorization", "Bearer "+token)
 
 	stream, err := c.eventClient.Subscribe(ctx, req)
 	if err != nil {

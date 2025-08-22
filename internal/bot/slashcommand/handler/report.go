@@ -9,6 +9,7 @@ import (
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
+	"snitch/internal/bot/transport"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -48,7 +49,6 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	reportRequest := connect.NewRequest(&snitchv1.CreateReportRequest{ReportText: reportReason, ReporterId: reporterID, ReportedId: reportedUser.ID})
-	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateReport(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -57,7 +57,6 @@ func handleNewReport(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	userRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedID, Username: reportedUser.Username, GlobalName: reportedUser.GlobalName, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
-	userRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	_, err = userClient.CreateUserHistory(ctx, userRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -97,7 +96,6 @@ func handleListReports(ctx context.Context, session *discordgo.Session, interact
 	slogger.InfoContext(ctx, "List Params", "Reporter", reporterUserID, "Reported", reportedUserID)
 
 	listReportRequest := connect.NewRequest(&snitchv1.ListReportsRequest{ReporterId: reporterUserID, ReportedId: reportedUserID})
-	listReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	listReportResponse, err := client.ListReports(ctx, listReportRequest)
 
 	if err != nil {
@@ -138,7 +136,6 @@ func handleDeleteReport(ctx context.Context, session *discordgo.Session, interac
 	}
 
 	deleteReportRequest := connect.NewRequest(&snitchv1.DeleteReportRequest{ReportId: reportID})
-	deleteReportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	deleteReportResponse, err := client.DeleteReport(ctx, deleteReportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -156,12 +153,23 @@ func CreateReportCommandHandler(botconfig botconfig.BotConfig, httpClient http.C
 	}
 	reportServiceClient := snitchv1connect.NewReportServiceClient(&httpClient, backendURL.String())
 	userServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
+	registrarServiceClient := snitchv1connect.NewRegistrarServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 		if !ok {
 			slogger = slog.Default()
 		}
+
+		getGroupReq := connect.NewRequest(&snitchv1.GetGroupForServerRequest{ServerId: interaction.GuildID})
+		getGroupResp, err := registrarServiceClient.GetGroupForServer(ctx, getGroupReq)
+		if err != nil {
+			slogger.ErrorContext(ctx, "failed to get group for server", "error", err)
+			messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to get group for server.")
+			return
+		}
+
+		ctx = transport.WithAuthInfo(ctx, interaction.GuildID, getGroupResp.Msg.GroupId)
 
 		options := interaction.ApplicationCommandData().Options
 

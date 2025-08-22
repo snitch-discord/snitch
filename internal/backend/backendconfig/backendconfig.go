@@ -9,7 +9,7 @@ import (
 )
 
 type BackendConfig struct {
-	CertFilePath, KeyFilePath, CaCertFilePath, DbHost, DbPort string
+	CertFilePath, KeyFilePath, CaCertFilePath, DbHost, DbPort, JwtSecret string
 }
 
 func FromEnv() (BackendConfig, error) {
@@ -30,6 +30,7 @@ func FromEnv() (BackendConfig, error) {
 		CaCertFilePath: get("CA_CERT_FILE_PATH"),
 		DbHost:         get("SNITCH_DB_HOST"),
 		DbPort:         get("SNITCH_DB_PORT"),
+		JwtSecret:      get("SNITCH_JWT_SECRET"),
 	}
 
 	if len(missing) > 0 {

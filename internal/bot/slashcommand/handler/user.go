@@ -9,6 +9,7 @@ import (
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
+	"snitch/internal/bot/transport"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -47,7 +48,6 @@ func handleUserHistory(ctx context.Context, session *discordgo.Session, interact
 	reportedUser := reportedUserOption.UserValue(session)
 
 	reportRequest := connect.NewRequest(&snitchv1.CreateUserHistoryRequest{UserId: reportedUser.ID, Username: reportedUser.Username, ChangedAt: time.Now().UTC().Format(time.RFC3339)})
-	reportRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	reportResponse, err := client.CreateUserHistory(ctx, reportRequest)
 	if err != nil {
 		slogger.ErrorContext(ctx, "Backend Request Call", "Error", err)
@@ -86,7 +86,6 @@ func handleListUserHistory(ctx context.Context, session *discordgo.Session, inte
 	userID := user.ID
 
 	listUserHistoryRequest := connect.NewRequest(&snitchv1.ListUserHistoryRequest{UserId: userID})
-	listUserHistoryRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	listUserHistoryResponse, err := client.ListUserHistory(ctx, listUserHistoryRequest)
 
 	if err != nil {
@@ -112,12 +111,23 @@ func CreateUserCommandHandler(botconfig botconfig.BotConfig, httpClient http.Cli
 		log.Fatal(backendURL)
 	}
 	userHistoryServiceClient := snitchv1connect.NewUserHistoryServiceClient(&httpClient, backendURL.String())
+	registrarServiceClient := snitchv1connect.NewRegistrarServiceClient(&httpClient, backendURL.String())
 
 	return func(ctx context.Context, session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		slogger, ok := ctxutil.Value[*slog.Logger](ctx)
 		if !ok {
 			slogger = slog.Default()
 		}
+
+		getGroupReq := connect.NewRequest(&snitchv1.GetGroupForServerRequest{ServerId: interaction.GuildID})
+		getGroupResp, err := registrarServiceClient.GetGroupForServer(ctx, getGroupReq)
+		if err != nil {
+			slogger.ErrorContext(ctx, "failed to get group for server", "error", err)
+			messageutil.SimpleRespondContext(ctx, session, interaction, "Failed to get group for server.")
+			return
+		}
+
+		ctx = transport.WithAuthInfo(ctx, interaction.GuildID, getGroupResp.Msg.GroupId)
 
 		options := interaction.ApplicationCommandData().Options
 

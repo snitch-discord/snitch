@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync"
 	"time"
 
-	"snitch/internal/backend/service/interceptor"
+	"github.com/golang-jwt/jwt/v5"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -24,12 +25,14 @@ type EventService struct {
 	subscribers map[*subscriber]bool
 	mu          sync.RWMutex
 	dbClient    snitchv1connect.DatabaseServiceClient
+	jwtSecret   string
 }
 
-func NewEventService(dbClient snitchv1connect.DatabaseServiceClient) *EventService {
+func NewEventService(dbClient snitchv1connect.DatabaseServiceClient, jwtSecret string) *EventService {
 	return &EventService{
 		subscribers: make(map[*subscriber]bool),
 		dbClient:    dbClient,
+		jwtSecret:   jwtSecret,
 	}
 }
 
@@ -44,11 +47,40 @@ func (s *EventService) Subscribe(
 		slogger = slog.Default()
 	}
 
-	// Get server ID from request header and look up group ID
-	serverID := req.Header().Get(interceptor.ServerIDHeader)
-	if serverID == "" {
-		slogger.Error("Missing server ID header in subscription request")
-		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("server ID header is required"))
+	authHeader := req.Header().Get("Authorization")
+	if authHeader == "" {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("missing authorization header"))
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid authorization header format"))
+	}
+	tokenString := parts[1]
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.jwtSecret), nil
+	})
+
+	if err != nil {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token: %w", err))
+	}
+
+	if !token.Valid {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token"))
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token claims"))
+	}
+
+	serverID, ok := claims["sub"].(string)
+	if !ok {
+		return connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("missing 'sub' claim"))
 	}
 
 	// Find group ID for this server

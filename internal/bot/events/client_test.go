@@ -30,7 +30,7 @@ func TestClient_Creation(t *testing.T) {
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
 
-	client := NewClient("https://localhost:4200", session, slogger, httpClient)
+	client := NewClient("https://localhost:4200", "test-jwt-secret", session, slogger, httpClient)
 
 	if client.eventClient == nil {
 		t.Error("Connect client should not be nil")
@@ -61,7 +61,7 @@ func TestClient_RegisterHandler(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, httpClient)
+	client := NewClient("https://localhost:4200", "test-jwt-secret", session, slogger, httpClient)
 
 	// Test handler registration
 	handlerCalled := false
@@ -93,7 +93,7 @@ func TestClient_HandlerNotFound(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, httpClient)
+	client := NewClient("https://localhost:4200", "test-jwt-secret", session, slogger, httpClient)
 
 	// Test handling an event type with no registered handler
 	testEvent := &snitchv1.SubscribeResponse{
@@ -110,7 +110,7 @@ func TestClient_MultipleHandlers(t *testing.T) {
 	session := &discordgo.Session{}
 	slogger := slog.Default()
 	httpClient := createTestHTTPClient()
-	client := NewClient("https://localhost:4200", session, slogger, httpClient)
+	client := NewClient("https://localhost:4200", "test-jwt-secret", session, slogger, httpClient)
 
 	// Register multiple handlers
 	handler1Called := false

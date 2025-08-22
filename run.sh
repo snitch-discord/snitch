@@ -21,6 +21,14 @@ if [ ! -f "$ENV_FILE" ]; then
   echo "Created .env file. Please replace SNITCH_DISCORD_TOKEN with your actual Discord bot token."
 fi
 
+# Generate JWT secret if it doesn't exist
+if ! grep -q "SNITCH_JWT_SECRET" "$ENV_FILE"; then
+  echo "Generating JWT secret..."
+  JWT_SECRET=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 64)
+  printf "\nSNITCH_JWT_SECRET=%s\n" "$JWT_SECRET" >> "$ENV_FILE"
+  echo "JWT secret added to $ENV_FILE"
+fi
+
 # Generate TLS certificates if they don't exist
 if [ ! -f "${BASE_DIR}/certs/ca/ca-cert.pem" ]; then
   echo "TLS certificates not found. Generating certificates..."

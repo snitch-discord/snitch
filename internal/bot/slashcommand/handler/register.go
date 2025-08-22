@@ -9,6 +9,7 @@ import (
 	"snitch/internal/bot/botconfig"
 	"snitch/internal/bot/messageutil"
 	"snitch/internal/bot/slashcommand"
+	"snitch/internal/bot/transport"
 	"snitch/internal/shared/ctxutil"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
@@ -31,7 +32,6 @@ func handleCreateGroup(ctx context.Context, session *discordgo.Session, interact
 	groupName := options[0].StringValue()
 
 	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupName: &groupName})
-	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	registerResponse, err := client.Register(ctx, registerRequest)
 
 	if err != nil {
@@ -62,7 +62,6 @@ func handleJoinGroup(ctx context.Context, session *discordgo.Session, interactio
 	}
 
 	registerRequest := connect.NewRequest(&snitchv1.RegisterRequest{UserId: userID, GroupId: &groupId})
-	registerRequest.Header().Add("X-Server-ID", interaction.GuildID)
 	registerResponse, err := client.Register(ctx, registerRequest)
 
 	if err != nil {
@@ -105,6 +104,16 @@ func CreateRegisterCommandHandler(botconfig botconfig.BotConfig, httpClient http
 		if !ok {
 			slogger = slog.Default()
 		}
+
+		getGroupReq := connect.NewRequest(&snitchv1.GetGroupForServerRequest{ServerId: interaction.GuildID})
+		// We expect this to fail when creating or joining a group for the first time.
+		getGroupResp, err := registrarServiceClient.GetGroupForServer(ctx, getGroupReq)
+		groupID := ""
+		if err == nil {
+			groupID = getGroupResp.Msg.GroupId
+		}
+
+		ctx = transport.WithAuthInfo(ctx, interaction.GuildID, groupID)
 
 		options := interaction.ApplicationCommandData().Options
 
