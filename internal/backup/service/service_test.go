@@ -129,7 +129,11 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			t.Errorf("Failed to close test database: %v", closeErr)
+		}
+	}()
 	
 	// Create realistic database schema similar to the actual service
 	schemas := []string{

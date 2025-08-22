@@ -72,7 +72,9 @@ func calculateCRC64NVMEFromFile(filePath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open file for checksum: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close() // Ignore close error since checksum calculation is the primary concern
+	}()
 	return calculateCRC64NVME(file)
 }
 
@@ -126,7 +128,9 @@ func (c *Client) UploadFile(ctx context.Context, key string, filePath string, co
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close() // Ignore close error since file upload is the primary concern
+	}()
 
 	// Get file info for content length
 	fileInfo, err := file.Stat()

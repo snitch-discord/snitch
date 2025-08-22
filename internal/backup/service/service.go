@@ -204,18 +204,30 @@ func (s *BackupService) compressBrotli(inputPath, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
 	}
-	defer inputFile.Close()
+	defer func() {
+		if closeErr := inputFile.Close(); closeErr != nil {
+			s.logger.Error("Failed to close input file", "error", closeErr)
+		}
+	}()
 	
 	// Create output file
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)
 	}
-	defer outputFile.Close()
+	defer func() {
+		if closeErr := outputFile.Close(); closeErr != nil {
+			s.logger.Error("Failed to close output file", "error", closeErr)
+		}
+	}()
 	
 	// Create brotli writer
 	brotliWriter := brotli.NewWriter(outputFile)
-	defer brotliWriter.Close()
+	defer func() {
+		if closeErr := brotliWriter.Close(); closeErr != nil {
+			s.logger.Error("Failed to close brotli writer", "error", closeErr)
+		}
+	}()
 	
 	// Copy and compress with fixed buffer to limit memory usage
 	buffer := make([]byte, 64*1024) // 64KB buffer

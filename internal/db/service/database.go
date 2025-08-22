@@ -371,17 +371,6 @@ func (s *DatabaseService) CreateGroupBackup(ctx context.Context, groupID, backup
 	return nil
 }
 
-func (s *DatabaseService) getGroupIDs() []string {
-	s.groupDBMutex.RLock()
-	defer s.groupDBMutex.RUnlock()
-	
-	groupIDs := make([]string, 0, len(s.groupDBs))
-	for groupID := range s.groupDBs {
-		groupIDs = append(groupIDs, groupID)
-	}
-	
-	return groupIDs
-}
 
 // gRPC Backup handlers
 func (s *DatabaseService) CreateBackup(ctx context.Context, req *connect.Request[snitchv1.CreateBackupRequest]) (*connect.Response[snitchv1.CreateBackupResponse], error) {
