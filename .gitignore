@@ -25,6 +25,7 @@ tmp/
 /db
 /backend  
 /bot
+/backup
 
 bin/
 data/

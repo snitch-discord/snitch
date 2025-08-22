@@ -25,6 +25,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./certs:/app/certs:ro
+      - backup-temp:/tmp/snitch-backups
 
   snitch-backend:
     build:
@@ -82,3 +83,39 @@ services:
       - SNITCH_BACKEND_PORT=4200
     volumes:
       - ./certs:/app/certs:ro
+
+  snitch-backup:
+    build:
+      dockerfile: backup.Containerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: go.mod
+        - action: rebuild
+          path: pkg
+        - action: rebuild
+          path: cmd/backup
+        - action: rebuild
+          path: internal/backup
+        - action: rebuild
+          path: internal/shared
+    restart: unless-stopped
+    image: snitch-backup
+    depends_on:
+      - snitch-db
+    environment:
+      - CA_CERT_FILE_PATH=./certs/ca/ca-cert.pem
+      - DATABASE_SERVICE_URL=https://snitch-db:5200
+      - BACKUP_CRON_SCHEDULE=${BACKUP_CRON_SCHEDULE}
+      - BACKUP_TEMP_DIR=/tmp/snitch-backups
+      - BACKUP_BUCKET_ENDPOINT=${BACKUP_BUCKET_ENDPOINT}
+      - BACKUP_BUCKET_NAME=${BACKUP_BUCKET_NAME}
+      - BACKUP_BUCKET_ACCESS_KEY=${BACKUP_BUCKET_ACCESS_KEY}
+      - BACKUP_BUCKET_SECRET_KEY=${BACKUP_BUCKET_SECRET_KEY}
+      - BACKUP_BUCKET_REGION=${BACKUP_BUCKET_REGION:-auto}
+    volumes:
+      - ./certs:/app/certs:ro
+      - backup-temp:/tmp/snitch-backups
+
+volumes:
+  backup-temp:

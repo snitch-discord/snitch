@@ -134,6 +134,24 @@ message ListServersResponse {
   repeated ServerEntry servers = 1;
 }
 
+// Backup operations
+message CreateBackupRequest {
+  string backup_path = 1;
+  optional string group_id = 2; // If specified, backup single group; if empty, backup metadata
+}
+
+message CreateBackupResponse {
+  string backup_path = 1;
+  int64 size_bytes = 2;
+}
+
+message ListGroupIDsRequest {
+}
+
+message ListGroupIDsResponse {
+  repeated string group_ids = 1;
+}
+
 service DatabaseService {
   // Metadata operations
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
@@ -155,4 +173,8 @@ service DatabaseService {
   
   // Server operations
   rpc ListServers(ListServersRequest) returns (ListServersResponse) {}
+  
+  // Backup operations
+  rpc CreateBackup(CreateBackupRequest) returns (CreateBackupResponse) {}
+  rpc ListGroupIDs(ListGroupIDsRequest) returns (ListGroupIDsResponse) {}
 }
