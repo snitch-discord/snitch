@@ -56,7 +56,7 @@ func NewBackupService(dbServiceURL string, httpClient *http.Client, logger *slog
 	}
 
 	// Create bucket client
-	bucketClient, err := bucketclient.New(bucketConfig)
+	bucketClient, err := bucketclient.New(context.Background(), bucketConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bucket client: %w", err)
 	}

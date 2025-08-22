@@ -28,8 +28,8 @@ type Client struct {
 	bucket   string
 }
 
-func New(cfg Config) (*Client, error) {
-	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
+func New(ctx context.Context, cfg Config) (*Client, error) {
+	awsCfg, err := config.LoadDefaultConfig(ctx,
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(cfg.AccessKeyID, cfg.SecretAccessKey, "")),
 		config.WithRegion(cfg.Region),
 	)
@@ -60,7 +60,7 @@ func calculateCRC64NVME(reader io.Reader) (string, error) {
 	checksum := hash.Sum64()
 	// Convert to base64 as required by AWS API
 	checksumBytes := make([]byte, 8)
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		checksumBytes[7-i] = byte(checksum >> (8 * i))
 	}
 	return base64.StdEncoding.EncodeToString(checksumBytes), nil
@@ -96,7 +96,7 @@ func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, conte
 	// Calculate final checksum
 	checksum := hash.Sum64()
 	checksumBytes := make([]byte, 8)
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		checksumBytes[7-i] = byte(checksum >> (8 * i))
 	}
 	checksumB64 = base64.StdEncoding.EncodeToString(checksumBytes)
