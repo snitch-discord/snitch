@@ -63,9 +63,9 @@ func main() {
 	}()
 
 	c := cron.New()
-	
+
 	slogger.Info("Scheduling backup job", "schedule", config.CronSchedule, "database_service_url", config.DatabaseServiceURL)
-	
+
 	_, err = c.AddFunc(config.CronSchedule, func() {
 		slogger.Info("Starting scheduled backup")
 		if err := backupService.PerformBackup(ctx); err != nil {
@@ -86,9 +86,9 @@ func main() {
 
 	<-sigChan
 	slogger.Info("Received shutdown signal, stopping backup service")
-	
+
 	stopCtx := c.Stop()
 	<-stopCtx.Done()
-	
+
 	slogger.Info("Backup service stopped")
 }

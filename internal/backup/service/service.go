@@ -10,13 +10,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/andybalholm/brotli"
 	"connectrpc.com/connect"
+	"github.com/andybalholm/brotli"
 	"snitch/pkg/bucketclient"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 )
-
 
 type DatabaseInfo struct {
 	Name    string
@@ -101,7 +100,7 @@ func (s *BackupService) PerformBackup(ctx context.Context) error {
 	databases := []DatabaseInfo{
 		{Name: "metadata", GroupID: ""}, // Empty group ID for metadata
 	}
-	
+
 	// Add all group databases
 	for _, groupID := range groupIDsResp.Msg.GroupIds {
 		databases = append(databases, DatabaseInfo{
@@ -113,14 +112,14 @@ func (s *BackupService) PerformBackup(ctx context.Context) error {
 	s.logger.Info("Found databases to backup", "count", len(databases))
 
 	var uploadedDatabases []string
-	
+
 	for _, db := range databases {
 		if err := s.backupSingleDatabase(ctx, db, timestamp, &uploadedDatabases); err != nil {
 			s.logger.Error("Database backup failed", "database", db.Name, "error", err)
 		}
 	}
 
-	s.logger.Info("Backup completed", 
+	s.logger.Info("Backup completed",
 		"timestamp", timestamp,
 		"uploaded_databases", len(uploadedDatabases),
 		"total_databases", len(databases))
@@ -129,37 +128,37 @@ func (s *BackupService) PerformBackup(ctx context.Context) error {
 
 func (s *BackupService) backupSingleDatabase(ctx context.Context, db DatabaseInfo, timestamp string, uploadedDatabases *[]string) error {
 	s.logger.Info("Backing up database", "database", db.Name, "group_id", db.GroupID)
-	
+
 	// Create safe backup using database service
 	tempBackupPath := filepath.Join(s.tempDir, fmt.Sprintf("%s_backup.db", db.Name))
 	tempCompressedPath := filepath.Join(s.tempDir, fmt.Sprintf("%s_backup.br", db.Name))
-	
+
 	// Ensure cleanup happens even on panic or early return
 	defer func() {
 		s.cleanupTempFiles(tempBackupPath, tempCompressedPath)
 	}()
-	
+
 	var groupIDPtr *string
 	if db.GroupID != "" {
 		groupIDPtr = &db.GroupID
 	}
 	// For metadata database, groupIDPtr remains nil
-	
+
 	backupReq := &snitchv1.CreateBackupRequest{
 		BackupPath: tempBackupPath,
 		GroupId:    groupIDPtr, // nil for metadata, pointer to string for groups
 	}
-	
+
 	backupResp, err := s.dbClient.CreateBackup(ctx, connect.NewRequest(backupReq))
 	if err != nil {
 		return fmt.Errorf("database backup failed: %w", err)
 	}
-	
-	s.logger.Info("Database backup created", 
+
+	s.logger.Info("Database backup created",
 		"database", db.Name,
 		"size_bytes", backupResp.Msg.SizeBytes,
 		"path", backupResp.Msg.BackupPath)
-	
+
 	// Compress with Brotli
 	start := time.Now()
 	err = s.compressBrotli(tempBackupPath, tempCompressedPath)
@@ -167,33 +166,33 @@ func (s *BackupService) backupSingleDatabase(ctx context.Context, db DatabaseInf
 		return fmt.Errorf("brotli compression failed for database %s: %w", db.Name, err)
 	}
 	compressionTime := time.Since(start)
-	
+
 	// Get compressed file size
 	compressedInfo, err := os.Stat(tempCompressedPath)
 	if err != nil {
 		return fmt.Errorf("failed to stat compressed file for database %s: %w", db.Name, err)
 	}
-	
-	s.logger.Info("Database compressed", 
+
+	s.logger.Info("Database compressed",
 		"database", db.Name,
 		"original_size_bytes", backupResp.Msg.SizeBytes,
 		"compressed_size_bytes", compressedInfo.Size(),
 		"compression_time", compressionTime)
-	
+
 	// Upload compressed file
 	bucketKey := fmt.Sprintf("backups/%s/%s.br", timestamp, db.Name)
 	err = s.bucketClient.UploadFile(ctx, bucketKey, tempCompressedPath, "application/x-brotli")
 	if err != nil {
 		return fmt.Errorf("upload failed for database %s: %w", db.Name, err)
 	}
-	
+
 	s.logger.Info("Database backup uploaded",
 		"database", db.Name,
 		"compression", "brotli",
 		"size_bytes", compressedInfo.Size(),
 		"compression_time", compressionTime,
 		"key", bucketKey)
-	
+
 	*uploadedDatabases = append(*uploadedDatabases, db.Name)
 	return nil
 }
@@ -209,7 +208,7 @@ func (s *BackupService) compressBrotli(inputPath, outputPath string) error {
 			s.logger.Error("Failed to close input file", "error", closeErr)
 		}
 	}()
-	
+
 	// Create output file
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -220,7 +219,7 @@ func (s *BackupService) compressBrotli(inputPath, outputPath string) error {
 			s.logger.Error("Failed to close output file", "error", closeErr)
 		}
 	}()
-	
+
 	// Create brotli writer
 	brotliWriter := brotli.NewWriter(outputFile)
 	defer func() {
@@ -228,23 +227,23 @@ func (s *BackupService) compressBrotli(inputPath, outputPath string) error {
 			s.logger.Error("Failed to close brotli writer", "error", closeErr)
 		}
 	}()
-	
+
 	// Copy and compress with fixed buffer to limit memory usage
 	buffer := make([]byte, 64*1024) // 64KB buffer
 	_, err = io.CopyBuffer(brotliWriter, inputFile, buffer)
 	if err != nil {
 		return fmt.Errorf("brotli compression failed: %w", err)
 	}
-	
+
 	// Close brotli writer
 	if err := brotliWriter.Close(); err != nil {
 		return fmt.Errorf("failed to close brotli writer: %w", err)
 	}
-	
+
 	if err := outputFile.Close(); err != nil {
 		return fmt.Errorf("failed to close output file: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -255,7 +254,7 @@ func (s *BackupService) cleanupTempFiles(backupPath, compressedPath string) {
 			s.logger.Warn("Failed to cleanup backup file", "path", backupPath, "error", err)
 		}
 	}
-	
+
 	// Remove compressed file
 	if compressedPath != "" {
 		if err := os.Remove(compressedPath); err != nil && !os.IsNotExist(err) {
@@ -263,7 +262,6 @@ func (s *BackupService) cleanupTempFiles(backupPath, compressedPath string) {
 		}
 	}
 }
-
 
 func getEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {

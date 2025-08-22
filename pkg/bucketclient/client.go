@@ -82,17 +82,17 @@ func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, conte
 	// Calculate CRC64NVME checksum while reading the data
 	var checksumReader io.Reader
 	var checksumB64 string
-	
+
 	// Use TeeReader to calculate checksum while uploading
 	hash := crc64nvme.New()
 	checksumReader = io.TeeReader(reader, hash)
-	
+
 	// Read all data to calculate checksum
 	data, err := io.ReadAll(checksumReader)
 	if err != nil {
 		return fmt.Errorf("failed to read data for upload: %w", err)
 	}
-	
+
 	// Calculate final checksum
 	checksum := hash.Sum64()
 	checksumBytes := make([]byte, 8)
@@ -100,7 +100,7 @@ func (c *Client) Upload(ctx context.Context, key string, reader io.Reader, conte
 		checksumBytes[7-i] = byte(checksum >> (8 * i))
 	}
 	checksumB64 = base64.StdEncoding.EncodeToString(checksumBytes)
-	
+
 	_, err = c.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:            aws.String(c.bucket),
 		Key:               aws.String(key),

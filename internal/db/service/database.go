@@ -339,46 +339,45 @@ func (s *DatabaseService) ListServers(ctx context.Context, req *connect.Request[
 // Backup operations
 func (s *DatabaseService) CreateMetadataBackup(ctx context.Context, backupPath string) error {
 	s.logger.Info("Creating metadata database backup", "backup_path", backupPath)
-	
+
 	query := fmt.Sprintf("VACUUM INTO '%s'", backupPath)
 	_, err := s.metadataDB.ExecContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("failed to create metadata backup: %w", err)
 	}
-	
+
 	s.logger.Info("Metadata database backup created successfully", "backup_path", backupPath)
 	return nil
 }
 
 func (s *DatabaseService) CreateGroupBackup(ctx context.Context, groupID, backupPath string) error {
 	s.logger.Info("Creating group database backup", "group_id", groupID, "backup_path", backupPath)
-	
+
 	s.groupDBMutex.RLock()
 	groupDB, exists := s.groupDBs[groupID]
 	s.groupDBMutex.RUnlock()
-	
+
 	if !exists {
 		return fmt.Errorf("group database not found: %s", groupID)
 	}
-	
+
 	query := fmt.Sprintf("VACUUM INTO '%s'", backupPath)
 	_, err := groupDB.ExecContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("failed to create group backup: %w", err)
 	}
-	
+
 	s.logger.Info("Group database backup created successfully", "group_id", groupID, "backup_path", backupPath)
 	return nil
 }
-
 
 // gRPC Backup handlers
 func (s *DatabaseService) CreateBackup(ctx context.Context, req *connect.Request[snitchv1.CreateBackupRequest]) (*connect.Response[snitchv1.CreateBackupResponse], error) {
 	backupPath := req.Msg.GetBackupPath()
 	groupID := req.Msg.GetGroupId()
-	
+
 	s.logger.Info("Creating database backup", "backup_path", backupPath, "group_id", groupID)
-	
+
 	var err error
 	if groupID == "" {
 		// Backup metadata database
@@ -387,22 +386,22 @@ func (s *DatabaseService) CreateBackup(ctx context.Context, req *connect.Request
 		// Backup specific group database
 		err = s.CreateGroupBackup(ctx, groupID, backupPath)
 	}
-	
+
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("backup failed: %w", err))
 	}
-	
+
 	// Get backup file size
 	info, err := os.Stat(backupPath)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to stat backup file: %w", err))
 	}
-	
+
 	response := &snitchv1.CreateBackupResponse{
 		BackupPath: backupPath,
 		SizeBytes:  info.Size(),
 	}
-	
+
 	return connect.NewResponse(response), nil
 }
 
@@ -413,10 +412,10 @@ func (s *DatabaseService) ListGroupIDs(ctx context.Context, req *connect.Request
 		groupIDs = append(groupIDs, groupID)
 	}
 	s.groupDBMutex.RUnlock()
-	
+
 	response := &snitchv1.ListGroupIDsResponse{
 		GroupIds: groupIDs,
 	}
-	
+
 	return connect.NewResponse(response), nil
 }

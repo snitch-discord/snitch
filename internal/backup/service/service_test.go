@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
+	_ "github.com/tursodatabase/go-libsql"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
-	_ "github.com/tursodatabase/go-libsql"
 )
 
 const (
@@ -46,7 +46,7 @@ func (m *mockDatabaseServiceClient) CreateBackup(ctx context.Context, req *conne
 	if m.backupError != nil {
 		return nil, m.backupError
 	}
-	
+
 	// Create a test backup file
 	backupPath := req.Msg.BackupPath
 	testData := "test backup data"
@@ -54,7 +54,7 @@ func (m *mockDatabaseServiceClient) CreateBackup(ctx context.Context, req *conne
 	if err != nil {
 		return nil, fmt.Errorf("failed to create test backup file: %w", err)
 	}
-	
+
 	response := m.backupResponse
 	if response == nil {
 		response = &snitchv1.CreateBackupResponse{
@@ -123,7 +123,7 @@ func createTestFile(t *testing.T, dir, filename, content string) string {
 // Helper function to create a realistic SQLite database file
 func createTestDatabase(t *testing.T, dir, filename string, populateData bool) string {
 	dbPath := filepath.Join(dir, filename)
-	
+
 	// Create database using libsql like the actual service
 	db, err := sql.Open("libsql", "file:"+dbPath)
 	if err != nil {
@@ -134,7 +134,7 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 			t.Errorf("Failed to close test database: %v", closeErr)
 		}
 	}()
-	
+
 	// Create realistic database schema similar to the actual service
 	schemas := []string{
 		`CREATE TABLE IF NOT EXISTS users (
@@ -165,7 +165,7 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)`,
 	}
-	
+
 	// Create tables
 	for _, schema := range schemas {
 		_, err = db.Exec(schema)
@@ -173,13 +173,13 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 			t.Fatalf("Failed to create table: %v", err)
 		}
 	}
-	
+
 	// Populate with realistic data if requested
 	if populateData {
 		// Insert many users (repetitive data that should compress well)
 		for i := 0; i < 1000; i++ {
 			_, err = db.Exec(`INSERT INTO users (user_id, server_id, username, discriminator) 
-				VALUES (?, ?, ?, ?)`, 
+				VALUES (?, ?, ?, ?)`,
 				fmt.Sprintf("user_%d", i),
 				fmt.Sprintf("server_%d", i%10), // Repeat server IDs for better compression
 				fmt.Sprintf("username_%d", i),
@@ -188,7 +188,7 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 				t.Fatalf("Failed to insert user data: %v", err)
 			}
 		}
-		
+
 		// Insert reports (more repetitive structured data)
 		for i := 0; i < 500; i++ {
 			_, err = db.Exec(`INSERT INTO reports (user_id, reporter_id, server_id, reason, evidence_url) 
@@ -202,7 +202,7 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 				t.Fatalf("Failed to insert report data: %v", err)
 			}
 		}
-		
+
 		// Insert user history
 		for i := 0; i < 300; i++ {
 			_, err = db.Exec(`INSERT INTO user_history (user_id, server_id, action, reason) 
@@ -216,10 +216,9 @@ func createTestDatabase(t *testing.T, dir, filename string, populateData bool) s
 			}
 		}
 	}
-	
+
 	return dbPath
 }
-
 
 func TestBackupService_compressBrotli(t *testing.T) {
 	// Create a minimal service for testing compression functionality
@@ -259,49 +258,49 @@ func TestBackupService_compressBrotli(t *testing.T) {
 			// Create input database using the test-specific function
 			inputPath := tt.createInput(t, tempDir)
 			outputPath := filepath.Join(tempDir, "output.br")
-			
+
 			err := service.compressBrotli(inputPath, outputPath)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("Expected no error but got: %v", err)
 				return
 			}
-			
+
 			// Check that output file exists
 			if _, err := os.Stat(outputPath); os.IsNotExist(err) {
 				t.Errorf("Expected output file to be created")
 				return
 			}
-			
+
 			// Analyze compression results
 			inputInfo, _ := os.Stat(inputPath)
 			outputInfo, _ := os.Stat(outputPath)
-			
+
 			// Compressed file should not be empty (unless input was empty)
 			if outputInfo.Size() == 0 && inputInfo.Size() > 0 {
 				t.Errorf("Compressed file should not be empty when input has content")
 				return
 			}
-			
+
 			// Calculate and log compression ratio
 			compressionRatio := float64(outputInfo.Size()) / float64(inputInfo.Size())
-			t.Logf("%s: %d -> %d bytes (ratio: %.2f%%)", 
+			t.Logf("%s: %d -> %d bytes (ratio: %.2f%%)",
 				tt.name, inputInfo.Size(), outputInfo.Size(), compressionRatio*100)
-			
+
 			// Check compression effectiveness based on expectations
 			if tt.shouldShrink {
 				if outputInfo.Size() >= inputInfo.Size() {
-					t.Errorf("Expected compression to reduce file size: input=%d bytes, output=%d bytes (ratio=%.2f%%)", 
+					t.Errorf("Expected compression to reduce file size: input=%d bytes, output=%d bytes (ratio=%.2f%%)",
 						inputInfo.Size(), outputInfo.Size(), compressionRatio*100)
 				}
-				
+
 				// For databases with repetitive data, expect good compression
 				if compressionRatio > 0.8 {
 					t.Logf("Warning: Compression ratio %.2f%% is higher than expected for database with repetitive data", compressionRatio*100)
@@ -309,7 +308,7 @@ func TestBackupService_compressBrotli(t *testing.T) {
 			} else {
 				// For empty/small databases, just ensure compression doesn't blow up the size
 				if outputInfo.Size() > inputInfo.Size()*3 {
-					t.Errorf("Compression overhead seems excessive: input=%d bytes, output=%d bytes (ratio=%.2f%%)", 
+					t.Errorf("Compression overhead seems excessive: input=%d bytes, output=%d bytes (ratio=%.2f%%)",
 						inputInfo.Size(), outputInfo.Size(), compressionRatio*100)
 				}
 			}
@@ -326,21 +325,21 @@ func TestBackupService_compressBrotli_Errors(t *testing.T) {
 		tempDir:      tempDir,
 		logger:       logger,
 	}
-	
+
 	t.Run("input file does not exist", func(t *testing.T) {
 		nonExistentPath := filepath.Join(tempDir, "nonexistent.txt")
 		outputPath := filepath.Join(tempDir, "output.br")
-		
+
 		err := service.compressBrotli(nonExistentPath, outputPath)
 		if err == nil {
 			t.Errorf("Expected error for non-existent input file")
 		}
 	})
-	
+
 	t.Run("output directory does not exist", func(t *testing.T) {
 		inputPath := createTestFile(t, tempDir, "input.txt", "test data")
 		outputPath := filepath.Join(tempDir, "nonexistent", "output.br")
-		
+
 		err := service.compressBrotli(inputPath, outputPath)
 		if err == nil {
 			t.Errorf("Expected error for non-existent output directory")
@@ -357,11 +356,11 @@ func TestBackupService_cleanupTempFiles(t *testing.T) {
 		tempDir:      tempDir,
 		logger:       logger,
 	}
-	
+
 	t.Run("cleanup existing files", func(t *testing.T) {
 		backupPath := createTestFile(t, tempDir, "backup.db", "backup data")
 		compressedPath := createTestFile(t, tempDir, "backup.br", "compressed data")
-		
+
 		// Files should exist before cleanup
 		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
 			t.Fatalf("Backup file should exist before cleanup")
@@ -369,9 +368,9 @@ func TestBackupService_cleanupTempFiles(t *testing.T) {
 		if _, err := os.Stat(compressedPath); os.IsNotExist(err) {
 			t.Fatalf("Compressed file should exist before cleanup")
 		}
-		
+
 		service.cleanupTempFiles(backupPath, compressedPath)
-		
+
 		// Files should not exist after cleanup
 		if _, err := os.Stat(backupPath); !os.IsNotExist(err) {
 			t.Errorf("Backup file should be cleaned up")
@@ -380,15 +379,15 @@ func TestBackupService_cleanupTempFiles(t *testing.T) {
 			t.Errorf("Compressed file should be cleaned up")
 		}
 	})
-	
+
 	t.Run("cleanup non-existent files", func(t *testing.T) {
 		nonExistentBackup := filepath.Join(tempDir, "nonexistent_backup.db")
 		nonExistentCompressed := filepath.Join(tempDir, "nonexistent_compressed.br")
-		
+
 		// This should not panic or return error
 		service.cleanupTempFiles(nonExistentBackup, nonExistentCompressed)
 	})
-	
+
 	t.Run("cleanup empty paths", func(t *testing.T) {
 		// This should not panic or return error
 		service.cleanupTempFiles("", "")
@@ -404,7 +403,7 @@ func TestBackupService_Close(t *testing.T) {
 		tempDir:      tempDir,
 		logger:       logger,
 	}
-	
+
 	err := service.Close()
 	if err != nil {
 		t.Errorf("Expected no error from Close(), got: %v", err)
