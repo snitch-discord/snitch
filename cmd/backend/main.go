@@ -70,7 +70,7 @@ func main() {
 	baseInterceptors := connect.WithInterceptors(
 		interceptor.NewRecoveryInterceptor(),
 		interceptor.NewLogInterceptor(),
-		interceptor.NewAuthInterceptor(config.JwtSecret, dbClient),
+		interceptor.NewAuthInterceptor(config.JwtSecret),
 		interceptor.NewTraceInterceptor(),
 	)
 

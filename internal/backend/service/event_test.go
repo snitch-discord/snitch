@@ -14,7 +14,7 @@ const TEST_SERVER_ID = "test-server-id"
 
 func TestEventService_PublishEvent(t *testing.T) {
 	// PublishEvent doesn't use dbClient, so we can pass nil
-	service := NewEventService(nil, "")
+	service := NewEventService(nil, "test-jwt-secret")
 
 	// Test event publishing to subscribers with group filtering
 	eventChan := make(chan *snitchv1.SubscribeResponse, 10)
@@ -60,7 +60,7 @@ func TestEventService_GroupFiltering(t *testing.T) {
 	group2ID := "group-2"
 
 	// PublishEvent doesn't use dbClient, so we can pass nil
-	service := NewEventService(nil, "")
+	service := NewEventService(nil, "test-jwt-secret")
 
 	// Create subscribers for different groups
 	group1Chan := make(chan *snitchv1.SubscribeResponse, 10)
@@ -115,7 +115,7 @@ func TestEventService_GroupFiltering(t *testing.T) {
 
 func TestEventService_ChannelFullHandling(t *testing.T) {
 	// PublishEvent doesn't use dbClient, so we can pass nil
-	service := NewEventService(nil, "")
+	service := NewEventService(nil, "test-jwt-secret")
 
 	// Test that full channels don't block publishing
 	testEvent := &snitchv1.SubscribeResponse{

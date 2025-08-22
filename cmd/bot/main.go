@@ -18,6 +18,7 @@ import (
 	"snitch/internal/bot/slashcommand"
 	"snitch/internal/bot/slashcommand/handler"
 	"snitch/internal/bot/slashcommand/middleware"
+	"snitch/internal/bot/transport"
 	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
 
 	"github.com/bwmarrin/discordgo"
@@ -40,22 +41,22 @@ func main() {
 		log.Fatalf("Failed to parse CA certificate")
 	}
 
+	tokenGenerator := auth.NewTokenGenerator(config.JwtSecret)
+
 	httpClient := http.Client{
 		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
+		Transport: transport.NewAuthTransport(tokenGenerator, &http.Transport{
 			TLSClientConfig: &tls.Config{
 				RootCAs: caCertPool,
 			},
-		},
+		}),
 	}
-
-	tokenGenerator := auth.NewTokenGenerator(config.JwtSecret)
 
 	// initialize map of command name to command handler
 	commandHandlers := map[string]slashcommand.SlashCommandHandlerFunc{
-		"register": handler.CreateRegisterCommandHandler(config, httpClient, tokenGenerator),
-		"report":   handler.CreateReportCommandHandler(config, httpClient, tokenGenerator),
-		"user":     handler.CreateUserCommandHandler(config, httpClient, tokenGenerator),
+		"register": handler.CreateRegisterCommandHandler(config, httpClient),
+		"report":   handler.CreateReportCommandHandler(config, httpClient),
+		"user":     handler.CreateUserCommandHandler(config, httpClient),
 	}
 
 	commands := slashcommand.InitializeCommands()

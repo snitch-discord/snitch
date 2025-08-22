@@ -14,9 +14,10 @@ func NewTokenGenerator(secret string) *TokenGenerator {
 	return &TokenGenerator{secret: []byte(secret)}
 }
 
-func (g *TokenGenerator) Generate(serverID string) (string, error) {
+func (g *TokenGenerator) Generate(serverID, groupID string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": serverID,
+		"gID": groupID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 		"iat": time.Now().Unix(),
 	}

@@ -218,7 +218,7 @@ func (c *Client) connectAndListenForGroup(ctx context.Context, groupID, serverID
 		GroupId: groupID,
 	})
 
-	token, err := c.tokenGenerator.Generate(serverID)
+	token, err := c.tokenGenerator.Generate(serverID, groupID)
 	if err != nil {
 		return fmt.Errorf("failed to generate token for server %s: %w", serverID, err)
 	}

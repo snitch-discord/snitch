@@ -51,7 +51,7 @@ services:
       - KEY_FILE_PATH=./certs/backend/key.pem
       - SNITCH_DB_HOST=snitch-db
       - SNITCH_DB_PORT=5200
-      - SNITCH_JWT_SECRET=a-super-secret-key-that-is-long-enough
+      - SNITCH_JWT_SECRET=${SNITCH_JWT_SECRET}
     ports:
       - 4200:4200
     volumes:
@@ -81,6 +81,6 @@ services:
       - SNITCH_DISCORD_TOKEN=${SNITCH_DISCORD_TOKEN}
       - SNITCH_BACKEND_HOST=snitch-backend
       - SNITCH_BACKEND_PORT=4200
-      - SNITCH_JWT_SECRET=a-super-secret-key-that-is-long-enough
+      - SNITCH_JWT_SECRET=${SNITCH_JWT_SECRET}
     volumes:
       - ./certs:/app/certs:ro

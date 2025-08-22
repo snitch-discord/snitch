@@ -7,8 +7,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/golang-jwt/jwt/v5"
-	snitchv1 "snitch/pkg/proto/gen/snitch/v1"
-	"snitch/pkg/proto/gen/snitch/v1/snitchv1connect"
 )
 
 type contextKey string
@@ -18,7 +16,7 @@ const (
 	groupIDContextKey  = contextKey("group_id")
 )
 
-func NewAuthInterceptor(jwtSecret string, dbClient snitchv1connect.DatabaseServiceClient) connect.UnaryInterceptorFunc {
+func NewAuthInterceptor(jwtSecret string) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			authHeader := req.Header().Get("Authorization")
@@ -57,17 +55,13 @@ func NewAuthInterceptor(jwtSecret string, dbClient snitchv1connect.DatabaseServi
 				return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("missing 'sub' claim"))
 			}
 
-			// Find group ID using database service
-			findGroupReq := &snitchv1.FindGroupByServerRequest{
-				ServerId: serverID,
-			}
-			findGroupResp, err := dbClient.FindGroupByServer(ctx, connect.NewRequest(findGroupReq))
-			if err != nil {
-				return nil, connect.NewError(connect.CodeNotFound, err)
+			groupID, ok := claims["gID"].(string)
+			if !ok {
+				return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("missing 'gID' claim"))
 			}
 
 			ctx = context.WithValue(ctx, serverIDContextKey, serverID)
-			ctx = context.WithValue(ctx, groupIDContextKey, findGroupResp.Msg.GroupId)
+			ctx = context.WithValue(ctx, groupIDContextKey, groupID)
 
 			return next(ctx, req)
 		})
